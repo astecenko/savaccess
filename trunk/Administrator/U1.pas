@@ -67,7 +67,7 @@ var
   Frm1: TFrm1;
 
 implementation
-uses U2, U3, U4, U5, U6, U7, U8, U9, DU1, UAccessConstant;
+uses U3, U4, U5, U6, U7, U8, U9, DU1, UAccessConstant;
 
 {$R *.dfm}
 

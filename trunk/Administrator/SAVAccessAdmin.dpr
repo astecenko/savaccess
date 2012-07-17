@@ -2,7 +2,7 @@ program SAVAccessAdmin;
 
 uses
   FastMM4,
-  Fastcode,
+  Fastcode, FastMove,
   VCLFixPack,
   Forms,
   DU1 in 'DU1.pas' {dtmdl1: TDataModule},
@@ -21,7 +21,6 @@ uses
   U8 in 'U8.pas' {Frm8},
   UAccessFile in 'UAccessFile.pas',
   U9 in 'U9.pas' {Frm9},
-  U10 in 'U10.pas' {Frm10},
   U1AD in 'U1AD.pas' {FrmAD};
 
 {$R *.res}
