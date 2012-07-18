@@ -46,7 +46,7 @@ type
   end;
 
 implementation
-uses UAccessFile, UAccessConstant,U7;
+uses UAccessPattern, UAccessConstant,U7;
 var
   Templ1: TPathTemplate;
 {$R *.dfm}

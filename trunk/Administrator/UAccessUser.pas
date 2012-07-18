@@ -47,6 +47,7 @@ constructor TSAVAccessUser.Create(aBase: TSAVAccessBase; const aDomain,
 begin
   Create;
   Open(aBase, aCaption, aSID, aDescription, aDomain);
+
   Save;
 end;
 
@@ -78,6 +79,8 @@ begin
     Description := table1.FieldByName(csFieldDescription).AsString;
     ID := table1.FieldByName(csFieldID).AsInteger;
     Domain := table1.FieldByName(csFieldDomain).AsString;
+    WorkDir:=IncludeTrailingPathDelimiter(Bases.UsersDir)+SID;
+    ReadVersion;
   end;
   table1.Close;
   FreeAndNil(table1);
@@ -108,9 +111,11 @@ begin
   Version:=table1.FieldByName(csFieldVersion).AsString;
   ID := table1.FieldByName(csFieldID).AsInteger;
   table1.Post;
-  ForceDirectories(IncludeTrailingPathDelimiter(Bases.UsersDir) + SID);
   table1.Close;
   FreeAndNil(table1);
+  WorkDir:=IncludeTrailingPathDelimiter(Bases.UsersDir) + SID;
+  ForceDirectories(WorkDir);
+  WriteVersion;
 end;
 
 procedure TSAVAccessUser.SetDomain(const Value: string);
@@ -123,6 +128,7 @@ procedure TSAVAccessUser.Open(aBase: TSAVAccessBase; const aCaption, aSID:
   aDescription: string = ''; const aParam: string = ''; const aVersion: TVersionString =
     '');
 begin
+  WorkDir:=IncludeTrailingPathDelimiter(Bases.UsersDir)+aSID;
   inherited Open(aBase,aCaption,aSID,aDescription,aParam,aVersion);
   FDomain := aParam;
 end;

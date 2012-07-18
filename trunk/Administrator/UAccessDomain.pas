@@ -20,6 +20,9 @@ type
     procedure GetGroups(List: TStrings);
     procedure GetUsers(List: TStrings);
     procedure GetUsersFromAD(List: TStrings);
+    procedure Open(aBase: TSAVAccessBase; const aCaption, aSID: string; const
+      aDescription: string = ''; const aParam: string = ''; const aVersion:
+      TVersionString = ''); override;
 
   end;
 
@@ -80,9 +83,18 @@ begin
     Caption := table1.fieldByName(csFieldCaption).AsString;
     Description := table1.FieldByName(csFieldDescription).AsString;
     ID := table1.FieldByName(csFieldID).AsInteger;
+    WorkDir := IncludeTrailingPathDelimiter(Bases.DomainsDir) + SID;
+    ReadVersion;
   end;
   table1.Close;
   FreeAndNil(table1);
+end;
+
+procedure TSAVAccessDomain.Open(aBase: TSAVAccessBase; const aCaption,
+  aSID, aDescription, aParam: string; const aVersion: TVersionString);
+begin
+  WorkDir := IncludeTrailingPathDelimiter(Bases.DomainsDir) + aSID;
+  inherited Open(aBase, aCaption, aSID, aDescription, aParam, aVersion);
 end;
 
 procedure TSAVAccessDomain.Save;
@@ -105,14 +117,17 @@ begin
   else
     table1.Edit;
   table1.FieldByName(csFieldVersion).AsString := GetNewVersion;
-  Version:=table1.FieldByName(csFieldVersion).AsString;
+  Version := table1.FieldByName(csFieldVersion).AsString;
   table1.FieldByName(csFieldCaption).AsString := Caption;
   table1.FieldByName(csFieldDescription).AsString := Description;
   ID := table1.FieldByName(csFieldID).AsInteger;
   table1.Post;
-  ForceDirectories(IncludeTrailingPathDelimiter(Bases.DomainsDir) + SID);
   table1.Close;
   FreeAndNil(table1);
+  WorkDir := IncludeTrailingPathDelimiter(Bases.DomainsDir) + SID;
+  ForceDirectories(WorkDir);
+  WriteVersion;
+
 end;
 
 end.

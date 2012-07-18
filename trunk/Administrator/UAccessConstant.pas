@@ -13,6 +13,7 @@ const
   { Default filenames }
 
   csTemplateMain='main.tpl';
+  csContainerCfg='container.cfg';
 
   { Tables filename }
 
