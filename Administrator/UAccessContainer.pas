@@ -13,6 +13,7 @@ type
     FSID: string;
     FVersion: TVersionString;
     FID: Integer;
+    FWorkDir: string;
     FFilepath: string;
     FIniPath: string;
     FBases: TSAVAccessBase;
@@ -24,9 +25,11 @@ type
     procedure SetSID(const Value: string);
     procedure SetID(const Value: Integer);
     procedure SetVersion(const Value: TVersionString);
+    procedure SetWorkDir(const Value: string);
   public
     property Caption: string read FCaption write SetCaption;
     property Description: string read FDescription write SetDescription;
+    property WorkDir: string read FWorkDir write SetWorkDir;
     property ID: Integer read FID write SetID;
     property SID: string read FSID write SetSID;
     property FilePath: string read FFilePath write SetFilePath;
@@ -40,12 +43,15 @@ type
     procedure GetIndependentList(List: TStrings); virtual;
     procedure Clear; virtual;
     procedure Open(aBase: TSAVAccessBase; const aCaption, aSID: string; const
-      aDescription: string = ''; const aParam: string = ''; const aVersion: TVersionString = ''); virtual;
-    function GetNewVersion:string;
+      aDescription: string = ''; const aParam: string = ''; const aVersion:
+      TVersionString = ''); virtual;
+    function GetNewVersion: string;
+    function WriteVersion(const aFileName: string = ''): Boolean;
+    function ReadVersion(const aFileName: string = ''): Boolean;
   end;
 
 implementation
-uses Sysutils;
+uses Sysutils, IniFiles, UAccessConstant;
 
 { TSAVAccessContainer }
 
@@ -99,6 +105,7 @@ begin
   FIniPath := '';
   FBases := nil;
   FVersion := '';
+  FWorkDir := '';
 end;
 
 procedure TSAVAccessContainer.GetImportantList(List: TStrings);
@@ -118,7 +125,7 @@ end;
 
 function TSAVAccessContainer.GetNewVersion: string;
 begin
-   DateTimeToString(Result,'yymmddhhnnss',Now);
+  DateTimeToString(Result, 'yymmddhhnnss', Now);
 end;
 
 procedure TSAVAccessContainer.Open(aBase: TSAVAccessBase; const aCaption,
@@ -129,10 +136,58 @@ begin
   FSID := aSID;
   FDescription := aDescription;
   if aVersion = '' then
-    FVersion:=GetNewVersion
+  begin
+    ReadVersion;
+    if FVersion = '' then
+      FVersion := GetNewVersion
+  end
   else
     FVersion := aVersion;
+end;
 
+function TSAVAccessContainer.ReadVersion(const aFileName: string): Boolean;
+var
+  Ini01: TIniFile;
+  sF: string;
+begin
+  Result := True;
+  if aFileName = '' then
+    sF := IncludeTrailingPathDelimiter(WorkDir) + csContainerCfg
+  else
+    sF := aFileName;
+  Ini01 := TIniFile.Create(sF);
+  try
+    FVersion := Ini01.ReadString('main', 'version', '');
+  except
+    Result := False;
+    FVersion := '';
+  end;
+  FreeAndNil(Ini01);
+end;
+
+function TSAVAccessContainer.WriteVersion(
+  const aFileName: string): Boolean;
+var
+  Ini01: TIniFile;
+  sF: string;
+begin
+  Result := True;
+  if aFileName = '' then
+    sF := IncludeTrailingPathDelimiter(WorkDir) + csContainerCfg
+  else
+    sF := aFileName;
+  Ini01 := TIniFile.Create(sF);
+  try
+    Ini01.WriteString('main', 'version', FVersion);
+  except
+    Result := False;
+  end;
+  FreeAndNil(Ini01);
+end;
+
+procedure TSAVAccessContainer.SetWorkDir(const Value: string);
+begin
+  FWorkDir := Value;
 end;
 
 end.
