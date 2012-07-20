@@ -70,6 +70,7 @@ begin
   table1.DBFFileName := IncludeTrailingPathDelimiter(Bases.JournalsDir) +
     csUsersTable;
   table1.AccessMode.AccessMode := 66;
+  table1.OEM:=True;
   table1.Open;
   Result := table1.Locate(csFieldSID, s, []);
   if Result then
@@ -95,6 +96,7 @@ begin
   table1.DBFFileName := IncludeTrailingPathDelimiter(Bases.JournalsDir) +
     csUsersTable;
   table1.AccessMode.AccessMode := 66;
+  table1.OEM:=True;
   table1.Open;
   if not (table1.Locate(csFieldSID, SID, [])) then
   begin
@@ -128,7 +130,7 @@ procedure TSAVAccessUser.Open(aBase: TSAVAccessBase; const aCaption, aSID:
   aDescription: string = ''; const aParam: string = ''; const aVersion: TVersionString =
     '');
 begin
-  WorkDir:=IncludeTrailingPathDelimiter(Bases.UsersDir)+aSID;
+  WorkDir:=IncludeTrailingPathDelimiter(aBase.UsersDir)+aSID;
   inherited Open(aBase,aCaption,aSID,aDescription,aParam,aVersion);
   FDomain := aParam;
 end;

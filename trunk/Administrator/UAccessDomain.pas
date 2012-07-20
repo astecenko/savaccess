@@ -93,7 +93,7 @@ end;
 procedure TSAVAccessDomain.Open(aBase: TSAVAccessBase; const aCaption,
   aSID, aDescription, aParam: string; const aVersion: TVersionString);
 begin
-  WorkDir := IncludeTrailingPathDelimiter(Bases.DomainsDir) + aSID;
+  WorkDir := IncludeTrailingPathDelimiter(aBase.DomainsDir) + aSID;
   inherited Open(aBase, aCaption, aSID, aDescription, aParam, aVersion);
 end;
 

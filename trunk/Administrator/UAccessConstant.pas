@@ -43,6 +43,13 @@ const
   csFieldPrority='PRIORITY';
   csFieldSID = 'SID';
   csFieldVersion = 'VERSION';
+  csFieldClntFile='CLNTFILE';
+  csFieldSrvrFile='SRVRFILE';
+  csFieldType='TYPE';
+  csFieldExt='EXT';
+  csFieldAction='ACTION';
+  csFieldMD5='MD5';
+
 
   { Others }
 

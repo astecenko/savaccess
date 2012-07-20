@@ -175,11 +175,20 @@ begin
       ClearStructDBF(FTableUsers);
       InitOpenDBF(FTableUsers, IncludeTrailingPathDelimiter(FJournalsDir) +
         csUsersTable, 66);
-      with FTableUsers.Indexes.Add as TVKNTXIndex do
+      FTableUsers.Open;
+     { with FTableUsers.Indexes.Add as TVKNTXIndex do
+      begin
         NTXFileName := IncludeTrailingPathDelimiter(FJournalsDir) +
           csUsersSIDIndex;
-      FTableUsers.Open;
-      FTableUsers.SetOrder(1);
+        if FileExists(NTXFileName) = False then
+        begin
+          ClipperVer := v501;
+          KeyExpresion := 'SID';
+        //  Unique := True;
+          CreateIndex(True);
+        end;
+      end;
+      FTableUsers.SetOrder(1);}
     end;
     if Assigned(FTableGroups) then
     begin
@@ -199,6 +208,7 @@ begin
   table1 := TVKDBFNTX.Create(nil);
   table1.DBFFileName := IncludeTrailingPathDelimiter(FJournalsDir) +
     csDomainsTable;
+  table1.OEM:=True;
   table1.AccessMode.AccessMode := 66;
   with table1.DBFFieldDefs.Add as TVKDBFFieldDef do
   begin
@@ -212,7 +222,7 @@ begin
     field_type := 'C';
     len := 50;
   end;
-    with table1.DBFFieldDefs.Add as TVKDBFFieldDef do
+  with table1.DBFFieldDefs.Add as TVKDBFFieldDef do
   begin
     Name := csFieldVersion;
     field_type := 'C';
@@ -269,6 +279,7 @@ var
 begin
   table1 := TVKDBFNTX.Create(nil);
   table1.AccessMode.AccessMode := 66;
+    table1.OEM:=True;
   table1.DBFFileName := IncludeTrailingPathDelimiter(FJournalsDir) +
     csGroupsTable;
   with table1.DBFFieldDefs.Add as TVKDBFFieldDef do
@@ -283,13 +294,7 @@ begin
     field_type := 'C';
     len := 50;
   end;
-    with table1.DBFFieldDefs.Add as TVKDBFFieldDef do
-  begin
-    Name := csFieldVersion;
-    field_type := 'C';
-    len := 30;
-  end;
-    with table1.DBFFieldDefs.Add as TVKDBFFieldDef do
+  with table1.DBFFieldDefs.Add as TVKDBFFieldDef do
   begin
     Name := csFieldVersion;
     field_type := 'C';
@@ -323,6 +328,7 @@ var
 begin
   table1 := TVKDBFNTX.Create(nil);
   table1.AccessMode.AccessMode := 66;
+    table1.OEM:=True;
   table1.DBFFileName := IncludeTrailingPathDelimiter(FJournalsDir) +
     csOULinkTable;
   with table1.DBFFieldDefs.Add as TVKDBFFieldDef do
@@ -352,6 +358,7 @@ var
 begin
   table1 := TVKDBFNTX.Create(nil);
   table1.AccessMode.AccessMode := 66;
+    table1.OEM:=True;
   table1.DBFFileName := IncludeTrailingPathDelimiter(FJournalsDir) +
     csUsersTable;
   with table1.DBFFieldDefs.Add as TVKDBFFieldDef do
@@ -372,7 +379,7 @@ begin
     field_type := 'C';
     len := 50;
   end;
-    with table1.DBFFieldDefs.Add as TVKDBFFieldDef do
+  with table1.DBFFieldDefs.Add as TVKDBFFieldDef do
   begin
     Name := csFieldVersion;
     field_type := 'C';
@@ -396,6 +403,7 @@ begin
   begin
     NTXFileName := IncludeTrailingPathDelimiter(FJournalsDir) + csUsersSIDIndex;
     KeyExpresion := csFieldSID;
+    Unique:=True;
     CreateIndex(True);
   end;
   table1.Close;
@@ -414,6 +422,7 @@ var
 begin
   table1 := TVKDBFNTX.Create(nil);
   table1.AccessMode.AccessMode := 64;
+    table1.OEM:=True;
   table1.DBFFileName := IncludeTrailingPathDelimiter(FJournalsDir) +
     TableName;
   table1.Open;

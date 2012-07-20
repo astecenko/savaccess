@@ -11,6 +11,7 @@ object Frm4: TFrm4
   Font.Name = 'MS Sans Serif'
   Font.Style = []
   OldCreateOrder = False
+  OnShow = FormShow
   DesignSize = (
     792
     453)
@@ -82,12 +83,66 @@ object Frm4: TFrm4
       Width = 635
       Height = 322
       Align = alClient
+      DataSource = dsUserFiles
       TabOrder = 1
       TitleFont.Charset = DEFAULT_CHARSET
       TitleFont.Color = clWindowText
       TitleFont.Height = -11
       TitleFont.Name = 'MS Sans Serif'
       TitleFont.Style = []
+      Columns = <
+        item
+          Expanded = False
+          FieldName = 'SRVRFILE'
+          ReadOnly = True
+          Title.Caption = #1060#1072#1081#1083
+          Width = 120
+          Visible = True
+        end
+        item
+          Expanded = False
+          FieldName = 'CLNTFILE'
+          Title.Caption = #1050#1083#1080#1077#1085#1090#1089#1082#1080#1081' '#1087#1091#1090#1100' ('#1096#1072#1073#1083#1086#1085#1099')'
+          Width = 250
+          Visible = True
+        end
+        item
+          Expanded = False
+          FieldName = 'EXT'
+          Title.Caption = #1056#1072#1089#1096#1080#1088#1077#1085#1080#1077
+          Width = 70
+          Visible = True
+        end
+        item
+          Expanded = False
+          FieldName = 'TYPE'
+          PickList.Strings = (
+            'F'
+            'C')
+          Title.Caption = #1058#1080#1087
+          Width = 35
+          Visible = True
+        end
+        item
+          Expanded = False
+          FieldName = 'ACTION'
+          Title.Caption = #1044#1077#1081#1089#1090#1074#1080#1077
+          Width = 60
+          Visible = True
+        end
+        item
+          Expanded = False
+          FieldName = 'DESCR'
+          Title.Caption = #1054#1087#1080#1089#1072#1085#1080#1077
+          Width = 120
+          Visible = True
+        end
+        item
+          Expanded = False
+          FieldName = 'MD5'
+          ReadOnly = True
+          Visible = True
+        end>
     end
   end
   object stat1: TStatusBar
@@ -165,6 +220,7 @@ object Frm4: TFrm4
     ParentShowHint = False
     ShowHint = True
     TabOrder = 8
+    OnClick = btnFileAddClick
     Glyph.Data = {
       76010000424D7601000000000000760000002800000020000000100000000100
       04000000000000010000130B0000130B00001000000000000000000000000000
@@ -241,5 +297,18 @@ object Frm4: TFrm4
     ShowHint = True
     State = cbChecked
     TabOrder = 11
+  end
+  object dbnvgr1: TDBNavigator
+    Left = 120
+    Top = 406
+    Width = 280
+    Height = 25
+    DataSource = dsUserFiles
+    Anchors = [akLeft, akRight, akBottom]
+    TabOrder = 12
+  end
+  object dsUserFiles: TDataSource
+    Left = 200
+    Top = 102
   end
 end
