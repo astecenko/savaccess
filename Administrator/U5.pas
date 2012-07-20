@@ -4,7 +4,8 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, U4, ComCtrls, Grids, DBGrids, ExtCtrls, StdCtrls, Buttons;
+  Dialogs, U4, ComCtrls, Grids, DBGrids, ExtCtrls, StdCtrls, Buttons, DB,
+  DBCtrls, VKDBFDataSet;
 
 type
   TFrm5 = class(TFrm4)

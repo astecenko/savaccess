@@ -13,7 +13,7 @@ inherited Frm6: TFrm6
   inherited chkCopyCaption: TCheckBox
     Anchors = [akTop, akRight]
   end
-  object btnSelectUser: TBitBtn
+  object btnSelectUser: TBitBtn [15]
     Left = 504
     Top = 4
     Width = 33
@@ -36,7 +36,7 @@ inherited Frm6: TFrm6
       33333333337FF7F3333333333300003333333333337777333333}
     NumGlyphs = 2
   end
-  object edtDomain: TEdit
+  object edtDomain: TEdit [16]
     Left = 632
     Top = 5
     Width = 158
@@ -45,5 +45,9 @@ inherited Frm6: TFrm6
     Anchors = [akTop, akRight]
     ReadOnly = True
     TabOrder = 13
+  end
+  inherited dbnvgr1: TDBNavigator
+    Hints.Strings = ()
+    TabOrder = 14
   end
 end

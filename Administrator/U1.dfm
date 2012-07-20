@@ -69,35 +69,6 @@ object Frm1: TFrm1
         TitleFont.Height = -11
         TitleFont.Name = 'MS Sans Serif'
         TitleFont.Style = []
-        Columns = <
-          item
-            Expanded = False
-            FieldName = 'NAME'
-            Title.Caption = #1060#1048#1054
-            Width = 146
-            Visible = True
-          end
-          item
-            Expanded = False
-            FieldName = 'DOMAIN'
-            Title.Caption = #1044#1086#1084#1077#1085
-            Width = 65
-            Visible = True
-          end
-          item
-            Expanded = False
-            FieldName = 'SID'
-            ReadOnly = True
-            Width = 150
-            Visible = True
-          end
-          item
-            Expanded = False
-            FieldName = 'DESCR'
-            Title.Caption = #1050#1086#1084#1084#1077#1085#1090#1072#1088#1080#1081
-            Width = 240
-            Visible = True
-          end>
       end
     end
     object ts3: TTabSheet
@@ -355,6 +326,7 @@ object Frm1: TFrm1
       Category = #1055#1086#1083#1100#1079#1086#1074#1072#1090#1077#1083#1080
       Caption = #1056#1077#1076#1072#1082#1090#1080#1088#1086#1074#1072#1090#1100' '#1087#1086#1083#1100#1079#1086#1074#1072#1090#1077#1083#1103
       ImageIndex = 7
+      OnExecute = actUserEditExecute
     end
     object actUserShow: TAction
       Category = #1055#1086#1083#1100#1079#1086#1074#1072#1090#1077#1083#1080

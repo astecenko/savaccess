@@ -142,11 +142,11 @@ object dtmdl1: Tdtmdl1
   end
   object dsUsers: TDataSource
     DataSet = vkdbfUsers
+    OnDataChange = dsUsersDataChange
     Left = 96
     Top = 8
   end
   object vkdbfUsers: TVKDBFNTX
-    OEM = True
     SetDeleted = False
     FastPostRecord = False
     LookupOptions = []
@@ -166,7 +166,7 @@ object dtmdl1: Tdtmdl1
     BufferSize = 4096
     WaitBusyRes = 3000
     CreateNow = False
-    DbfVersion = xBaseIII
+    DbfVersion = xClipper
     LobBlockSize = 512
     LockProtocol = lpClipperLock
     LobLockProtocol = lpClipperLock
@@ -176,87 +176,6 @@ object dtmdl1: Tdtmdl1
     FoxTableFlag.ItIsDatabase = False
     Left = 96
     Top = 56
-    DBFFieldDefs = <
-      item
-        FieldFlag.FieldFlag = 0
-        FieldFlag.System = False
-        FieldFlag.CanStoreNull = False
-        FieldFlag.BinaryColumn = False
-        FieldFlag.AutoIncrement = False
-        Name = 'ID'
-        field_type = 'N'
-        extend_type = dbftUndefined
-        len = 6
-        dec = 0
-        NextAutoInc = 0
-        NativeNextAutoInc = 1
-        NativeStepAutoInc = 1
-        Tag = 0
-      end
-      item
-        FieldFlag.FieldFlag = 0
-        FieldFlag.System = False
-        FieldFlag.CanStoreNull = False
-        FieldFlag.BinaryColumn = False
-        FieldFlag.AutoIncrement = False
-        Name = 'NAME'
-        field_type = 'C'
-        extend_type = dbftUndefined
-        len = 50
-        dec = 0
-        NextAutoInc = 0
-        NativeNextAutoInc = 1
-        NativeStepAutoInc = 1
-        Tag = 0
-      end
-      item
-        FieldFlag.FieldFlag = 0
-        FieldFlag.System = False
-        FieldFlag.CanStoreNull = False
-        FieldFlag.BinaryColumn = False
-        FieldFlag.AutoIncrement = False
-        Name = 'SID'
-        field_type = 'C'
-        extend_type = dbftUndefined
-        len = 50
-        dec = 0
-        NextAutoInc = 0
-        NativeNextAutoInc = 1
-        NativeStepAutoInc = 1
-        Tag = 0
-      end
-      item
-        FieldFlag.FieldFlag = 0
-        FieldFlag.System = False
-        FieldFlag.CanStoreNull = False
-        FieldFlag.BinaryColumn = False
-        FieldFlag.AutoIncrement = False
-        Name = 'DOMAIN'
-        field_type = 'C'
-        extend_type = dbftUndefined
-        len = 50
-        dec = 0
-        NextAutoInc = 0
-        NativeNextAutoInc = 1
-        NativeStepAutoInc = 1
-        Tag = 0
-      end
-      item
-        FieldFlag.FieldFlag = 0
-        FieldFlag.System = False
-        FieldFlag.CanStoreNull = False
-        FieldFlag.BinaryColumn = False
-        FieldFlag.AutoIncrement = False
-        Name = 'DESCR'
-        field_type = 'C'
-        extend_type = dbftUndefined
-        len = 200
-        dec = 0
-        NextAutoInc = 0
-        NativeNextAutoInc = 1
-        NativeStepAutoInc = 1
-        Tag = 0
-      end>
   end
   object dsGroups: TDataSource
     DataSet = vkdbfGroups

@@ -57,6 +57,7 @@ type
     procedure actDomainEditExecute(Sender: TObject);
     procedure actTemplatExecute(Sender: TObject);
     procedure actDomainAddExecute(Sender: TObject);
+    procedure actUserEditExecute(Sender: TObject);
   private
     { Private declarations }
   public
@@ -67,7 +68,7 @@ var
   Frm1: TFrm1;
 
 implementation
-uses U3, U4, U5, U6, U7, U8, U9, DU1, UAccessConstant;
+uses U3, U4, U5, U6, U7, U8, U9, DU1, UAccessConstant,UAccessFileDBF;
 
 {$R *.dfm}
 
@@ -75,6 +76,7 @@ procedure TFrm1.actCreateBaseExecute(Sender: TObject);
 var
   Frm01: TFrm8;
   list: array[1..5] of string;
+
   function CheckOnEmpty(const edit1, deftext: string): string;
   begin
     if Trim(edit1) = '' then
@@ -83,6 +85,7 @@ var
     else
       Result := edit1;
   end;
+
 begin
   Frm01 := TFrm8.Create(Self);
   list[1] := Settings.Base.StoragePath;
@@ -124,6 +127,7 @@ var
   Frm01: TFrm6;
 begin
   //  Frm2.Show;
+  ShowMessage(Settings.Base.UsersDir);
   Frm01 := TFrm6.Create(Self);
   Frm01.FullAccess(False);
   Frm01.edtDomain.Text:=Settings.Domain.SID;
@@ -136,11 +140,8 @@ begin
     Settings.User.Open(Settings.Base, Frm01.edtCaption.Text,
       Frm01.edtSID.Text, Frm01.edtDescription.Text,Settings.Domain.SID);
     Settings.User.Save;
-    //dbgrdDomain.DataSource.DataSet.EnableControls;
-    //DU1.dtmdl1.vkdbfDomain.UpdateCursorPos;
-    //Application.ProcessMessages;
-    dbgrdUser.DataSource.DataSet.Close;
-    dbgrdUser.DataSource.DataSet.Open;
+    Settings.Base.TableUsers.Close;
+    Settings.Base.TableUsers.Open;
   end;
   FreeAndNil(Frm01);
 end;
@@ -234,10 +235,41 @@ begin
     //dbgrdDomain.DataSource.DataSet.EnableControls;
     //DU1.dtmdl1.vkdbfDomain.UpdateCursorPos;
     //Application.ProcessMessages;
-    dbgrdDomain.DataSource.DataSet.Close;
-    dbgrdDomain.DataSource.DataSet.Open;
+    Settings.Base.TableDomains.Close;
+    Settings.Base.TableDomains.Open;
   end;
   FreeAndNil(Frm01);
+end;
+
+procedure TFrm1.actUserEditExecute(Sender: TObject);
+var
+  Frm01: TFrm6;
+  UF01:TSAVAccessFilesDBF;
+begin
+  //  Frm2.Show;
+  Frm01 := TFrm6.Create(Self);
+  Frm01.FullAccess(True);
+  Frm01.edtDomain.Text:=Settings.Domain.SID;
+  UF01:=TSAVAccessFilesDBF.Create(Settings.User);
+  Frm01.edtCaption.Text:=Settings.User.Caption;
+  Frm01.edtSID.Text:=Settings.User.SID;
+  Frm01.edtDescription.Text:=Settings.User.Description;
+  Frm01.edtSID.ReadOnly:=True;
+  Frm01.btnSelectUser.Enabled:=False;
+  Frm01.UserFiles:=UF01;
+  if Frm01.ShowModal = mrok then
+  begin
+   (* Settings.User.Clear;
+    if Trim(Frm01.edtCaption.Text) = '' then
+      Frm01.edtCaption.Text := Frm01.edtSID.Text;
+    Settings.User.Open(Settings.Base, Frm01.edtCaption.Text,
+      Frm01.edtSID.Text, Frm01.edtDescription.Text,Settings.Domain.SID);
+    Settings.User.Save;
+    dbgrdUser.DataSource.DataSet.Close;
+    dbgrdUser.DataSource.DataSet.Open;*)
+  end;
+  FreeAndNil(Frm01);
+  FreeAndNil(UF01);
 end;
 
 end.
