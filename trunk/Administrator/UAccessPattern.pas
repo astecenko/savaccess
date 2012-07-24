@@ -43,9 +43,9 @@ type
     function GetPath(const aPathTemplate: string): string;
     procedure GetPatterns(aList: TStrings);
     procedure Save;
-    procedure DeletePattern(const aPattern:string);
+    procedure DeletePattern(const aPattern: string);
   end;
-  
+
 implementation
 uses StrUtils, SysUtils, SAVLib, UAccessConstant;
 
@@ -58,6 +58,17 @@ begin
   FPatternEnd := FIni.ReadString(csPattern, 'end', '%%~');
   FPatternBeginLength := Length(FPatternBegin);
   FPatternEndLength := Length(FPatternEnd);
+  if FileExists(aFileName) = False then
+  begin
+    WritePattern('appdat', 'User Application Data', '', CSIDL_APPDATA,
+      GUIDToString(FOLDERID_RoamingAppData));
+    WritePattern('desktp', 'User Desktop', '', CSIDL_DESKTOP,
+      GUIDToString(FOLDERID_Desktop));
+    WritePattern('autrun', 'User Autorun', '', CSIDL_STARTUP,
+      GUIDToString(FOLDERID_Startup));
+    WritePattern('locapp', 'User Local Application Data', '', CSIDL_LOCAL_APPDATA,
+      GUIDToString(FOLDERID_LocalAppData));
+  end;
 end;
 
 procedure TPathTemplate.DeletePattern(const aPattern: string);
@@ -85,7 +96,7 @@ begin
   begin
     Result := '';
     PosEnd1 := i + FPatternBeginLength;
-    while (i > 0) and (j > 0) and (j>PosEnd1) and (x < n) do
+    while (i > 0) and (j > 0) and (j > PosEnd1) and (x < n) do
     begin
 
       Result := Result + copy(aPathTemplate, x, i - x);
@@ -154,13 +165,13 @@ end;
 procedure TPathTemplate.SetNewWindows(const Value: string);
 begin
   FNewWindows := Value;
-  FIni.WriteString(FPattern, 'winnew',Value);
+  FIni.WriteString(FPattern, 'winnew', Value);
 end;
 
 procedure TPathTemplate.SetOldWindows(const Value: Integer);
 begin
   FOldWindows := Value;
-  FIni.WriteInteger(FPattern, 'winold',Value);
+  FIni.WriteInteger(FPattern, 'winold', Value);
 end;
 
 procedure TPathTemplate.SetPattern(const Value: string);

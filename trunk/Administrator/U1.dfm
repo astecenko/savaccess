@@ -63,12 +63,14 @@ object Frm1: TFrm1
         Height = 190
         Anchors = [akLeft, akTop, akRight, akBottom]
         DataSource = dtmdl1.dsUsers
+        Options = [dgTitles, dgIndicator, dgColumnResize, dgColLines, dgRowLines, dgTabs, dgRowSelect, dgConfirmDelete, dgCancelOnExit]
         TabOrder = 0
         TitleFont.Charset = DEFAULT_CHARSET
         TitleFont.Color = clWindowText
         TitleFont.Height = -11
         TitleFont.Name = 'MS Sans Serif'
         TitleFont.Style = []
+        OnDblClick = dbgrdUserDblClick
       end
     end
     object ts3: TTabSheet
@@ -206,6 +208,10 @@ object Frm1: TFrm1
               item
                 Action = actBaseSaveAs
                 ImageIndex = 2
+              end
+              item
+                Action = actBaseProperty
+                ImageIndex = 16
               end
               item
                 Caption = '-'
@@ -377,6 +383,12 @@ object Frm1: TFrm1
       Category = #1057#1077#1088#1074#1080#1089
       Caption = #1056#1077#1076#1072#1082#1090#1086#1088' '#1096#1072#1073#1083#1086#1085#1086#1074
       OnExecute = actTemplatExecute
+    end
+    object actBaseProperty: TAction
+      Category = #1061#1088#1072#1085#1080#1083#1080#1097#1077
+      Caption = #1057#1074#1086#1081#1089#1090#1074#1072
+      ImageIndex = 16
+      OnExecute = actBasePropertyExecute
     end
   end
   object il1: TImageList

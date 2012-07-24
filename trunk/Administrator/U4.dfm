@@ -215,12 +215,12 @@ object Frm4: TFrm4
     Top = 406
     Width = 33
     Height = 25
-    Hint = #1044#1086#1073#1072#1074#1080#1090#1100' '#1092#1072#1081#1083'('#1099')'
+    Hint = #1044#1086#1073#1072#1074#1080#1090#1100' '#1092#1072#1081#1083#1099
+    Action = actFileAdd
     Anchors = [akLeft, akBottom]
     ParentShowHint = False
     ShowHint = True
     TabOrder = 8
-    OnClick = btnFileAddClick
     Glyph.Data = {
       76010000424D7601000000000000760000002800000020000000100000000100
       04000000000000010000130B0000130B00001000000000000000000000000000
@@ -241,7 +241,8 @@ object Frm4: TFrm4
     Top = 406
     Width = 33
     Height = 25
-    Hint = #1056#1077#1076#1072#1082#1090#1080#1088#1086#1074#1072#1090#1100' '#1087#1088#1072#1074#1080#1083#1072' '#1092#1072#1081#1083#1072
+    Hint = #1054#1090#1088#1077#1076#1072#1082#1090#1080#1088#1086#1074#1072#1090#1100' '#1092#1072#1081#1083
+    Action = actFileEdit
     Anchors = [akLeft, akBottom]
     ParentShowHint = False
     ShowHint = True
@@ -266,7 +267,8 @@ object Frm4: TFrm4
     Top = 406
     Width = 33
     Height = 25
-    Hint = #1059#1076#1072#1083#1080#1090#1100' '#1074#1099#1076#1077#1083#1077#1085#1085#1099#1077' '#1092#1072#1081#1083#1099
+    Hint = #1059#1076#1072#1083#1080#1090#1100' '#1092#1072#1081#1083
+    Action = actFileDelete
     Anchors = [akLeft, akBottom]
     ParentShowHint = False
     ShowHint = True
@@ -308,7 +310,26 @@ object Frm4: TFrm4
     TabOrder = 12
   end
   object dsUserFiles: TDataSource
-    Left = 200
-    Top = 102
+    Left = 584
+    Top = 6
+  end
+  object dlgOpen1: TOpenDialog
+    Options = [ofHideReadOnly, ofAllowMultiSelect, ofEnableSizing]
+    Title = #1044#1086#1073#1072#1074#1083#1077#1085#1080#1077' '#1092#1072#1081#1083#1086#1074
+    Left = 616
+    Top = 8
+  end
+  object actlst1: TActionList
+    Left = 552
+    Top = 6
+    object actFileEdit: TAction
+      OnExecute = actFileEditExecute
+    end
+    object actFileAdd: TAction
+      OnExecute = actFileAddExecute
+    end
+    object actFileDelete: TAction
+      OnExecute = actFileDeleteExecute
+    end
   end
 end

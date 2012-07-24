@@ -8,6 +8,7 @@ type
   TSAVAccessFilesDBF = class(TSAVAccessFiles)
   private
     FTable: TVKDBFNTX;
+    procedure DataSourceAfterDelete(DataSet: TDataSet);
   public
     function TableCreate: Boolean;
     procedure TablePrepare(const ReadOnly: Boolean = True);
@@ -23,9 +24,9 @@ uses SysUtils, UAccessConstant;
 
 constructor TSAVAccessFilesDBF.Create(aContainer: TSAVAccessContainer);
 begin
-  inherited Create;
-  Container := aContainer;
+  inherited Create(aContainer);
   FTable := TVKDBFNTX.Create(nil);
+  FTable.AfterDelete:=DataSourceAfterDelete;
   FTable.DBFFileName := IncludeTrailingPathDelimiter(Container.WorkDir) +
     csFilesTable;
   TablePrepare(False);
@@ -35,11 +36,16 @@ begin
   DataSource := FTable;
 end;
 
+procedure TSAVAccessFilesDBF.DataSourceAfterDelete(DataSet: TDataSet);
+begin
+   (DataSet as TVKDBFNTX).Pack;
+end;
+
 destructor TSAVAccessFilesDBF.Destroy;
 begin
   FTable.Close;
   FreeAndNil(FTable);
-  DataSource:=nil;
+  DataSource := nil;
   inherited;
 end;
 
@@ -50,12 +56,18 @@ begin
   table1 := TVKDBFNTX.Create(nil);
   table1.DBFFileName := FTable.DBFFileName;
   table1.AccessMode.AccessMode := 66;
-  table1.oem:=True;
+  table1.oem := True;
   with table1.DBFFieldDefs.Add as TVKDBFFieldDef do
   begin
     Name := csFieldSrvrFile;
     field_type := 'C';
     len := 50;
+  end;
+  with table1.DBFFieldDefs.Add as TVKDBFFieldDef do
+  begin
+    Name := csFieldVersion;
+    field_type := 'C';
+    len := 30;
   end;
   with table1.DBFFieldDefs.Add as TVKDBFFieldDef do
   begin
@@ -105,6 +117,10 @@ begin
     FTable.AccessMode.AccessMode := 66;
   FTable.OEM := True;
   FTable.DbfVersion := xClipper;
+  FTable.LockProtocol := lpClipperLock;
+  FTable.LobLockProtocol := lpClipperLock;
+  FTable.TrimInLocate := True;
+  FTable.TrimCType := True;
 end;
 
 end.

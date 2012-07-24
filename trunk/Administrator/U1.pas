@@ -49,6 +49,7 @@ type
     dbnvgr1: TDBNavigator;
     dbmmoDESCR: TDBMemo;
     actTemplat: TAction;
+    actBaseProperty: TAction;
     procedure actCreateBaseExecute(Sender: TObject);
     procedure actUserAddExecute(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -58,6 +59,8 @@ type
     procedure actTemplatExecute(Sender: TObject);
     procedure actDomainAddExecute(Sender: TObject);
     procedure actUserEditExecute(Sender: TObject);
+    procedure actBasePropertyExecute(Sender: TObject);
+    procedure dbgrdUserDblClick(Sender: TObject);
   private
     { Private declarations }
   public
@@ -68,7 +71,7 @@ var
   Frm1: TFrm1;
 
 implementation
-uses U3, U4, U5, U6, U7, U8, U9, DU1, UAccessConstant,UAccessFileDBF;
+uses U3, U4, U5, U6, U7, U8, U9, DU1, UAccessConstant, UAccessFileDBF;
 
 {$R *.dfm}
 
@@ -130,7 +133,7 @@ begin
   ShowMessage(Settings.Base.UsersDir);
   Frm01 := TFrm6.Create(Self);
   Frm01.FullAccess(False);
-  Frm01.edtDomain.Text:=Settings.Domain.SID;
+  Frm01.edtDomain.Text := Settings.Domain.SID;
   if (Frm01.ShowModal = mrok) and (Frm01.edtSID.Text <> '') then
   begin
     // dbgrdDomain.DataSource.DataSet.DisableControls;
@@ -138,7 +141,7 @@ begin
     if Trim(Frm01.edtCaption.Text) = '' then
       Frm01.edtCaption.Text := Frm01.edtSID.Text;
     Settings.User.Open(Settings.Base, Frm01.edtCaption.Text,
-      Frm01.edtSID.Text, Frm01.edtDescription.Text,Settings.Domain.SID);
+      Frm01.edtSID.Text, Frm01.edtDescription.Text, Settings.Domain.SID);
     Settings.User.Save;
     Settings.Base.TableUsers.Close;
     Settings.Base.TableUsers.Open;
@@ -244,32 +247,65 @@ end;
 procedure TFrm1.actUserEditExecute(Sender: TObject);
 var
   Frm01: TFrm6;
-  UF01:TSAVAccessFilesDBF;
+  UF01: TSAVAccessFilesDBF;
 begin
   //  Frm2.Show;
   Frm01 := TFrm6.Create(Self);
   Frm01.FullAccess(True);
-  Frm01.edtDomain.Text:=Settings.Domain.SID;
-  UF01:=TSAVAccessFilesDBF.Create(Settings.User);
-  Frm01.edtCaption.Text:=Settings.User.Caption;
-  Frm01.edtSID.Text:=Settings.User.SID;
-  Frm01.edtDescription.Text:=Settings.User.Description;
-  Frm01.edtSID.ReadOnly:=True;
-  Frm01.btnSelectUser.Enabled:=False;
-  Frm01.UserFiles:=UF01;
+  Frm01.edtDomain.Text := Settings.Domain.SID;
+  UF01 := TSAVAccessFilesDBF.Create(Settings.User);
+  Frm01.edtCaption.Text := Settings.User.Caption;
+  Frm01.edtSID.Text := Settings.User.SID;
+  Frm01.edtDescription.Text := Settings.User.Description;
+  Frm01.edtSID.ReadOnly := True;
+  Frm01.btnSelectUser.Enabled := False;
+  Frm01.UserFiles := UF01;
   if Frm01.ShowModal = mrok then
   begin
-   (* Settings.User.Clear;
-    if Trim(Frm01.edtCaption.Text) = '' then
-      Frm01.edtCaption.Text := Frm01.edtSID.Text;
-    Settings.User.Open(Settings.Base, Frm01.edtCaption.Text,
-      Frm01.edtSID.Text, Frm01.edtDescription.Text,Settings.Domain.SID);
-    Settings.User.Save;
-    dbgrdUser.DataSource.DataSet.Close;
-    dbgrdUser.DataSource.DataSet.Open;*)
+    (* Settings.User.Clear;
+     if Trim(Frm01.edtCaption.Text) = '' then
+       Frm01.edtCaption.Text := Frm01.edtSID.Text;
+     Settings.User.Open(Settings.Base, Frm01.edtCaption.Text,
+       Frm01.edtSID.Text, Frm01.edtDescription.Text,Settings.Domain.SID);
+     Settings.User.Save;
+     dbgrdUser.DataSource.DataSet.Close;
+     dbgrdUser.DataSource.DataSet.Open;*)
   end;
   FreeAndNil(Frm01);
   FreeAndNil(UF01);
+end;
+
+procedure TFrm1.actBasePropertyExecute(Sender: TObject);
+var
+  Form1: TForm;
+  Memo1: TMemo;
+begin
+  Form1 := TForm.Create(Self);
+  Form1.Width:=640;
+  Form1.Height:=240;
+  Form1.Position:=poDesktopCenter;
+  Memo1 := TMemo.Create(Form1);
+  Memo1.Parent := Form1;
+  Memo1.Align := alClient;
+  Memo1.ReadOnly := True;
+  Memo1.Font.Size:=13;
+  Memo1.ScrollBars := ssBoth;
+  Memo1.Lines.Add('Файл конфигурации: ' + Settings.ConfigFile);
+  Memo1.Lines.Add('');
+  Memo1.Lines.Add('--- ДИРЕКТОРИИ ---');
+  Memo1.Lines.Add('Таблицы: ' + Settings.Base.JournalsDir);
+  Memo1.Lines.Add('Домены: ' + Settings.Base.DomainsDir);
+  Memo1.Lines.Add('Пользователи: ' + Settings.Base.UsersDir);
+  Memo1.Lines.Add('Группы: ' + Settings.Base.GroupsDir);
+  Memo1.Lines.Add('');
+  Memo1.Lines.Add('Версия: ');
+  Form1.ShowModal;
+  FreeAndNil(Form1);
+end;
+
+procedure TFrm1.dbgrdUserDblClick(Sender: TObject);
+begin
+  actUserEdit.Execute;
 end;
 
 end.
