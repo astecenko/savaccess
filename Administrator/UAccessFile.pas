@@ -1,25 +1,30 @@
 unit UAccessFile;
 
 interface
-uses Classes,UAccessContainer, DB;
+uses Classes, UAccessContainer, DB, md5;
 type
 
   TMD5 = string[32];
 
-  TSAVAccessFiles = class (TObject)
+  TSAVAccessFiles = class(TObject)
   private
-    FContainer:TSAVAccessContainer;
-    FDataSource:TDataSet;
+    FContainer: TSAVAccessContainer;
+    FDataSource: TDataSet;
+    FFileDir: string;
     procedure SetContainer(const Value: TSAVAccessContainer);
     procedure SetDataSource(const Value: TDataSet);
   public
-    property Container:TSAVAccessContainer read FContainer write SetContainer;
-    property DataSource:TDataSet read FDataSource write SetDataSource;
-    constructor Create overload;
+    property Container: TSAVAccessContainer read FContainer write SetContainer;
+    property DataSource: TDataSet read FDataSource write SetDataSource;
+    property FileDir: string read FFileDir;
+    function GetMD5(const aFileName: string): string;
+    function AppendFile(const aFileName: string): Boolean; virtual;
+    function AppendAndCopyFile(const aFileName: string; const aNewFileName:
+      string = ''): Boolean; virtual;
+    function UpdateFile: Boolean; virtual;
+    function DeleteFile: Boolean; virtual;
+    constructor Create(aContainer: TSAVAccessContainer); overload;
   end;
-
-
-
 
   TSAVAccessFile = class(TObject)
   private
@@ -49,10 +54,8 @@ type
 
   end;
 
-
-
 implementation
-uses StrUtils, SysUtils, SAVLib, UAccessConstant;
+uses StrUtils, SysUtils, SAVLib, UAccessConstant, KoaUtils;
 
 { TSAVAccessFile }
 
@@ -93,9 +96,67 @@ end;
 
 { TSAVAccessFiles }
 
-constructor TSAVAccessFiles.Create;
+function TSAVAccessFiles.AppendAndCopyFile(const aFileName,
+  aNewFileName: string): Boolean;
+var
+  s: string;
 begin
+  if aNewFileName = '' then
+    s := ExtractFileName(aFileName)
+  else
+    s := aNewFileName;
+  Result := True;
+  try
+    fCopyFile(aFileName, FFileDir + s);
+  except
+    Result := False;
+  end;
+  if Result then
+    Result := AppendFile(FFileDir + s);
+end;
 
+function TSAVAccessFiles.AppendFile(const aFileName: string): Boolean;
+begin
+  try
+    Result := True;
+    FDataSource.Append;
+    FDataSource.FieldByName(csFieldSrvrFile).AsString :=
+      AnsiLowerCase(ExtractFileName(aFileName));
+    FDataSource.FieldByName(csFieldExt).AsString :=
+      ExtractFileExt(FDataSource.FieldByName(csFieldSrvrFile).AsString);
+    FDataSource.FieldByName(csFieldMD5).AsString := GetMD5(aFileName);
+    FDataSource.FieldByName(csFieldVersion).AsString := Container.GetNewVersion;
+    FDataSource.Post;
+  except
+    Result := False;
+  end;
+end;
+
+constructor TSAVAccessFiles.Create(aContainer: TSAVAccessContainer);
+begin
+  inherited Create;
+  FContainer := aContainer;
+  FFileDir := IncludeTrailingPathDelimiter(FContainer.WorkDir) + 'f\';
+end;
+
+function TSAVAccessFiles.DeleteFile: Boolean;
+begin
+  Result:=True;
+  try
+  fDeleteFile(FFileDir+DataSource.FieldByName(csFieldSrvrFile).AsString);
+  except
+    Result:=False;
+  end;
+  if Result then DataSource.Delete;
+end;
+
+function TSAVAccessFiles.GetMD5(const aFileName: string): string;
+begin
+  try
+    Result := MD5DigestToStr(MD5File(aFileName));
+  except
+    Result := '';
+  end;
 end;
 
 procedure TSAVAccessFiles.SetContainer(const Value: TSAVAccessContainer);
@@ -106,6 +167,26 @@ end;
 procedure TSAVAccessFiles.SetDataSource(const Value: TDataSet);
 begin
   FDataSource := Value;
+end;
+
+function TSAVAccessFiles.UpdateFile: Boolean;
+var
+  s: string;
+begin
+  Result := False;
+  if FDataSource.FieldByName(csFieldSrvrFile).AsString <> '' then
+  begin
+    s := GetMD5(FFileDir + FDataSource.FieldByName(csFieldSrvrFile).AsString);
+    if s <> FDataSource.FieldByName(csFieldMD5).AsString then
+    begin
+      FDataSource.Edit;
+      FDataSource.FieldByName(csFieldMD5).AsString := s;
+      FDataSource.FieldByName(csFieldVersion).AsString :=
+        Container.GetNewVersion;
+      FDataSource.Post;
+    end;
+    Result := True;
+  end;
 end;
 
 end.

@@ -1,8 +1,8 @@
 object Frm10: TFrm10
   Left = 530
   Top = 105
-  Width = 480
-  Height = 357
+  Width = 400
+  Height = 350
   Caption = #1056#1077#1076#1072#1082#1090#1086#1088' '#1087#1088#1072#1074#1080#1083' '#1092#1072#1081#1083#1072
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -11,16 +11,17 @@ object Frm10: TFrm10
   Font.Name = 'MS Sans Serif'
   Font.Style = []
   OldCreateOrder = False
+  OnResize = FormResize
   DesignSize = (
-    472
-    330)
+    392
+    323)
   PixelsPerInch = 96
   TextHeight = 13
   object lbl1: TLabel
     Left = 0
     Top = 8
     Width = 189
-    Height = 17
+    Height = 13
     Caption = #1048#1084#1103' '#1092#1072#1081#1083#1072'/'#1076#1080#1088#1077#1082#1090#1086#1088#1080#1080' '#1074' '#1093#1088#1072#1085#1080#1083#1080#1097#1077
   end
   object lbl2: TLabel
@@ -30,55 +31,59 @@ object Frm10: TFrm10
     Height = 13
     Caption = #1048#1084#1103' '#1092#1072#1081#1083#1072'/'#1076#1080#1088#1077#1082#1090#1086#1088#1080#1080' '#1091' '#1082#1083#1080#1077#1085#1090#1072
   end
-  object lbl3: TLabel
-    Left = 0
-    Top = 88
-    Width = 469
-    Height = 33
-    Anchors = [akLeft, akTop, akRight]
-    AutoSize = False
-    Caption = #1064#1072#1073#1083#1086#1085
-    WordWrap = True
-  end
   object lbl4: TLabel
     Left = 80
-    Top = 168
+    Top = 144
     Width = 63
     Height = 13
     Caption = #1056#1072#1089#1096#1080#1088#1077#1085#1080#1077
   end
   object lbl5: TLabel
     Left = 16
-    Top = 168
+    Top = 144
     Width = 19
     Height = 13
     Caption = #1058#1080#1087
   end
   object lbl6: TLabel
     Left = 200
-    Top = 168
+    Top = 144
     Width = 50
     Height = 13
     Caption = #1044#1077#1081#1089#1090#1074#1080#1077
   end
   object bvl1: TBevel
     Left = 0
-    Top = 160
-    Width = 472
+    Top = 136
+    Width = 392
     Height = 57
     Anchors = [akLeft, akTop, akRight]
   end
   object lbl7: TLabel
     Left = 0
-    Top = 136
+    Top = 88
     Width = 23
     Height = 13
     Caption = 'MD5'
   end
+  object lbl8: TLabel
+    Left = 0
+    Top = 200
+    Width = 70
+    Height = 13
+    Caption = #1050#1086#1084#1084#1077#1085#1090#1072#1088#1080#1081
+  end
+  object lbl3: TLabel
+    Left = 0
+    Top = 240
+    Width = 37
+    Height = 13
+    Caption = #1042#1077#1088#1089#1080#1103
+  end
   object edtSrvrFile: TEdit
     Left = 0
     Top = 24
-    Width = 423
+    Width = 343
     Height = 21
     Anchors = [akLeft, akTop, akRight]
     TabOrder = 0
@@ -86,18 +91,19 @@ object Frm10: TFrm10
   object edtClntFile: TEdit
     Left = 0
     Top = 64
-    Width = 447
+    Width = 345
     Height = 21
     Anchors = [akLeft, akTop, akRight]
     TabOrder = 1
   end
   object btnTest: TBitBtn
-    Left = 450
+    Left = 346
     Top = 64
     Width = 22
     Height = 22
     Anchors = [akTop, akRight]
     TabOrder = 2
+    OnClick = btnTestClick
     Glyph.Data = {
       76010000424D7601000000000000760000002800000020000000100000000100
       04000000000000010000120B0000120B00001000000000000000000000000000
@@ -115,15 +121,15 @@ object Frm10: TFrm10
   end
   object edtExt: TEdit
     Left = 80
-    Top = 184
+    Top = 160
     Width = 89
     Height = 21
     MaxLength = 10
     TabOrder = 3
   end
-  object cbb1: TComboBox
+  object cbbType: TComboBox
     Left = 16
-    Top = 184
+    Top = 160
     Width = 41
     Height = 21
     ItemHeight = 13
@@ -135,7 +141,7 @@ object Frm10: TFrm10
   end
   object seAction: TSpinEdit
     Left = 200
-    Top = 184
+    Top = 160
     Width = 57
     Height = 22
     MaxValue = 999
@@ -144,8 +150,8 @@ object Frm10: TFrm10
     Value = 0
   end
   object btnOk: TBitBtn
-    Left = 304
-    Top = 303
+    Left = 224
+    Top = 296
     Width = 75
     Height = 25
     Anchors = [akRight, akBottom]
@@ -153,8 +159,8 @@ object Frm10: TFrm10
     Kind = bkOK
   end
   object btnCancel: TBitBtn
-    Left = 392
-    Top = 303
+    Left = 312
+    Top = 296
     Width = 75
     Height = 25
     Anchors = [akRight, akBottom]
@@ -162,7 +168,7 @@ object Frm10: TFrm10
     Kind = bkCancel
   end
   object btnShow: TBitBtn
-    Left = 450
+    Left = 370
     Top = 24
     Width = 22
     Height = 22
@@ -184,7 +190,7 @@ object Frm10: TFrm10
     NumGlyphs = 2
   end
   object btnLoad: TBitBtn
-    Left = 425
+    Left = 345
     Top = 24
     Width = 22
     Height = 22
@@ -206,21 +212,39 @@ object Frm10: TFrm10
     NumGlyphs = 2
   end
   object edtMD5: TEdit
-    Left = 24
-    Top = 128
-    Width = 409
+    Left = 0
+    Top = 104
+    Width = 345
     Height = 21
     Anchors = [akLeft, akTop, akRight]
     ReadOnly = True
     TabOrder = 10
   end
   object btnMD5: TBitBtn
-    Left = 435
-    Top = 128
-    Width = 33
+    Left = 347
+    Top = 104
+    Width = 45
     Height = 22
     Anchors = [akTop, akRight]
     Caption = 'MD5'
     TabOrder = 11
+    OnClick = btnMD5Click
+  end
+  object edtDescr: TEdit
+    Left = 0
+    Top = 216
+    Width = 391
+    Height = 21
+    Anchors = [akLeft, akTop, akRight]
+    TabOrder = 12
+  end
+  object edtVersion: TEdit
+    Left = 0
+    Top = 256
+    Width = 393
+    Height = 21
+    Anchors = [akLeft, akTop, akRight]
+    ReadOnly = True
+    TabOrder = 13
   end
 end

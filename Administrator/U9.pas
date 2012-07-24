@@ -11,7 +11,6 @@ type
     edtTestInput: TEdit;
     lbl1: TLabel;
     lbl2: TLabel;
-    edtTestResult: TEdit;
     btnTest: TButton;
     lst1: TListBox;
     edtCaption: TEdit;
@@ -23,13 +22,19 @@ type
     lbl5: TLabel;
     lbl6: TLabel;
     lbl7: TLabel;
-    bvl1: TBevel;
-    btnSave: TButton;
     edtPattern: TEdit;
-    bvl2: TBevel;
     btnAdd: TButton;
     btnDel: TButton;
     btnSaveFile: TBitBtn;
+    btnOk: TBitBtn;
+    btnCancel: TBitBtn;
+    lbl8: TLabel;
+    edtPatternBegin: TEdit;
+    lbl9: TLabel;
+    edtPatternEnd: TEdit;
+    bvl1: TBevel;
+    bvl2: TBevel;
+    edtTestResult: TMemo;
     procedure btnTestClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
@@ -39,6 +44,9 @@ type
     procedure btnSaveClick(Sender: TObject);
     procedure btnSaveFileClick(Sender: TObject);
     procedure lst1DblClick(Sender: TObject);
+    procedure edtPatternBeginChange(Sender: TObject);
+    procedure edtPatternEndChange(Sender: TObject);
+    procedure FormResize(Sender: TObject);
   private
     { Private declarations }
   public
@@ -63,6 +71,8 @@ begin
     TPathTemplate.Create(IncludeTrailingPathDelimiter(Settings.Base.JournalsDir) +
     csTemplateMain);
   Templ1.GetPatterns(lst1.Items);
+  edtPatternBegin.Text:=Templ1.PatternBegin;
+  edtPatternEnd.Text:=Templ1.PatternEnd;
 
 end;
 
@@ -77,6 +87,7 @@ Templ1.Pattern:=lst1.Items[lst1.itemindex];
 edtCaption.Text:=Templ1.Caption;
 edtNewWind.Text:=Templ1.NewWindows;
 edtPath.Text:=Templ1.Path;
+edtPattern.Text:=Templ1.Pattern;
 seOldWind.Value:=Templ1.OldWindows;
 end;
 
@@ -106,6 +117,22 @@ end;
 procedure TFrm9.lst1DblClick(Sender: TObject);
 begin
 edtTestInput.Text:=edtTestInput.Text+Templ1.PatternBegin+lst1.Items[lst1.itemindex]+Templ1.PatternEnd;
+end;
+
+procedure TFrm9.edtPatternBeginChange(Sender: TObject);
+begin
+Templ1.PatternBegin:=edtPatternBegin.Text;
+end;
+
+procedure TFrm9.edtPatternEndChange(Sender: TObject);
+begin
+Templ1.PatternEnd:=edtPatternEnd.Text;
+end;
+
+procedure TFrm9.FormResize(Sender: TObject);
+begin
+if Width<490 then Width:=490;
+if Height<340 then Height:=340;
 end;
 
 end.
