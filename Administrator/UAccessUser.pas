@@ -18,7 +18,7 @@ type
     procedure Save; override;
     procedure Open(aBase: TSAVAccessBase; const aCaption, aSID: string; const
       aDescription: string = ''; const aParam: string = ''; const aVersion:
-        TVersionString = ''); override;
+      TVersionString = ''); override;
     function Load(aSID: string = ''): Boolean; override;
     procedure GetGroups(List: TStrings);
     procedure Clear; override;
@@ -47,7 +47,6 @@ constructor TSAVAccessUser.Create(aBase: TSAVAccessBase; const aDomain,
 begin
   Create;
   Open(aBase, aCaption, aSID, aDescription, aDomain);
-
   Save;
 end;
 
@@ -67,10 +66,8 @@ begin
   else
     s := aSID;
   table1 := TVKDBFNTX.Create(nil);
-  table1.DBFFileName := IncludeTrailingPathDelimiter(Bases.JournalsDir) +
-    csUsersTable;
-  table1.AccessMode.AccessMode := 66;
-  table1.OEM:=True;
+  SAVLib_DBF.InitOpenDBF(table1, IncludeTrailingPathDelimiter(Bases.JournalsDir)
+    + csUsersTable, 64);
   table1.Open;
   Result := table1.Locate(csFieldSID, s, []);
   if Result then
@@ -80,7 +77,7 @@ begin
     Description := table1.FieldByName(csFieldDescription).AsString;
     ID := table1.FieldByName(csFieldID).AsInteger;
     Domain := table1.FieldByName(csFieldDomain).AsString;
-    WorkDir:=IncludeTrailingPathDelimiter(Bases.UsersDir)+SID;
+    WorkDir := IncludeTrailingPathDelimiter(Bases.UsersDir) + SID;
     ReadVersion;
   end;
   table1.Close;
@@ -93,10 +90,8 @@ var
 begin
   inherited;
   table1 := TVKDBFNTX.Create(nil);
-  table1.DBFFileName := IncludeTrailingPathDelimiter(Bases.JournalsDir) +
-    csUsersTable;
-  table1.AccessMode.AccessMode := 66;
-  table1.OEM:=True;
+  SAVLib_DBF.InitOpenDBF(table1, IncludeTrailingPathDelimiter(Bases.JournalsDir)
+    + csUsersTable, 66);
   table1.Open;
   if not (table1.Locate(csFieldSID, SID, [])) then
   begin
@@ -110,12 +105,12 @@ begin
   table1.FieldByName(csFieldCaption).AsString := Caption;
   table1.FieldByName(csFieldDescription).AsString := Description;
   table1.FieldByName(csFieldVersion).AsString := GetNewVersion;
-  Version:=table1.FieldByName(csFieldVersion).AsString;
+  Version := table1.FieldByName(csFieldVersion).AsString;
   ID := table1.FieldByName(csFieldID).AsInteger;
   table1.Post;
   table1.Close;
   FreeAndNil(table1);
-  WorkDir:=IncludeTrailingPathDelimiter(Bases.UsersDir) + SID;
+  WorkDir := IncludeTrailingPathDelimiter(Bases.UsersDir) + SID;
   ForceDirectories(WorkDir);
   WriteVersion;
 end;
@@ -127,11 +122,12 @@ end;
 
 procedure TSAVAccessUser.Open(aBase: TSAVAccessBase; const aCaption, aSID:
   string; const
-  aDescription: string = ''; const aParam: string = ''; const aVersion: TVersionString =
-    '');
+  aDescription: string = ''; const aParam: string = ''; const aVersion:
+    TVersionString =
+  '');
 begin
-  WorkDir:=IncludeTrailingPathDelimiter(aBase.UsersDir)+aSID;
-  inherited Open(aBase,aCaption,aSID,aDescription,aParam,aVersion);
+  WorkDir := IncludeTrailingPathDelimiter(aBase.UsersDir) + aSID;
+  inherited Open(aBase, aCaption, aSID, aDescription, aParam, aVersion);
   FDomain := aParam;
 end;
 

@@ -254,8 +254,6 @@ object Frm9: TFrm9
     Width = 513
     Height = 57
     Anchors = [akLeft, akTop, akRight, akBottom]
-    Lines.Strings = (
-      'edtTestResult')
     ReadOnly = True
     TabOrder = 15
   end

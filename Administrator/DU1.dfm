@@ -15,7 +15,6 @@ object dtmdl1: Tdtmdl1
     SetDeleted = False
     FastPostRecord = False
     LookupOptions = []
-    AfterInsert = vkdbfDomainAfterInsert
     TrimInLocate = False
     TrimCType = False
     StorageType = pstFile
@@ -179,6 +178,7 @@ object dtmdl1: Tdtmdl1
   end
   object dsGroups: TDataSource
     DataSet = vkdbfGroups
+    OnDataChange = dsGroupsDataChange
     Left = 168
     Top = 8
   end

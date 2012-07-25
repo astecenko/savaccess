@@ -44,7 +44,7 @@ object Frm1: TFrm1
     Top = 24
     Width = 648
     Height = 410
-    ActivePage = ts2
+    ActivePage = ts3
     Align = alClient
     TabOrder = 2
     object ts1: TTabSheet
@@ -121,19 +121,14 @@ object Frm1: TFrm1
             Visible = True
           end>
       end
-      object dbgrd1: TDBGrid
+      object lstUserGroup: TListBox
         Left = 0
         Top = 217
-        Width = 176
-        Height = 164
-        Anchors = [akLeft, akRight, akBottom]
-        DataSource = dtmdl1.dsUsersGroup
+        Width = 297
+        Height = 165
+        ItemHeight = 13
+        Sorted = True
         TabOrder = 1
-        TitleFont.Charset = DEFAULT_CHARSET
-        TitleFont.Color = clWindowText
-        TitleFont.Height = -11
-        TitleFont.Name = 'MS Sans Serif'
-        TitleFont.Style = []
       end
     end
   end
@@ -343,11 +338,13 @@ object Frm1: TFrm1
       Category = #1043#1088#1091#1087#1087#1072
       Caption = #1044#1086#1073#1072#1074#1080#1090#1100' '#1075#1088#1091#1087#1087#1091
       ImageIndex = 9
+      OnExecute = actGroupAddExecute
     end
     object actGroupEdit: TAction
       Category = #1043#1088#1091#1087#1087#1072
       Caption = #1056#1077#1076#1072#1082#1090#1080#1088#1086#1074#1072#1090#1100' '#1075#1088#1091#1087#1087#1091
       ImageIndex = 11
+      OnExecute = actGroupEditExecute
     end
     object actGroupDelete: TAction
       Category = #1043#1088#1091#1087#1087#1072
