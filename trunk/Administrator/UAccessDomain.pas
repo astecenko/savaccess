@@ -71,10 +71,8 @@ begin
   else
     s := aSID;
   table1 := TVKDBFNTX.Create(nil);
-  table1.DBFFileName := IncludeTrailingPathDelimiter(Bases.JournalsDir) +
-    csDomainsTable;
-  table1.OEM := True;
-  table1.AccessMode.AccessMode := 66;
+  SAVLib_DBF.InitOpenDBF(table1, IncludeTrailingPathDelimiter(Bases.JournalsDir)
+    + csDomainsTable, 64);
   table1.Open;
   Result := table1.Locate(csFieldSID, s, []);
   if Result then
@@ -103,10 +101,8 @@ var
 begin
   inherited;
   table1 := TVKDBFNTX.Create(nil);
-  table1.DBFFileName := IncludeTrailingPathDelimiter(Bases.JournalsDir) +
-    csDomainsTable;
-  table1.OEM := True;
-  table1.AccessMode.AccessMode := 66;
+  SAVLib_DBF.InitOpenDBF(table1, IncludeTrailingPathDelimiter(Bases.JournalsDir)
+    + csDomainsTable, 66);
   table1.Open;
   if not (table1.Locate(csFieldSID, SID, [])) then
   begin

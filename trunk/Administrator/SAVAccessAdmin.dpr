@@ -24,7 +24,8 @@ uses
   U9 in 'U9.pas' {Frm9},
   U1AD in 'U1AD.pas' {FrmAD},
   UAccessFileDBF in 'UAccessFileDBF.pas',
-  U10 in 'U10.pas' {Frm10};
+  U10 in 'U10.pas' {Frm10},
+  U11 in 'U11.pas' {Frm11};
 
 {$R *.res}
 

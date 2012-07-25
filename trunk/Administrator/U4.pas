@@ -43,14 +43,10 @@ type
     procedure actFileDeleteExecute(Sender: TObject);
   private
     FUserFiles: TSAVAccessFilesDBF;
-    FFilesDirectory: string;
     procedure SetUserFiles(const Value: TSAVAccessFilesDBF);
-    { Private declarations }
   public
     property UserFiles: TSAVAccessFilesDBF read FUserFiles write SetUserFiles;
-    property FilesDirectory: string read FFilesDirectory;
     procedure FullAccess(const bParam: Boolean = True);
-    // procedure AddFileToTable
   end;
 
 implementation
@@ -86,12 +82,7 @@ end;
 procedure TFrm4.FormShow(Sender: TObject);
 begin
   if Assigned(UserFiles) then
-  begin
     dsUserFiles.DataSet := FUserFiles.DataSource;
-    FFilesDirectory := IncludeTrailingPathDelimiter(FUserFiles.Container.WorkDir)
-      + 'f\';
-  end;
-
 end;
 
 procedure TFrm4.actFileEditExecute(Sender: TObject);
@@ -159,8 +150,8 @@ begin
           IDYES:
             begin
               try
-                fDeleteFile(FilesDirectory + s);
-                fCopyFile(dlgOpen1.Files[i], FilesDirectory + s);
+                fDeleteFile(UserFiles.FileDir + s);
+                fCopyFile(dlgOpen1.Files[i], UserFiles.FileDir + s);
               except
                 ShowMessage('Ошибка при обработке файла "' + s + '"'#10#13 +
                   SysErrorMessage(GetLastError));
@@ -182,34 +173,6 @@ begin
       Inc(i);
     end;
   end;
-  {Frm02 := TFrm10.Create(Self);
-  Frm02.UserFiles:=Self.UserFiles;
-  if Frm02.ShowModal = mrok then
-  begin
-    Frm02.edtSrvrFile.Text := AnsiLowerCase(Frm02.edtSrvrFile.Text);
-    Frm02.cbbType.Text := AnsiUpperCase(Frm02.cbbType.Text);
-    if dsUserFiles.DataSet.Locate(csFieldSrvrFile + ';' + csFieldType,
-      VarArrayOf([Frm02.edtSrvrFile.Text, Frm02.cbbType.Text]), []) then
-    begin
-      if
-        Application.MessageBox('Файл/каталог с таким именем уже существует. Заменить?',
-        'Добавление файла/каталога', MB_YESNO + MB_ICONWARNING + MB_DEFBUTTON2)
-        = IDYES then
-      begin
-        dsUserFiles.DataSet.Edit;
-
-        dsUserFiles.DataSet.Post;
-      end
-    end
-    else
-    begin
-      dsUserFiles.DataSet.Append;
-
-      dsUserFiles.DataSet.Post;
-    end;
-
-  end;
-  FreeAndNil(Frm02);   }
 end;
 
 procedure TFrm4.actFileDeleteExecute(Sender: TObject);

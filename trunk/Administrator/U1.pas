@@ -28,7 +28,6 @@ type
     ts3: TTabSheet;
     dbgrdUser: TDBGrid;
     dbgrdGroup: TDBGrid;
-    dbgrd1: TDBGrid;
     pnl1: TPanel;
     dbgrdDomain: TDBGrid;
     il1: TImageList;
@@ -50,6 +49,7 @@ type
     dbmmoDESCR: TDBMemo;
     actTemplat: TAction;
     actBaseProperty: TAction;
+    lstUserGroup: TListBox;
     procedure actCreateBaseExecute(Sender: TObject);
     procedure actUserAddExecute(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -61,6 +61,8 @@ type
     procedure actUserEditExecute(Sender: TObject);
     procedure actBasePropertyExecute(Sender: TObject);
     procedure dbgrdUserDblClick(Sender: TObject);
+    procedure actGroupAddExecute(Sender: TObject);
+    procedure actGroupEditExecute(Sender: TObject);
   private
     { Private declarations }
   public
@@ -71,7 +73,8 @@ var
   Frm1: TFrm1;
 
 implementation
-uses U3, U4, U5, U6, U7, U8, U9, DU1, UAccessConstant, UAccessFileDBF;
+uses U3, U4, U5, U6, U7, U8, U9, DU1, UAccessConstant, UAccessFileDBF,
+  UAccessGroup;
 
 {$R *.dfm}
 
@@ -86,7 +89,7 @@ var
       Result := IncludeTrailingPathDelimiter(Settings.Base.StoragePath)
         + deftext
     else
-      Result := edit1;
+      Result := edit1;  
   end;
 
 begin
@@ -129,14 +132,12 @@ procedure TFrm1.actUserAddExecute(Sender: TObject);
 var
   Frm01: TFrm6;
 begin
-  //  Frm2.Show;
   ShowMessage(Settings.Base.UsersDir);
   Frm01 := TFrm6.Create(Self);
   Frm01.FullAccess(False);
   Frm01.edtDomain.Text := Settings.Domain.SID;
   if (Frm01.ShowModal = mrok) and (Frm01.edtSID.Text <> '') then
   begin
-    // dbgrdDomain.DataSource.DataSet.DisableControls;
     Settings.User.Clear;
     if Trim(Frm01.edtCaption.Text) = '' then
       Frm01.edtCaption.Text := Frm01.edtSID.Text;
@@ -190,17 +191,14 @@ end;
 procedure TFrm1.actDomainEditExecute(Sender: TObject);
 var
   Frm01: TFrm4;
-
 begin
   Frm01 := TFrm4.Create(Self);
   Frm01.pnl1.Enabled := True;
-
   if Frm01.ShowModal = mrok then
   begin
 
   end;
   FreeAndNil(Frm01);
-
 end;
 
 procedure TFrm1.actTemplatExecute(Sender: TObject);
@@ -210,14 +208,6 @@ begin
   Frm01 := TFrm9.Create(Self);
   Frm01.ShowModal;
   FreeAndNil(Frm01);
-  (*  Templ1 :=
-      TPathTemplate.Create(IncludeTrailingPathDelimiter(MainBase.JournalsDir) +
-      'Main.tpl');
-    Templ1.WritePattern('1','',$001A,'{3EB685DB-65F9-4CF6-A03A-E3EF65729F3D}');
-    Templ1.WritePattern('2','',$0007,'{B97D20BB-F46A-4C97-BA10-5E3608430854}');
-    Templ1.WritePattern('3','D:\LWS');
-    Templ1.Save;
-    FreeAndNil(Templ1); *)
 end;
 
 procedure TFrm1.actDomainAddExecute(Sender: TObject);
@@ -228,16 +218,12 @@ begin
   Frm01.FullAccess(False);
   if (Frm01.ShowModal = mrok) and (Frm01.edtSID.Text <> '') then
   begin
-    // dbgrdDomain.DataSource.DataSet.DisableControls;
     Settings.Domain.Clear;
     if Trim(Frm01.edtCaption.Text) = '' then
       Frm01.edtCaption.Text := Frm01.edtSID.Text;
     Settings.Domain.Open(Settings.Base, Frm01.edtCaption.Text,
       Frm01.edtSID.Text, Frm01.edtDescription.Text);
     Settings.Domain.Save;
-    //dbgrdDomain.DataSource.DataSet.EnableControls;
-    //DU1.dtmdl1.vkdbfDomain.UpdateCursorPos;
-    //Application.ProcessMessages;
     Settings.Base.TableDomains.Close;
     Settings.Base.TableDomains.Open;
   end;
@@ -249,7 +235,6 @@ var
   Frm01: TFrm6;
   UF01: TSAVAccessFilesDBF;
 begin
-  //  Frm2.Show;
   Frm01 := TFrm6.Create(Self);
   Frm01.FullAccess(True);
   Frm01.edtDomain.Text := Settings.Domain.SID;
@@ -306,6 +291,58 @@ end;
 procedure TFrm1.dbgrdUserDblClick(Sender: TObject);
 begin
   actUserEdit.Execute;
+end;
+
+procedure TFrm1.actGroupAddExecute(Sender: TObject);
+var
+  Frm01: TFrm5;
+begin
+  Frm01 := TFrm5.Create(Self);
+  Frm01.FullAccess(False);
+  Frm01.edtSID.Hint:='Если не заполнен, цифровой ID будет сгенерирован автоматически при добавлении';
+  Frm01.edtSID.ShowHint:=True;
+  if Frm01.ShowModal = mrok then
+  begin
+    // dbgrdDomain.DataSource.DataSet.DisableControls;
+    Settings.Group.Clear;
+    if Trim(Frm01.edtCaption.Text) = '' then
+      Frm01.edtCaption.Text := 'Новая группа';
+    Settings.Group.Open(Settings.Base, Frm01.edtCaption.Text,
+      Frm01.edtSID.Text, Frm01.edtDescription.Text, Frm01.sePriority.Text);
+    Settings.Group.Save;
+    Settings.Base.TableGroups.Close;
+    Settings.Base.TableGroups.Open;
+  end;
+  FreeAndNil(Frm01);
+end;
+
+procedure TFrm1.actGroupEditExecute(Sender: TObject);
+var
+  Frm01: TFrm5;
+  UF01: TSAVAccessFilesDBF;
+begin
+  Frm01 := TFrm5.Create(Self);
+  Frm01.FullAccess(True);
+  Frm01.sePriority.Value := Settings.Group.Priority;
+  UF01 := TSAVAccessFilesDBF.Create(Settings.Group);
+  Frm01.edtCaption.Text := Settings.Group.Caption;
+  Frm01.edtSID.Text := Settings.Group.SID;
+  Frm01.edtDescription.Text := Settings.Group.Description;
+  Frm01.edtSID.ReadOnly := True;
+  Frm01.UserFiles := UF01;
+  if Frm01.ShowModal = mrok then
+  begin
+    (* Settings.User.Clear;
+     if Trim(Frm01.edtCaption.Text) = '' then
+       Frm01.edtCaption.Text := Frm01.edtSID.Text;
+     Settings.User.Open(Settings.Base, Frm01.edtCaption.Text,
+       Frm01.edtSID.Text, Frm01.edtDescription.Text,Settings.Domain.SID);
+     Settings.User.Save;
+     dbgrdUser.DataSource.DataSet.Close;
+     dbgrdUser.DataSource.DataSet.Open;*)
+  end;
+  FreeAndNil(Frm01);
+  FreeAndNil(UF01);
 end;
 
 end.
