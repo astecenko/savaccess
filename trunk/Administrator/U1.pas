@@ -7,7 +7,7 @@ uses
   Dialogs, XPStyleActnCtrls, ActnList, ActnMan, ToolWin, ActnCtrls,
   ActnMenus, ComCtrls, StdActns, DB,
   VKDBFDataSet, ExtCtrls, Grids, DBGrids, ImgList, StdCtrls,
-  DBCtrls;
+  DBCtrls, Buttons, CheckLst;
 
 const
   csFrm1Caption = 'SAV Access - Администратор: ';
@@ -49,7 +49,12 @@ type
     dbmmoDESCR: TDBMemo;
     actTemplat: TAction;
     actBaseProperty: TAction;
-    lstUserGroup: TListBox;
+    btnUserAdd: TBitBtn;
+    btnUserDel: TBitBtn;
+    pnl2: TPanel;
+    spl1: TSplitter;
+    pnl3: TPanel;
+    chklstGroupUsers: TCheckListBox;
     procedure actCreateBaseExecute(Sender: TObject);
     procedure actUserAddExecute(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -63,6 +68,9 @@ type
     procedure dbgrdUserDblClick(Sender: TObject);
     procedure actGroupAddExecute(Sender: TObject);
     procedure actGroupEditExecute(Sender: TObject);
+    procedure btnUserAddClick(Sender: TObject);
+    procedure btnUserDelClick(Sender: TObject);
+    procedure chklstGroupUsersClickCheck(Sender: TObject);
   private
     { Private declarations }
   public
@@ -73,7 +81,7 @@ var
   Frm1: TFrm1;
 
 implementation
-uses U3, U4, U5, U6, U7, U8, U9, DU1, UAccessConstant, UAccessFileDBF,
+uses U3, U4, U5, U6, U7, U8, U9, U11, DU1, UAccessConstant, UAccessFileDBF,
   UAccessGroup;
 
 {$R *.dfm}
@@ -89,7 +97,7 @@ var
       Result := IncludeTrailingPathDelimiter(Settings.Base.StoragePath)
         + deftext
     else
-      Result := edit1;  
+      Result := edit1;
   end;
 
 begin
@@ -266,14 +274,14 @@ var
   Memo1: TMemo;
 begin
   Form1 := TForm.Create(Self);
-  Form1.Width:=640;
-  Form1.Height:=240;
-  Form1.Position:=poDesktopCenter;
+  Form1.Width := 640;
+  Form1.Height := 240;
+  Form1.Position := poDesktopCenter;
   Memo1 := TMemo.Create(Form1);
   Memo1.Parent := Form1;
   Memo1.Align := alClient;
   Memo1.ReadOnly := True;
-  Memo1.Font.Size:=13;
+  Memo1.Font.Size := 13;
   Memo1.ScrollBars := ssBoth;
   Memo1.Lines.Add('Файл конфигурации: ' + Settings.ConfigFile);
   Memo1.Lines.Add('');
@@ -299,8 +307,9 @@ var
 begin
   Frm01 := TFrm5.Create(Self);
   Frm01.FullAccess(False);
-  Frm01.edtSID.Hint:='Если не заполнен, цифровой ID будет сгенерирован автоматически при добавлении';
-  Frm01.edtSID.ShowHint:=True;
+  Frm01.edtSID.Hint :=
+    'Если не заполнен, цифровой ID будет сгенерирован автоматически при добавлении';
+  Frm01.edtSID.ShowHint := True;
   if Frm01.ShowModal = mrok then
   begin
     // dbgrdDomain.DataSource.DataSet.DisableControls;
@@ -343,6 +352,36 @@ begin
   end;
   FreeAndNil(Frm01);
   FreeAndNil(UF01);
+end;
+
+procedure TFrm1.btnUserAddClick(Sender: TObject);
+var
+  Form01: TFrm11;
+begin
+  Form01 := TFrm11.Create(Self);
+  Form01.vkdbfntx2.DBFFileName := Settings.Base.TableUsers.DBFFileName;
+  Form01.vkdbfntx2.Open;
+  if (Form01.ShowModal = mrOk) and (Form01.vkdbfntx2.RecNo > 0) then
+  begin
+    Settings.Group.UserAdd(Form01.vkdbfntx2.FieldByName(csFieldSID).AsString);
+    Settings.Group.GetUsersSID(chklstGroupUsers, True);
+  end;
+  Form01.vkdbfntx2.Close;
+  FreeAndNil(Form01);
+end;
+
+procedure TFrm1.btnUserDelClick(Sender: TObject);
+begin
+  if (chklstGroupUsers.ItemIndex > -1) and
+    (Settings.Group.UserDelete(chklstGroupUsers.Items.ValueFromIndex[chklstGroupUsers.ItemIndex])) then
+    chklstGroupUsers.DeleteSelected;
+end;
+
+procedure TFrm1.chklstGroupUsersClickCheck(Sender: TObject);
+begin
+  Settings.Group.UserSwitch(chklstGroupUsers.Items.ValueFromIndex[chklstGroupUsers.ItemIndex],
+    chklstGroupUsers.Checked[chklstGroupUsers.ItemIndex]);
+  Settings.Group.GetUsersSID(chklstGroupUsers, True);
 end;
 
 end.

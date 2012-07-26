@@ -28,7 +28,7 @@ var
   dtmdl1: Tdtmdl1;
 
 implementation
-uses UAccessConstant, U7, UAccessContainer;
+uses UAccessConstant, U7, UAccessContainer,u1;
 
 {$R *.dfm}
 
@@ -56,12 +56,15 @@ end;
 procedure Tdtmdl1.dsGroupsDataChange(Sender: TObject; Field: TField);
 begin
   if dsGroups.DataSet.RecordCount > 0 then
+  begin
     Settings.Group.Open(Settings.Base,
       dsGroups.DataSet.fieldbyname(csFieldCaption).AsString,
       dsGroups.DataSet.fieldbyname(csFieldSID).AsString,
       dsGroups.DataSet.fieldbyname(csFieldDescription).AsString,
       dsGroups.DataSet.fieldbyname(csFieldPrority).AsString,
       dsGroups.DataSet.fieldbyname(csFieldVersion).AsString);
+    Settings.Group.GetUsersSID(Frm1.chklstGroupUsers,True);
+  end
 end;
 
 end.
