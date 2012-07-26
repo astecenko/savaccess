@@ -1,13 +1,14 @@
 unit UAccessGroup;
 
 interface
-uses Classes, UAccessBase, UAccessContainer;
+uses Classes, UAccessBase, UAccessContainer, CheckLst;
 
 type
   TSAVAccessGroup = class(TSAVAccessContainer)
   private
     FPriority: Integer;
     procedure SetPriority(const Value: Integer);
+    //function UserAdd(const aSID: string): Boolean;
   protected
 
   public
@@ -22,9 +23,15 @@ type
     procedure Open(aBase: TSAVAccessBase; const aCaption, aSID: string; const
       aDescription: string = ''; const aParam: string = ''; const aVersion:
       TVersionString = ''); override;
-    procedure GetUsersSID(List: TStrings);
+    procedure GetUsersSID(List: TStrings; const aCaption: Boolean = False);
+      overload;
+    procedure GetUsersSID(List: TCheckListBox; const aCaption: Boolean = False);
+      overload;
     function UserAdd(const aSID: string): Boolean;
     function UserDelete(const aSID: string): Boolean;
+    function UserOff(const aSID: string): Boolean;
+    function UserOn(const aSID: string): Boolean;
+    function UserSwitch(const aSID: string; const aWork: Boolean):Boolean;
     procedure Clear; override;
 
   end;
@@ -41,13 +48,13 @@ begin
   Result := True;
   Ini01 := TIniFile.Create(IncludeTrailingPathDelimiter(WorkDir) +
     csContainerCfg);
-  Ini01.WriteBool('users', aSID, True);
+  Ini01.WriteBool(csIniUsers, aSID, True);
   FreeAndNil(Ini01);
   try
     Ini01 := TIniFile.Create(IncludeTrailingPathDelimiter(Bases.UsersDir) + aSID
       +
       '\' + csContainerCfg);
-    Ini01.WriteInteger('groups', SID, FPriority);
+    Ini01.WriteInteger(csIniGroups, SID, FPriority);
   except
     Result := False
   end;
@@ -74,13 +81,35 @@ begin
 
 end;
 
-procedure TSAVAccessGroup.GetUsersSID(List: TStrings);
+procedure TSAVAccessGroup.GetUsersSID(List: TStrings; const aCaption: Boolean =
+  False);
 var
   Ini01: TIniFile;
+  i: Integer;
+  s: string;
+  OldFiltered: Boolean;
+  OldRecNo: Integer;
 begin
   Ini01 := TIniFile.Create(IncludeTrailingPathDelimiter(WorkDir) +
     csContainerCfg);
-  Ini01.ReadSectionValues('users', List);
+  List.Clear;
+  Ini01.ReadSection(csIniUsers, List);
+  if (aCaption) and (Bases.TableUsers.RecordCount > 0) then
+  begin
+    OldFiltered := Bases.TableUsers.Filtered;
+    OldRecNo := Bases.TableUsers.RecNo;
+    Bases.TableUsers.Filtered := False;
+    for i := 0 to List.Count - 1 do
+    begin
+      if Bases.TableUsers.Locate(csFieldSID, List[i], []) then
+        s := Bases.TableUsers.FieldByName(csFieldCaption).AsString
+      else
+        s := 'Not found';
+      List[i] := s + '=' + List[i];
+    end;
+    Bases.TableUsers.RecNo := OldRecNo;
+    Bases.TableUsers.Filtered := OldFiltered;
+  end;
   FreeAndNil(Ini01);
 end;
 
@@ -167,13 +196,82 @@ begin
   Result := True;
   Ini01 := TIniFile.Create(IncludeTrailingPathDelimiter(WorkDir) +
     csContainerCfg);
-  Ini01.DeleteKey('users', aSID);
+  Ini01.DeleteKey(csIniUsers, aSID);
   FreeAndNil(Ini01);
   try
     Ini01 := TIniFile.Create(IncludeTrailingPathDelimiter(Bases.UsersDir) + aSID
       +
       '\' + csContainerCfg);
-    Ini01.DeleteKey('groups', SID);
+    Ini01.DeleteKey(csIniGroups, SID);
+  except
+    Result := False;
+  end;
+  if Assigned(Ini01) then
+    FreeAndNil(Ini01);
+end;
+
+procedure TSAVAccessGroup.GetUsersSID(List: TCheckListBox;
+  const aCaption: Boolean);
+var
+  Ini01: TMemIniFile;
+  i: Integer;
+  s: string;
+  OldFiltered: Boolean;
+  OldRecNo: Integer;
+begin
+  Ini01 := TMemIniFile.Create(IncludeTrailingPathDelimiter(WorkDir) +
+    csContainerCfg);
+  List.Clear;
+  Ini01.ReadSection(csIniUsers, List.Items);
+  for i := 0 to List.Count - 1 do
+    List.Checked[i] := Ini01.ReadBool(csIniUsers, List.Items[i], False);
+  if (aCaption) and (Bases.TableUsers.RecordCount > 0) then
+  begin
+    OldFiltered := Bases.TableUsers.Filtered;
+    OldRecNo := Bases.TableUsers.RecNo;
+    Bases.TableUsers.Filtered := False;
+    for i := 0 to List.Count - 1 do
+    begin
+      if Bases.TableUsers.Locate(csFieldSID, List.Items[i], []) then
+        s := Bases.TableUsers.FieldByName(csFieldCaption).AsString
+      else
+        s := 'Not found';
+      List.Items[i] := s + '=' + List.items[i];
+    end;
+    Bases.TableUsers.RecNo := OldRecNo;
+    Bases.TableUsers.Filtered := OldFiltered;
+  end;
+  FreeAndNil(Ini01);
+end;
+
+function TSAVAccessGroup.UserOff(const aSID: string): Boolean;
+begin
+  Result:=UserSwitch(aSID, False);
+end;
+
+function TSAVAccessGroup.UserOn(const aSID: string): Boolean;
+begin
+  Result:=UserSwitch(aSID, True);
+end;
+
+function TSAVAccessGroup.UserSwitch(const aSID: string;
+  const aWork: Boolean):Boolean;
+var
+  Ini01: TIniFile;
+begin
+  Result := True;
+  Ini01 := TIniFile.Create(IncludeTrailingPathDelimiter(WorkDir) +
+    csContainerCfg);
+  Ini01.WriteBool(csIniUsers, aSID, aWork);
+  FreeAndNil(Ini01);
+  try
+    Ini01 := TIniFile.Create(IncludeTrailingPathDelimiter(Bases.UsersDir) + aSID
+      +
+      '\' + csContainerCfg);
+    if aWork then
+      Ini01.WriteInteger(csIniGroups, SID, Priority)
+    else
+      Ini01.DeleteKey(csIniGroups, SID);
   except
     Result := False;
   end;

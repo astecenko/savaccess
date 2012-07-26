@@ -7,8 +7,11 @@ uses
   VCLFixPack,
   Forms,
   DU1 in 'DU1.pas' {dtmdl1: TDataModule},
-  U7 in 'U7.pas',
+  U7 in 'U7.pas' {Singelton},
   U1 in 'U1.pas' {Frm1},
+  SAVLib_INI in '..\..\Common\SAVLib_INI.pas';
+
+(*,
   UAccessBase in 'UAccessBase.pas',
   UAccessConstant in 'UAccessConstant.pas',
   UAccessUser in 'UAccessUser.pas',
@@ -25,7 +28,7 @@ uses
   U1AD in 'U1AD.pas' {FrmAD},
   UAccessFileDBF in 'UAccessFileDBF.pas',
   U10 in 'U10.pas' {Frm10},
-  U11 in 'U11.pas' {Frm11};
+  U11 in 'U11.pas' {Frm11};*)
 
 {$R *.res}
 

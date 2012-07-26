@@ -252,7 +252,12 @@ begin
     field_type := 'C';
     len := 250;
   end;
+  Result:=True;
+  try
   table1.CreateTable;
+  except
+    Result:=False;
+  end;  
   FreeAndNil(table1);
   (*viborka.Open;
   with viborka.Indexes.Add as TVKNTXIndex do
@@ -318,7 +323,12 @@ begin
     field_type := 'N';
     len := 6;
   end;
+  Result:=True;
+  try
   table1.CreateTable;
+  except
+    Result:=False;
+  end;
   FreeAndNil(table1);
 end;
 
@@ -343,13 +353,18 @@ begin
     field_type := 'N';
     len := 6;
   end;
+  Result:=True;
+  try
   table1.CreateTable;
+  except
+    Result:=False;
+  end;
   FreeAndNil(table1);
 end;
 
 function TSAVAccessBase.CreateTableOrgUnits: Boolean;
 begin
-
+  Result:=False;
 end;
 
 function TSAVAccessBase.CreateTableUsers: Boolean;
@@ -397,8 +412,13 @@ begin
     field_type := 'C';
     len := 200;
   end;
+  Result:=True;
+  try
   table1.CreateTable;
-  table1.Open;
+  except
+    Result:=False;
+  end;
+ { table1.Open;
   with table1.Indexes.Add as TVKNTXIndex do
   begin
     NTXFileName := IncludeTrailingPathDelimiter(FJournalsDir) + csUsersSIDIndex;
@@ -406,7 +426,7 @@ begin
     Unique:=True;
     CreateIndex(True);
   end;
-  table1.Close;
+  table1.Close;}
   FreeAndNil(table1);
 end;
 

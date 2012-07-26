@@ -105,7 +105,12 @@ begin
     field_type := 'C';
     len := 150;
   end;
+  Result:=True;
+  try
   table1.CreateTable;
+  except
+    Result:=False;
+  end;  
   FreeAndNil(table1);
 end;
 

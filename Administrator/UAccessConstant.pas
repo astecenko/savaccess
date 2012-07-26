@@ -50,6 +50,9 @@ const
   csFieldAction='ACTION';
   csFieldMD5='MD5';
 
+   { ini-files }
+   csIniUsers='users';
+   csIniGroups='groups';
 
   { Others }
 

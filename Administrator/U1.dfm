@@ -76,59 +76,112 @@ object Frm1: TFrm1
     object ts3: TTabSheet
       Caption = #1043#1088#1091#1087#1087#1099
       ImageIndex = 2
-      DesignSize = (
-        640
-        382)
-      object dbgrdGroup: TDBGrid
+      object spl1: TSplitter
         Left = 0
-        Top = 25
-        Width = 639
-        Height = 190
-        Anchors = [akLeft, akTop, akRight, akBottom]
-        DataSource = dtmdl1.dsGroups
-        TabOrder = 0
-        TitleFont.Charset = DEFAULT_CHARSET
-        TitleFont.Color = clWindowText
-        TitleFont.Height = -11
-        TitleFont.Name = 'MS Sans Serif'
-        TitleFont.Style = []
-        Columns = <
-          item
-            Expanded = False
-            FieldName = 'NAME'
-            Title.Caption = #1043#1088#1091#1087#1087#1072
-            Width = 180
-            Visible = True
-          end
-          item
-            Expanded = False
-            FieldName = 'ID'
-            ReadOnly = True
-            Width = 50
-            Visible = True
-          end
-          item
-            Expanded = False
-            FieldName = 'PRIORITY'
-            Title.Caption = #1055#1088#1080#1086#1088#1080#1090#1077#1090
-            Visible = True
-          end
-          item
-            Expanded = False
-            FieldName = 'DESCR'
-            Title.Caption = #1050#1086#1084#1084#1077#1085#1090#1072#1088#1080#1080
-            Width = 300
-            Visible = True
-          end>
+        Top = 261
+        Width = 640
+        Height = 3
+        Cursor = crVSplit
+        Align = alBottom
       end
-      object lstUserGroup: TListBox
+      object pnl2: TPanel
         Left = 0
-        Top = 217
-        Width = 297
-        Height = 165
-        ItemHeight = 13
-        Sorted = True
+        Top = 264
+        Width = 640
+        Height = 118
+        Align = alBottom
+        TabOrder = 0
+        DesignSize = (
+          640
+          118)
+        object btnUserAdd: TBitBtn
+          Left = 256
+          Top = 5
+          Width = 25
+          Height = 25
+          Hint = #1042#1082#1083#1102#1095#1080#1090#1100' '#1087#1086#1083#1100#1079#1086#1074#1072#1090#1077#1083#1103' '#1074' '#1075#1088#1091#1087#1087#1091
+          Caption = '+'
+          ParentShowHint = False
+          ShowHint = True
+          TabOrder = 0
+          OnClick = btnUserAddClick
+          NumGlyphs = 2
+        end
+        object btnUserDel: TBitBtn
+          Left = 256
+          Top = 37
+          Width = 25
+          Height = 25
+          Hint = #1048#1089#1082#1083#1102#1095#1080#1090#1100' '#1087#1086#1083#1100#1079#1086#1074#1072#1090#1077#1083#1103' '#1080#1079' '#1075#1088#1091#1087#1087#1099
+          Caption = '-'
+          ParentShowHint = False
+          ShowHint = True
+          TabOrder = 1
+          OnClick = btnUserDelClick
+        end
+        object chklstGroupUsers: TCheckListBox
+          Left = 2
+          Top = 2
+          Width = 249
+          Height = 113
+          OnClickCheck = chklstGroupUsersClickCheck
+          Anchors = [akLeft, akTop, akBottom]
+          ItemHeight = 13
+          TabOrder = 2
+        end
+      end
+      object pnl3: TPanel
+        Left = 0
+        Top = 0
+        Width = 640
+        Height = 261
+        Align = alClient
         TabOrder = 1
+        DesignSize = (
+          640
+          261)
+        object dbgrdGroup: TDBGrid
+          Left = 0
+          Top = 25
+          Width = 636
+          Height = 232
+          Anchors = [akLeft, akTop, akRight, akBottom]
+          DataSource = dtmdl1.dsGroups
+          TabOrder = 0
+          TitleFont.Charset = DEFAULT_CHARSET
+          TitleFont.Color = clWindowText
+          TitleFont.Height = -11
+          TitleFont.Name = 'MS Sans Serif'
+          TitleFont.Style = []
+          Columns = <
+            item
+              Expanded = False
+              FieldName = 'NAME'
+              Title.Caption = #1043#1088#1091#1087#1087#1072
+              Width = 180
+              Visible = True
+            end
+            item
+              Expanded = False
+              FieldName = 'ID'
+              ReadOnly = True
+              Width = 50
+              Visible = True
+            end
+            item
+              Expanded = False
+              FieldName = 'PRIORITY'
+              Title.Caption = #1055#1088#1080#1086#1088#1080#1090#1077#1090
+              Visible = True
+            end
+            item
+              Expanded = False
+              FieldName = 'DESCR'
+              Title.Caption = #1050#1086#1084#1084#1077#1085#1090#1072#1088#1080#1080
+              Width = 300
+              Visible = True
+            end>
+        end
       end
     end
   end
