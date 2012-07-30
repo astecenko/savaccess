@@ -14,6 +14,7 @@ const
 
   csTemplateMain='main.tpl';
   csContainerCfg='container.cfg';
+  csClientData='clientdata.cds';
 
   { Tables filename }
 
@@ -49,6 +50,7 @@ const
   csFieldExt='EXT';
   csFieldAction='ACTION';
   csFieldMD5='MD5';
+  csFieldSource='SOURCE';
 
    { ini-files }
    csIniUsers='users';

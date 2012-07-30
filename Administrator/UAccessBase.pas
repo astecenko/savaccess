@@ -176,7 +176,7 @@ begin
       InitOpenDBF(FTableUsers, IncludeTrailingPathDelimiter(FJournalsDir) +
         csUsersTable, 66);
       FTableUsers.Open;
-     { with FTableUsers.Indexes.Add as TVKNTXIndex do
+      {with FTableUsers.Indexes.Add as TVKNTXIndex do
       begin
         NTXFileName := IncludeTrailingPathDelimiter(FJournalsDir) +
           csUsersSIDIndex;
