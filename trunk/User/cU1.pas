@@ -4,7 +4,8 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, JvComponentBase, JvTrayIcon, ActnList, StdActns, Menus,cUSettings;
+  Dialogs, JvComponentBase, JvTrayIcon, ActnList, StdActns, Menus,cUSettings,
+  StdCtrls, Grids, DBGrids, DB, DBClient;
 
 type
   TForm1 = class(TForm)
@@ -15,8 +16,16 @@ type
     actExit: TAction;
     N2: TMenuItem;
     N3: TMenuItem;
+    N4: TMenuItem;
+    mmo1: TMemo;
+    btn1: TButton;
+    ds1: TDataSource;
+    dbgrd1: TDBGrid;
+    ds2: TClientDataSet;
     procedure actExitExecute(Sender: TObject);
     procedure FormCreate(Sender: TObject);
+    procedure N4Click(Sender: TObject);
+    procedure btn1Click(Sender: TObject);
   private
     { Private declarations }
   public
@@ -37,7 +46,20 @@ end;
 
 procedure TForm1.FormCreate(Sender: TObject);
 begin
-Settings.Base.LoadFromFile(Settings.ConfigFile);
+Settings.Client.LoadFromFile(Settings.ConfigFile);
+ds1.DataSet:=Settings.Client.DataSet;
+end;
+
+procedure TForm1.N4Click(Sender: TObject);
+begin
+Form1.Show;
+end;
+
+procedure TForm1.btn1Click(Sender: TObject);
+begin
+mmo1.Lines.Add(IncludeTrailingPathDelimiter(Settings.Client.UsersDir)+Settings.Client.SID);
+mmo1.Lines.Add(Settings.Client.Workstation);
+mmo1.Lines.Add(IncludeTrailingPathDelimiter(Settings.Client.DomainsDir)+Settings.Client.Domain);
 end;
 
 end.
