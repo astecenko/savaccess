@@ -15,6 +15,7 @@ type
     FID: Integer;
     FWorkDir: string;
     FFilepath: string;
+    FContainerType:Char;
     FIniPath: string;
     FBases: TSAVAccessBase;
     procedure SetBases(const Value: TSAVAccessBase);
@@ -26,12 +27,14 @@ type
     procedure SetID(const Value: Integer);
     procedure SetVersion(const Value: TVersionString);
     procedure SetWorkDir(const Value: string);
+    procedure SetContainerType(const Value: Char);
   public
     property Caption: string read FCaption write SetCaption;
     property Description: string read FDescription write SetDescription;
     property WorkDir: string read FWorkDir write SetWorkDir;
     property ID: Integer read FID write SetID;
     property SID: string read FSID write SetSID;
+    property ContainerType:Char read FContainerType write SetContainerType;
     property FilePath: string read FFilePath write SetFilePath;
     property IniPath: string read FIniPath write SetIniPath;
     property Version: TVersionString read FVersion write SetVersion;
@@ -168,7 +171,7 @@ end;
 function TSAVAccessContainer.WriteVersion(
   const aFileName: string): Boolean;
 var
-  Ini01: TIniFile;
+  Ini01: TMemIniFile;
   sF: string;
 begin
   Result := True;
@@ -176,9 +179,11 @@ begin
     sF := IncludeTrailingPathDelimiter(WorkDir) + csContainerCfg
   else
     sF := aFileName;
-  Ini01 := TIniFile.Create(sF);
+  Ini01 := TMemIniFile.Create(sF);
   try
     Ini01.WriteString('main', 'version', FVersion);
+    Ini01.WriteString('main', 'type', FContainerType);
+    Ini01.UpdateFile;
   except
     Result := False;
   end;
@@ -188,6 +193,11 @@ end;
 procedure TSAVAccessContainer.SetWorkDir(const Value: string);
 begin
   FWorkDir := Value;
+end;
+
+procedure TSAVAccessContainer.SetContainerType(const Value: Char);
+begin
+  FContainerType := Value;
 end;
 
 end.

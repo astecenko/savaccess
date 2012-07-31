@@ -35,6 +35,7 @@ uses SAVLib, SAVLib_DBF, KoaUtils, SysUtils, VKDBFDataSet, VKDBFNTX, VKDBFIndex,
 constructor TSAVAccessDomain.Create;
 begin
   inherited Create;
+  ContainerType := 'D';
 end;
 
 constructor TSAVAccessDomain.Create(aBase: TSAVAccessBase; const aCaption,

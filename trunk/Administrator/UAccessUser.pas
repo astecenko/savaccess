@@ -34,6 +34,7 @@ uses SAVLib, SAVLib_DBF, KoaUtils, SysUtils, VKDBFDataSet, VKDBFNTX, VKDBFIndex,
 constructor TSAVAccessUser.Create;
 begin
   inherited Create;
+  ContainerType:='U';
 end;
 
 procedure TSAVAccessUser.Clear;
