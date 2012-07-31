@@ -78,7 +78,8 @@ end;
 
 constructor TSAVAccessGroup.Create;
 begin
-
+inherited Create;
+ContainerType:='G';
 end;
 
 procedure TSAVAccessGroup.GetUsersSID(List: TStrings; const aCaption: Boolean =
