@@ -14,6 +14,30 @@ type
     TypeF: Char;
     Action: Integer;
     MD5: string[32];
+    Source: Char;
+    SID: string[50];
+  end;
+
+  TSAVAccessFileProc = function(const rNew, rOld: TClientFile; const aDir, aSID:
+    string): Boolean;
+
+  TSAVAccessFileAction = class
+  private
+    procedure SetFileAction(const Value: Integer);
+    procedure SetFileExt(const Value: string);
+    procedure SetFileType(const Value: string);
+  protected
+    FFileType: string;
+    FFileAction: Integer;
+    FFileExt: string;
+    FFileProc: TSAVAccessFileProc;
+  public
+    property FileType: string read FFileType write SetFileType;
+    property FileAction: Integer read FFileAction write SetFileAction;
+    property FileExt: string read FFileExt write SetFileExt;
+    property FileProc: TSAVAccessFileProc read FFileProc write FFileProc;
+    constructor Create(const AFileType, AFileExt: string; const AFileAct:
+      Integer; AFunc: TSAVAccessFileProc);
   end;
 
   TSAVAccessClient = class(TObject)
@@ -30,12 +54,15 @@ type
     FGroupsDir: string;
     FTemplate: TPathTemplate;
     FDomainsDir: string;
+    FActions: TList;
     procedure SetDataSet(const Value: TClientDataSet);
     procedure SetIniFile(const Value: TMemIniFile);
+    procedure SetActions(const Value: TList);
   public
     property ConfigDir: string read FConfigDir;
     property Domain: string read FDomain;
     property SID: string read FSID;
+    property Actions: TList read FActions write SetActions;
     property User: string read FUser;
     property DataSet: TClientDataSet read FDataSet write SetDataSet;
     property JournalsDir: string read FJournalsDir;
@@ -45,20 +72,23 @@ type
     property Workstation: string read FWorkstation;
     property IniFile: TMemIniFile read FIniFile write SetIniFile;
     procedure LoadFromFile(const aFileName: string);
-    function Record2ClientFile(table1: TDataSet): TClientFile;
-    procedure ClientFile2Record(table1:TDataSet; const ClntFile1:TClientFile);
+    function Record2ClientFile(table1: TDataSet; const aSID, aSource: string):
+      TClientFile;
+    procedure ClientFile2Record(table1: TDataSet; const ClntFile1: TClientFile);
     function CheckDomainVersion: Boolean; //True = Equal
     function CheckUserVersion: Boolean;
+    function GetDirBySource(const aSource: Char): string;
     function CheckGroupVersion(const aSID: string): Boolean;
     function FileProcessing(const aOld, aNew: TClientFile): Boolean;
-    procedure UpdateContainerFile(const aDir: string);
+    procedure UpdateContainerFile(const aDir, aSID: string);
     constructor Create(const aConfDirName: string = ''); overload;
     destructor Destroy; override;
 
   end;
 
 implementation
-uses SAVLib, SysUtils, SPGetSid, MsAD, VKDBFDataSet, SAVLib_DBF, Variants;
+uses SAVLib, SysUtils, SPGetSid, MsAD, VKDBFDataSet, SAVLib_DBF, Variants,
+KoaUtils;
 
 { TSAVAccessContainer }
 
@@ -180,7 +210,7 @@ begin
   FDataSet.LogChanges := False;
   FDataSet.FileName := FConfigDir + csClientData;
   FIniFile := TMemIniFile.Create(FConfigDir + csContainerCfg);
-
+  FActions := TList.Create;
 end;
 
 destructor TSAVAccessClient.Destroy;
@@ -197,13 +227,62 @@ begin
     FIniFile.UpdateFile;
     FreeAndNil(Finifile);
   end;
+  if Assigned(FActions) then
+    FreeAndNil(FACtions);
   inherited;
 end;
 
 function TSAVAccessClient.FileProcessing(const aOld,
   aNew: TClientFile): Boolean;
 begin
+  case aNew.TypeF of
+    'F': //Файловая операция
+      begin
+        if aNew.Ext = '' then
+          case aNew.Action of
+            0: //удаление
+              begin
+                Windows.DeleteFile(PChar(FTemplate.GetPath(aNew.ClntFile)));
+              end;
+            1: //Копирование
+              begin
+                fCopyFile(GetDirBySource(aNew.Source)+);
+              end;
+            2: //Создать пустой файл
+              begin
+                ;
+              end;
+          else
+            begin
+              ;
+            end;
+          end
+        else
+        begin
+          // Для типовфайлов по расширению обработчики тут
+        end;
+      end;
+    'D': //Операция с каталогом
+      begin
+        ;
+      end;
+  else
+    begin
+      ;
+    end;
+  end;
+
   Result := False;
+end;
+
+function TSAVAccessClient.GetDirBySource(const aSource: Char): string
+begin
+  Result := '';
+  case aSource of
+    'D': Result := FDomainsDir;
+    'G': Result := FGroupsDir;
+    'U': Result := FUsersDir;
+  end;
 end;
 
 procedure TSAVAccessClient.LoadFromFile(const aFileName: string);
@@ -227,7 +306,8 @@ begin
     raise Exception.Create('Нет доступа к файлу ' + aFileName);
 end;
 
-function TSAVAccessClient.Record2ClientFile(table1: TDataSet): TClientFile;
+function TSAVAccessClient.Record2ClientFile(table1: TDataSet; const aSID,
+  aSource: string): TClientFile;
 begin
   Result.SrvrFile := table1.fieldbyname(csFieldSrvrFile).AsString;
   Result.Ext := table1.fieldbyname(csFieldExt).AsString;
@@ -236,6 +316,13 @@ begin
   Result.TypeF := table1.fieldbyname(csFieldType).AsString[1];
   Result.Action := table1.fieldbyname(csFieldAction).AsInteger;
   Result.MD5 := table1.fieldbyname(csFieldMD5).AsString;
+  Result.Source := table1.fieldbyname(csFieldSource).asstring[1];
+  Result.SID := table1.fieldbyname(csFieldSID).asstring;
+end;
+
+procedure TSAVAccessClient.SetActions(const Value: TList);
+begin
+  FActions := Value;
 end;
 
 procedure TSAVAccessClient.SetDataSet(const Value: TClientDataSet);
@@ -248,11 +335,12 @@ begin
   FIniFile := Value;
 end;
 
-procedure TSAVAccessClient.UpdateContainerFile(const aDir: string);
+procedure TSAVAccessClient.UpdateContainerFile(const aDir, aSID: string);
 var
   ini: TIniFile;
   c: Char;
   s: string;
+  sPath: string;
   table1: TVKDBFNTX;
 
   procedure FileInfoMove(aFrom, aTo: TDataSet; const aFull: Boolean);
@@ -265,6 +353,8 @@ var
         aFrom.fieldbyname(csFieldExt).AsString;
       aTo.fieldbyname(csFieldType).AsString :=
         aFrom.fieldbyname(csFieldType).AsString;
+      aTo.FieldByName(csFieldSource).AsString := c;
+      aTo.FieldByName(csFieldSID).AsString := aSID;
     end;
     aTo.fieldbyname(csFieldClntFile).AsString :=
       aFrom.fieldbyname(csFieldClntFile).AsString;
@@ -278,27 +368,30 @@ var
 
 begin
   s := '';
-  ini := TIniFile.Create(aDir + csContainerCfg);
+  sPath := IncludeTrailingPathDelimiter(IncludeTrailingPathDelimiter(aDir) +
+    aSID);
+  ini := TIniFile.Create(sPath + csContainerCfg);
   c := Ini.ReadString('main', 'type', ' ')[1];
   FreeAndNil(ini);
   table1 := TVKDBFNTX.Create(nil);
-  InitOpenDBF(table1, aDir + csFilesTable, 64);
+  InitOpenDBF(table1, sPath + csFilesTable, 64);
   table1.Open;
   while not (table1.Eof) do
   begin
-    if FDataSet.Locate(csFieldSrvrFile + ';' + csFieldExt + ';' + csFieldType,
+    if FDataSet.Locate(csFieldSrvrFile + ';' + csFieldExt + ';' + csFieldType +
+      ';' + csFieldSource + ';' + csFieldSID,
       varArrayOf([table1.fieldbyname(csFieldSrvrFile).AsString,
       table1.fieldbyname(csFieldExt).AsString,
-        table1.fieldbyname(csFieldType).AsString]), []) then
+        table1.fieldbyname(csFieldType).AsString, c, aSID]), []) then
     begin
       if FDataSet.fieldbyname(csFieldMD5).AsString <>
         table1.fieldbyname(csFieldMD5).AsString then
       begin
-        if FileProcessing(Record2ClientFile(FDataSet),
-          Record2ClientFile(table1)) then
+        if FileProcessing(Record2ClientFile(FDataSet, aSID, c),
+          Record2ClientFile(table1, aSID, c)) then
         begin
           FDataSet.Edit;
-          FileInfoMove(table1,FDataSet,False);
+          FileInfoMove(table1, FDataSet, False);
           FDataSet.Post;
         end;
       end
@@ -318,6 +411,32 @@ begin
   begin
 
   end;}
+end;
+
+{ TSAVAccessFileAction }
+
+constructor TSAVAccessFileAction.Create(const AFileType, AFileExt: string;
+  const AFileAct: Integer; AFunc: TSAVAccessFileProc);
+begin
+  FFileType := AFileType;
+  FFileExt := AFileExt;
+  FFileAction := AFileAct;
+  FFileProc := AFunc;
+end;
+
+procedure TSAVAccessFileAction.SetFileAction(const Value: Integer);
+begin
+  FFileAction := Value;
+end;
+
+procedure TSAVAccessFileAction.SetFileExt(const Value: string);
+begin
+  FFileExt := Value;
+end;
+
+procedure TSAVAccessFileAction.SetFileType(const Value: string);
+begin
+  FFileType := Value;
 end;
 
 end.
