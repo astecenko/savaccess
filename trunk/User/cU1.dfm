@@ -1,7 +1,7 @@
 object Form1: TForm1
   Left = 192
   Top = 133
-  Width = 840
+  Width = 606
   Height = 395
   Caption = 'Form1'
   Color = clBtnFace
@@ -13,20 +13,20 @@ object Form1: TForm1
   OldCreateOrder = False
   OnCreate = FormCreate
   DesignSize = (
-    832
+    598
     368)
   PixelsPerInch = 96
   TextHeight = 13
   object mmo1: TMemo
     Left = 0
     Top = 56
-    Width = 828
+    Width = 594
     Height = 97
     Anchors = [akLeft, akTop, akRight]
     TabOrder = 0
   end
   object btn1: TButton
-    Left = 120
+    Left = 160
     Top = 8
     Width = 75
     Height = 25
@@ -37,7 +37,7 @@ object Form1: TForm1
   object dbgrd1: TDBGrid
     Left = 0
     Top = 160
-    Width = 832
+    Width = 598
     Height = 206
     Anchors = [akLeft, akTop, akRight, akBottom]
     DataSource = ds1
@@ -79,13 +79,11 @@ object Form1: TForm1
     end
   end
   object ds1: TDataSource
-    Left = 296
-    Top = 16
+    Left = 96
   end
   object ds2: TClientDataSet
     Aggregates = <>
     Params = <>
-    Left = 392
-    Top = 32
+    Left = 128
   end
 end
