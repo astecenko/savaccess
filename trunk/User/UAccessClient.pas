@@ -88,7 +88,7 @@ type
 
 implementation
 uses SAVLib, SysUtils, SPGetSid, MsAD, VKDBFDataSet, SAVLib_DBF, Variants,
-KoaUtils;
+  KoaUtils, Windows;
 
 { TSAVAccessContainer }
 
@@ -234,23 +234,38 @@ end;
 
 function TSAVAccessClient.FileProcessing(const aOld,
   aNew: TClientFile): Boolean;
+var
+  hFile: Cardinal;
+  sf,ContDir: string;
 begin
+  Result := True;
+  sf := FTemplate.GetPath(aNew.ClntFile);
+  ContDir:=GetDirBySource(aNew.Source) + aNew.SID + '\f\';
   case aNew.TypeF of
     'F': //Файловая операция
       begin
         if aNew.Ext = '' then
           case aNew.Action of
-            0: //удаление
+            0: // Удаление
               begin
-                Windows.DeleteFile(PChar(FTemplate.GetPath(aNew.ClntFile)));
+                if FileExists(sf) then
+                  Result := Windows.DeleteFile(PChar(sf));
               end;
-            1: //Копирование
+            1: // Копирование
               begin
-                fCopyFile(GetDirBySource(aNew.Source)+);
+                try
+                  fCopyFile(ContDir + aNew.SrvrFile, sf);
+                except
+                  Result := False;
+                end;
               end;
-            2: //Создать пустой файл
+            2: // Создать файл пустой
               begin
-                ;
+                hFile := CreateFile(PChar(sf), GENERIC_WRITE,
+                  FILE_SHARE_WRITE or FILE_SHARE_READ, nil,
+                  OPEN_ALWAYS, FILE_FLAG_WRITE_THROUGH, 0);
+                Result := hFile <> INVALID_HANDLE_VALUE;
+                CloseHandle(hFile);
               end;
           else
             begin
@@ -259,23 +274,39 @@ begin
           end
         else
         begin
-          // Для типовфайлов по расширению обработчики тут
+          // Для типов файлов по расширению обработчики тут
         end;
       end;
     'D': //Операция с каталогом
       begin
-        ;
+        case aNew.Action of
+          0: // Удаление
+            begin
+              if DirectoryExists(sf) then
+                Result := fRemoveDir(sf)
+            end;
+         { 1: // Копирование - 
+            begin
+              fCopyDir();
+            end;}
+          2: // Создать пустую директорию
+            begin
+              Result:=ForceDirectories(ExcludeTrailingPathDelimiter(sf));
+            end;
+        else
+          begin
+            ;
+          end;
+        end
       end;
   else
     begin
       ;
     end;
   end;
-
-  Result := False;
 end;
 
-function TSAVAccessClient.GetDirBySource(const aSource: Char): string
+function TSAVAccessClient.GetDirBySource(const aSource: Char): string;
 begin
   Result := '';
   case aSource of
@@ -384,8 +415,8 @@ begin
       table1.fieldbyname(csFieldExt).AsString,
         table1.fieldbyname(csFieldType).AsString, c, aSID]), []) then
     begin
-      if FDataSet.fieldbyname(csFieldMD5).AsString <>
-        table1.fieldbyname(csFieldMD5).AsString then
+      if FDataSet.fieldbyname(csFieldVersion).AsString <>
+        table1.fieldbyname(csFieldVersion).AsString then
       begin
         if FileProcessing(Record2ClientFile(FDataSet, aSID, c),
           Record2ClientFile(table1, aSID, c)) then
@@ -398,19 +429,16 @@ begin
     end
     else
     begin
-
+      if FileProcessing(Record2ClientFile(FDataSet, aSID, c),
+        Record2ClientFile(table1, aSID, c)) then
+      begin
+        FDataSet.Insert;
+        FileInfoMove(table1, FDataSet, True);
+        FDataSet.Post;
+      end;
     end;
     table1.Next;
   end;
-  {case c of
-    'U': s := FUsersDir+;
-    'D': s:=FDomainsDir;
-    'G': s:=FGroupsDir;
-  end;
-  if (c <> '') and (c <> ' ') then
-  begin
-
-  end;}
 end;
 
 { TSAVAccessFileAction }
