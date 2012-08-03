@@ -12,7 +12,8 @@ uses
   UAccessBase in '..\Administrator\UAccessBase.pas',
   UAccessConstant in '..\Administrator\UAccessConstant.pas',
   UAccessContainer in '..\Administrator\UAccessContainer.pas',
-  UAccessClient in 'UAccessClient.pas';
+  UAccessClient in 'UAccessClient.pas',
+  UAccClient_INI in 'UAccClient_INI.pas';
 
 {$R *.res}
 

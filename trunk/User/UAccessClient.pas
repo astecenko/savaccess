@@ -18,8 +18,8 @@ type
     SID: string[50];
   end;
 
-  TSAVAccessFileProc = function(const rNew, rOld: TClientFile; const aDir, aSID:
-    string): Boolean;
+  TSAVAccessFileProc = function(const rNew, rOld: TClientFile;
+    const aDir, aSID: string; const aPath: string = ''): Boolean;
 
   TSAVAccessFileAction = class
   private
@@ -80,6 +80,8 @@ type
     function GetDirBySource(const aSource: Char): string;
     function CheckGroupVersion(const aSID: string): Boolean;
     function FileProcessing(const aOld, aNew: TClientFile): Boolean;
+    function AddedProc(const aOld, aNew: TClientFile; const aDir, aSID, aPath: string):
+      Boolean;
     procedure UpdateContainerFile(const aDir, aSID: string);
     constructor Create(const aConfDirName: string = ''); overload;
     destructor Destroy; override;
@@ -91,6 +93,29 @@ uses SAVLib, SysUtils, SPGetSid, MsAD, VKDBFDataSet, SAVLib_DBF, Variants,
   KoaUtils, Windows;
 
 { TSAVAccessContainer }
+
+function TSAVAccessClient.AddedProc(const aOld,
+  aNew: TClientFile; const aDir, aSID, aPath: string): Boolean;
+var
+  i: Integer;
+  b: Byte;
+begin
+  b := 0;
+  Result := False;
+  i := 0;
+  while (i < FActions.Count) and (b < 1) do
+  begin
+    if (TSAVAccessFileAction(FActions.Items[i]).FileType = aNew.TypeF) and
+      (TSAVAccessFileAction(FActions.Items[i]).FFileExt = aNew.Ext) and
+      (TSAVAccessFileAction(FActions.Items[i]).FFileAction = aNew.Action) then
+    begin
+      Result := TSAVAccessFileAction(FActions.Items[i]).FileProc(aNew, aOld,
+        aDir, aSID,aPath);
+      b := 1;
+    end;
+    Inc(i);
+  end
+end;
 
 function TSAVAccessClient.CheckDomainVersion: Boolean;
 var
@@ -236,11 +261,11 @@ function TSAVAccessClient.FileProcessing(const aOld,
   aNew: TClientFile): Boolean;
 var
   hFile: Cardinal;
-  sf,ContDir: string;
+  sf, ContDir: string;
 begin
   Result := True;
   sf := FTemplate.GetPath(aNew.ClntFile);
-  ContDir:=GetDirBySource(aNew.Source) + aNew.SID + '\f\';
+  ContDir := GetDirBySource(aNew.Source) + aNew.SID + '\f\';
   case aNew.TypeF of
     'F': //Файловая операция
       begin
@@ -274,7 +299,7 @@ begin
           end
         else
         begin
-          // Для типов файлов по расширению обработчики тут
+          AddedProc(aOld,aNew,ContDir,aNew.SID,sf);
         end;
       end;
     'D': //Операция с каталогом
@@ -285,13 +310,13 @@ begin
               if DirectoryExists(sf) then
                 Result := fRemoveDir(sf)
             end;
-         { 1: // Копирование - 
-            begin
-              fCopyDir();
-            end;}
+          { 1: // Копирование -
+             begin
+               fCopyDir();
+             end;}
           2: // Создать пустую директорию
             begin
-              Result:=ForceDirectories(ExcludeTrailingPathDelimiter(sf));
+              Result := ForceDirectories(ExcludeTrailingPathDelimiter(sf));
             end;
         else
           begin
