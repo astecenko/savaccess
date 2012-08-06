@@ -80,9 +80,11 @@ type
     function GetDirBySource(const aSource: Char): string;
     function CheckGroupVersion(const aSID: string): Boolean;
     function FileProcessing(const aOld, aNew: TClientFile): Boolean;
-    function AddedProc(const aOld, aNew: TClientFile; const aDir, aSID, aPath: string):
+    function AddedProc(const aOld, aNew: TClientFile; const aDir, aSID, aPath:
+      string):
       Boolean;
     procedure UpdateContainerFile(const aDir, aSID: string);
+    function Update: Boolean;
     constructor Create(const aConfDirName: string = ''); overload;
     destructor Destroy; override;
 
@@ -110,7 +112,7 @@ begin
       (TSAVAccessFileAction(FActions.Items[i]).FFileAction = aNew.Action) then
     begin
       Result := TSAVAccessFileAction(FActions.Items[i]).FileProc(aNew, aOld,
-        aDir, aSID,aPath);
+        aDir, aSID, aPath);
       b := 1;
     end;
     Inc(i);
@@ -239,6 +241,8 @@ begin
 end;
 
 destructor TSAVAccessClient.Destroy;
+var
+  I: Integer;
 begin
   if Assigned(FDataSet) then
   begin
@@ -253,7 +257,11 @@ begin
     FreeAndNil(Finifile);
   end;
   if Assigned(FActions) then
+  begin
+    for i := 0 to FACtions.Count - 1 do
+      TObject(FACtions[i]).Free;
     FreeAndNil(FACtions);
+  end;
   inherited;
 end;
 
@@ -265,11 +273,13 @@ var
 begin
   Result := True;
   sf := FTemplate.GetPath(aNew.ClntFile);
-  ContDir := GetDirBySource(aNew.Source) + aNew.SID + '\f\';
+  ContDir := IncludeTrailingPathDelimiter(GetDirBySource(aNew.Source)) + aNew.SID
+    + '\f\';
   case aNew.TypeF of
     'F': //Файловая операция
       begin
-        if aNew.Ext = '' then
+        if (aNew.Ext = '') or (AddedProc(aOld, aNew, ContDir, aNew.SID, sf) =
+          False) then
           case aNew.Action of
             0: // Удаление
               begin
@@ -292,15 +302,7 @@ begin
                 Result := hFile <> INVALID_HANDLE_VALUE;
                 CloseHandle(hFile);
               end;
-          else
-            begin
-              ;
-            end;
           end
-        else
-        begin
-          AddedProc(aOld,aNew,ContDir,aNew.SID,sf);
-        end;
       end;
     'D': //Операция с каталогом
       begin
@@ -326,7 +328,7 @@ begin
       end;
   else
     begin
-      ;
+      AddedProc(aOld, aNew, ContDir, aNew.SID, sf);
     end;
   end;
 end;
@@ -372,8 +374,8 @@ begin
   Result.TypeF := table1.fieldbyname(csFieldType).AsString[1];
   Result.Action := table1.fieldbyname(csFieldAction).AsInteger;
   Result.MD5 := table1.fieldbyname(csFieldMD5).AsString;
-  Result.Source := table1.fieldbyname(csFieldSource).asstring[1];
-  Result.SID := table1.fieldbyname(csFieldSID).asstring;
+  Result.Source := aSource[1];
+  Result.SID := aSID;
 end;
 
 procedure TSAVAccessClient.SetActions(const Value: TList);
@@ -390,6 +392,36 @@ procedure TSAVAccessClient.SetIniFile(const Value: TMemIniFile);
 begin
   FIniFile := Value;
 end;
+
+//основная ф-ция обновления
+
+function TSAVAccessClient.Update: Boolean;
+var
+  ini:TMemIniFile;
+  list1:TStringList;
+  sUserIni:string;
+begin
+  { TODO 1 -oStecenko -cТекущее : Реализовать сортировку групп по приоритету }
+  UpdateContainerFile(FDomainsDir, Domain);
+  sUserIni:=IncludeTrailingPathDelimiter(FUsersDir) + FSID + '\' +
+    csContainerCfg;
+  if FileExists(sUserIni) then
+  begin
+    ini:=TMemIniFile.Create(sUserIni);
+    list1:=TStringList.Create;
+    ini.ReadSection('groups',list1);
+    if list1.Count>0 then
+      begi
+        // сортируем и обрабатываем группы
+        
+      end;
+    FreeAndNil(list1);
+    FreeAndNil(ini);
+    UpdateContainerFile(FUsersDir, SID);
+  end;
+end;
+
+//Обновление файлов определенного контейнера хранилища переданного в aDir+aSID
 
 procedure TSAVAccessClient.UpdateContainerFile(const aDir, aSID: string);
 var
@@ -429,40 +461,44 @@ begin
   ini := TIniFile.Create(sPath + csContainerCfg);
   c := Ini.ReadString('main', 'type', ' ')[1];
   FreeAndNil(ini);
-  table1 := TVKDBFNTX.Create(nil);
-  InitOpenDBF(table1, sPath + csFilesTable, 64);
-  table1.Open;
-  while not (table1.Eof) do
+  if FileExists(sPath + csFilesTable) then
   begin
-    if FDataSet.Locate(csFieldSrvrFile + ';' + csFieldExt + ';' + csFieldType +
-      ';' + csFieldSource + ';' + csFieldSID,
-      varArrayOf([table1.fieldbyname(csFieldSrvrFile).AsString,
-      table1.fieldbyname(csFieldExt).AsString,
-        table1.fieldbyname(csFieldType).AsString, c, aSID]), []) then
+    table1 := TVKDBFNTX.Create(nil);
+    InitOpenDBF(table1, sPath + csFilesTable, 64);
+    table1.Open;
+    while not (table1.Eof) do
     begin
-      if FDataSet.fieldbyname(csFieldVersion).AsString <>
-        table1.fieldbyname(csFieldVersion).AsString then
+      if FDataSet.Locate(csFieldSrvrFile + ';' + csFieldExt + ';' + csFieldType
+        +
+        ';' + csFieldSource + ';' + csFieldSID,
+        varArrayOf([table1.fieldbyname(csFieldSrvrFile).AsString,
+        table1.fieldbyname(csFieldExt).AsString,
+          table1.fieldbyname(csFieldType).AsString, c, aSID]), []) then
       begin
-        if FileProcessing(Record2ClientFile(FDataSet, aSID, c),
+        if FDataSet.fieldbyname(csFieldVersion).AsString <>
+          table1.fieldbyname(csFieldVersion).AsString then
+        begin
+          if FileProcessing(Record2ClientFile(FDataSet, aSID, c),
+            Record2ClientFile(table1, aSID, c)) then
+          begin
+            FDataSet.Edit;
+            FileInfoMove(table1, FDataSet, False);
+            FDataSet.Post;
+          end;
+        end
+      end
+      else
+      begin
+        if FileProcessing(Record2ClientFile(table1, aSID, c),
           Record2ClientFile(table1, aSID, c)) then
         begin
-          FDataSet.Edit;
-          FileInfoMove(table1, FDataSet, False);
+          FDataSet.Insert;
+          FileInfoMove(table1, FDataSet, True);
           FDataSet.Post;
         end;
-      end
-    end
-    else
-    begin
-      if FileProcessing(Record2ClientFile(FDataSet, aSID, c),
-        Record2ClientFile(table1, aSID, c)) then
-      begin
-        FDataSet.Insert;
-        FileInfoMove(table1, FDataSet, True);
-        FDataSet.Post;
       end;
+      table1.Next;
     end;
-    table1.Next;
   end;
 end;
 

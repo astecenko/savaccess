@@ -199,14 +199,29 @@ end;
 procedure TFrm1.actDomainEditExecute(Sender: TObject);
 var
   Frm01: TFrm4;
+ UF01: TSAVAccessFilesDBF;
 begin
   Frm01 := TFrm4.Create(Self);
-  Frm01.pnl1.Enabled := True;
+  Frm01.FullAccess(True);
+  UF01 := TSAVAccessFilesDBF.Create(Settings.Domain);
+  Frm01.edtCaption.Text := Settings.Domain.Caption;
+  Frm01.edtSID.Text := Settings.Domain.SID;
+  Frm01.edtDescription.Text := Settings.Domain.Description;
+  Frm01.edtSID.ReadOnly := True;
+  Frm01.UserFiles := UF01;
   if Frm01.ShowModal = mrok then
   begin
-
+    (* Settings.User.Clear;
+     if Trim(Frm01.edtCaption.Text) = '' then
+       Frm01.edtCaption.Text := Frm01.edtSID.Text;
+     Settings.User.Open(Settings.Base, Frm01.edtCaption.Text,
+       Frm01.edtSID.Text, Frm01.edtDescription.Text,Settings.Domain.SID);
+     Settings.User.Save;
+     dbgrdUser.DataSource.DataSet.Close;
+     dbgrdUser.DataSource.DataSet.Open;*)
   end;
   FreeAndNil(Frm01);
+  FreeAndNil(UF01);
 end;
 
 procedure TFrm1.actTemplatExecute(Sender: TObject);

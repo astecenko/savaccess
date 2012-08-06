@@ -36,6 +36,7 @@ var
   Form1: TForm1;
 
 implementation
+uses SAVLib_INI;
 
 {$R *.dfm}
 
@@ -48,6 +49,7 @@ procedure TForm1.FormCreate(Sender: TObject);
 begin
   Settings.Client.LoadFromFile(Settings.ConfigFile);
   ds1.DataSet := Settings.Client.DataSet;
+  Settings.Client.Update;
 end;
 
 procedure TForm1.N4Click(Sender: TObject);
@@ -57,11 +59,13 @@ end;
 
 procedure TForm1.btn1Click(Sender: TObject);
 begin
-  mmo1.Lines.Add(IncludeTrailingPathDelimiter(Settings.Client.UsersDir) +
+ { mmo1.Lines.Add(IncludeTrailingPathDelimiter(Settings.Client.UsersDir) +
     Settings.Client.SID);
   mmo1.Lines.Add(Settings.Client.Workstation);
   mmo1.Lines.Add(IncludeTrailingPathDelimiter(Settings.Client.DomainsDir) +
-    Settings.Client.Domain);
+    Settings.Client.Domain);}
+  SAVLib_INI.MergeINI('d:\test_client\test_main.ini','d:\1\TestBase\Domains\NEVZ\f\nevz_main.ini');
+
 end;
 
 end.
