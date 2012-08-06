@@ -23,7 +23,7 @@ type
 function Settings: TSettings;
 
 implementation
-uses SysUtils, Windows;
+uses SysUtils, Windows, UAccClient_INI;
 
 function Settings: TSettings;
 begin
@@ -48,7 +48,11 @@ begin
       PostQuitMessage(0);
   end
   else
-  FClient.IniFile.WriteString('option', 'config', FConfigFile);
+  begin
+    FClient.IniFile.WriteString('option', 'config', FConfigFile);
+    { TODO 1 -oStecenko -cСовершенствование : Сделать добавление обработчиков из плагинов/dll или из Pascal Script }
+    FClient.Actions.Add(TSAVAccessFileAction.Create('F', '.ini', 1, UACCopyINI))
+  end;
 end;
 
 destructor TSettings.Destroy;
