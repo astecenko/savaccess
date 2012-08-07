@@ -12,7 +12,7 @@ type
     FOldWindows: Integer;
     FNewWindows: string;
     FCaption: string;
-    FIni: TMemIniFile;
+    FIni: TIniFile;
     FPatternBegin: string;
     FPatternEnd: string;
     FPatternBeginLength: Integer;
@@ -34,7 +34,8 @@ type
     property PatternEnd: string read FPatternEnd write SetPatternEnd;
     property PatternBeginLength: Integer read FPatternBeginLength;
     property PatternEndLength: Integer read FPatternEndLength;
-    constructor Create(const aFileName: string);
+    constructor Create(const aFileName: string; const bCreateNew: Boolean =
+      True);
     destructor Destroy; override;
     procedure WritePattern(const aPattern: string; const aCaption: string
       = ''; const aPath: string = ''; const aOldWindows: Integer = -1; const
@@ -51,14 +52,15 @@ uses StrUtils, SysUtils, SAVLib, UAccessConstant;
 
 { TPathTemplate }
 
-constructor TPathTemplate.Create(const aFileName: string);
+constructor TPathTemplate.Create(const aFileName: string; const bCreateNew:
+  Boolean = True);
 begin
-  FIni := TMemIniFile.Create(aFileName);
+  FIni := TIniFile.Create(aFileName);
   FPatternBegin := FIni.ReadString(csPattern, 'begin', '~%%');
   FPatternEnd := FIni.ReadString(csPattern, 'end', '%%~');
   FPatternBeginLength := Length(FPatternBegin);
   FPatternEndLength := Length(FPatternEnd);
-  if FileExists(aFileName) = False then
+  if (bCreateNew) and (FileExists(aFileName) = False) then
   begin
     WritePattern('appdat', 'User Application Data', '', CSIDL_APPDATA,
       GUIDToString(FOLDERID_RoamingAppData));
@@ -66,7 +68,8 @@ begin
       GUIDToString(FOLDERID_Desktop));
     WritePattern('autrun', 'User Autorun', '', CSIDL_STARTUP,
       GUIDToString(FOLDERID_Startup));
-    WritePattern('locapp', 'User Local Application Data', '', CSIDL_LOCAL_APPDATA,
+    WritePattern('locapp', 'User Local Application Data', '',
+      CSIDL_LOCAL_APPDATA,
       GUIDToString(FOLDERID_LocalAppData));
   end;
 end;
@@ -153,7 +156,7 @@ end;
 
 procedure TPathTemplate.Save;
 begin
-  FIni.UpdateFile;
+  //FIni.UpdateFile;
 end;
 
 procedure TPathTemplate.SetCaption(const Value: string);

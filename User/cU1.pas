@@ -5,7 +5,7 @@ interface
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, JvComponentBase, JvTrayIcon, ActnList, StdActns, Menus, cUSettings,
-  StdCtrls, Grids, DBGrids, DB, DBClient;
+  StdCtrls, Grids, DBGrids, DB, DBClient,IniFiles;
 
 type
   TForm1 = class(TForm)
@@ -47,6 +47,7 @@ end;
 
 procedure TForm1.FormCreate(Sender: TObject);
 begin
+  Settings.Init;
   Settings.Client.LoadFromFile(Settings.ConfigFile);
   ds1.DataSet := Settings.Client.DataSet;
   Settings.Client.Update;
@@ -58,13 +59,13 @@ begin
 end;
 
 procedure TForm1.btn1Click(Sender: TObject);
+
 begin
  { mmo1.Lines.Add(IncludeTrailingPathDelimiter(Settings.Client.UsersDir) +
     Settings.Client.SID);
   mmo1.Lines.Add(Settings.Client.Workstation);
   mmo1.Lines.Add(IncludeTrailingPathDelimiter(Settings.Client.DomainsDir) +
     Settings.Client.Domain);}
-  SAVLib_INI.MergeINI('d:\test_client\test_main.ini','d:\1\TestBase\Domains\NEVZ\f\nevz_main.ini');
 
 end;
 

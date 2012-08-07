@@ -20,8 +20,8 @@ object Form1: TForm1
   object mmo1: TMemo
     Left = 0
     Top = 56
-    Width = 594
-    Height = 97
+    Width = 593
+    Height = 201
     Anchors = [akLeft, akTop, akRight]
     TabOrder = 0
   end
@@ -36,9 +36,9 @@ object Form1: TForm1
   end
   object dbgrd1: TDBGrid
     Left = 0
-    Top = 160
+    Top = 264
     Width = 598
-    Height = 206
+    Height = 102
     Anchors = [akLeft, akTop, akRight, akBottom]
     DataSource = ds1
     TabOrder = 2
