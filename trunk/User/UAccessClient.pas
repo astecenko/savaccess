@@ -45,7 +45,7 @@ type
     FUser: string;
     FDomain: string;
     FSID: string;
-    FIniFile: TMemIniFile;
+    FIniFile: TIniFile;
     FWorkstation: string;
     FDataSet: TClientDataSet;
     FConfigDir: string;
@@ -56,8 +56,9 @@ type
     FDomainsDir: string;
     FActions: TList;
     procedure SetDataSet(const Value: TClientDataSet);
-    procedure SetIniFile(const Value: TMemIniFile);
+    procedure SetIniFile(const Value: TIniFile);
     procedure SetActions(const Value: TList);
+
   public
     property ConfigDir: string read FConfigDir;
     property Domain: string read FDomain;
@@ -70,8 +71,9 @@ type
     property GroupsDir: string read FGroupsDir;
     property DomainsDir: string read FDomainsDir;
     property Workstation: string read FWorkstation;
-    property IniFile: TMemIniFile read FIniFile write SetIniFile;
+    property IniFile: TIniFile read FIniFile write SetIniFile;
     procedure LoadFromFile(const aFileName: string);
+    procedure SortListVal(Source: TStrings);
     function Record2ClientFile(table1: TDataSet; const aSID, aSource: string):
       TClientFile;
     procedure ClientFile2Record(table1: TDataSet; const ClntFile1: TClientFile);
@@ -83,7 +85,7 @@ type
     function AddedProc(const aOld, aNew: TClientFile; const aDir, aSID, aPath:
       string):
       Boolean;
-    procedure UpdateContainerFile(const aDir, aSID: string);
+    procedure UpdateContainerFile(const aDir, aSID, aVersion: string);
     function Update: Boolean;
     constructor Create(const aConfDirName: string = ''); overload;
     destructor Destroy; override;
@@ -236,7 +238,7 @@ begin
   FDataSet.Open;
   FDataSet.LogChanges := False;
   FDataSet.FileName := FConfigDir + csClientData;
-  FIniFile := TMemIniFile.Create(FConfigDir + csContainerCfg);
+  FIniFile := TIniFile.Create(FConfigDir + csContainerCfg);
   FActions := TList.Create;
 end;
 
@@ -250,10 +252,11 @@ begin
     FDataSet.Close;
     FreeAndNil(FDataset);
   end;
+  if Assigned(FTemplate) then
+    FreeAndNil(FTemplate);
   if Assigned(FIniFile) then
   begin
     FIniFile.WriteDateTime('option', 'LastChange', Now);
-    FIniFile.UpdateFile;
     FreeAndNil(Finifile);
   end;
   if Assigned(FActions) then
@@ -304,7 +307,7 @@ begin
               end;
           end
       end;
-    'D': //Операция с каталогом
+    'C': //Операция с каталогом
       begin
         case aNew.Action of
           0: // Удаление
@@ -358,7 +361,8 @@ begin
     FreeAndNil(list);
     if Assigned(FTemplate) then
       FreeAndNil(FTemplate);
-    FTemplate := TPathTemplate.Create(FJournalsDir + csTemplateMain);
+
+    FTemplate := TPathTemplate.Create(IncludeTrailingPathDelimiter(FJournalsDir) + csTemplateMain, False);
   end
   else
     raise Exception.Create('Нет доступа к файлу ' + aFileName);
@@ -388,46 +392,98 @@ begin
   FDataSet := Value;
 end;
 
-procedure TSAVAccessClient.SetIniFile(const Value: TMemIniFile);
+procedure TSAVAccessClient.SetIniFile(const Value: TIniFile);
 begin
   FIniFile := Value;
 end;
 
 //основная ф-ция обновления
 
+procedure TSAVAccessClient.SortListVal(Source: TStrings);
+
+var
+  ListWork, ListRes: TStringList;
+  j: Integer;
+
+  function GetMinListNumb(List1: TStrings): Integer;
+  var
+    vMin: integer;
+    i, x: Integer;
+  begin
+    if List1.Count > 1 then
+    begin
+      Result := 0;
+      vMin := StrToIntDef(List1.ValueFromIndex[Result], Result);
+      for i := 1 to pred(List1.Count) do
+      begin
+        x := StrToIntDef(List1.ValueFromIndex[i], 0);
+        if vMin > x then
+        begin
+          Result := i;
+          vMin := x;
+        end;
+      end;
+    end
+    else
+      Result := 0;
+  end;
+begin
+  if Source.Count > 1 then
+  begin
+    ListWork := TStringList.Create;
+    ListRes := TStringList.Create;
+    ListWork.Assign(Source);
+    while ListWork.Count > 0 do
+    begin
+      j := GetMinListNumb(ListWork);
+      ListRes.Add(ListWork[j]);
+      ListWork.Delete(j);
+    end;
+    FreeAndNil(ListWork);
+    Source.Clear;
+    Source.Assign(ListRes);
+    FreeAndNil(ListRes);
+  end
+end;
+
 function TSAVAccessClient.Update: Boolean;
 var
-  ini:TMemIniFile;
-  list1:TStringList;
-  sUserIni:string;
+  ini: TIniFile;
+  list1: TStringList;
+  sUserIni: string;
+  i: Integer;
 begin
-  { TODO 1 -oStecenko -cТекущее : Реализовать сортировку групп по приоритету }
-  UpdateContainerFile(FDomainsDir, Domain);
-  sUserIni:=IncludeTrailingPathDelimiter(FUsersDir) + FSID + '\' +
+
+  UpdateContainerFile(FDomainsDir, Domain, FIniFile.ReadString('D', Domain,
+    ''));
+  sUserIni := IncludeTrailingPathDelimiter(FUsersDir) + FSID + '\' +
     csContainerCfg;
   if FileExists(sUserIni) then
   begin
-    ini:=TMemIniFile.Create(sUserIni);
-    list1:=TStringList.Create;
-    ini.ReadSection('groups',list1);
-    if list1.Count>0 then
-      begi
-        // сортируем и обрабатываем группы
-        
-      end;
+    ini := TIniFile.Create(sUserIni);
+    list1 := TStringList.Create;
+    ini.ReadSection('groups', list1);
+    SortListVal(list1);
+    list1.SaveToFile(FConfigDir + 'workgroups.lst');
+    for i := 0 to list1.Count - 1 do
+    begin //work with groups SID from LOW to HIGH priority
+      UpdateContainerFile(FGroupsDir, list1[i], FIniFile.ReadString('G',
+        list1[i], ''));
+    end;
     FreeAndNil(list1);
     FreeAndNil(ini);
-    UpdateContainerFile(FUsersDir, SID);
+    UpdateContainerFile(FUsersDir, SID, FIniFile.ReadString('U', SID, ''));
   end;
 end;
 
 //Обновление файлов определенного контейнера хранилища переданного в aDir+aSID
 
-procedure TSAVAccessClient.UpdateContainerFile(const aDir, aSID: string);
+procedure TSAVAccessClient.UpdateContainerFile(const aDir, aSID, aVersion:
+  string);
 var
   ini: TIniFile;
   c: Char;
-  s: string;
+  s, vers: string;
   sPath: string;
   table1: TVKDBFNTX;
 
@@ -460,8 +516,9 @@ begin
     aSID);
   ini := TIniFile.Create(sPath + csContainerCfg);
   c := Ini.ReadString('main', 'type', ' ')[1];
+  vers := Ini.ReadString('main', 'version', '');
   FreeAndNil(ini);
-  if FileExists(sPath + csFilesTable) then
+  if (FileExists(sPath + csFilesTable)) and (vers <> aVersion) then
   begin
     table1 := TVKDBFNTX.Create(nil);
     InitOpenDBF(table1, sPath + csFilesTable, 64);
@@ -499,6 +556,9 @@ begin
       end;
       table1.Next;
     end;
+    table1.Close;
+    FreeAndNil(table1);
+    FIniFile.WriteString(c, aSID, vers);
   end;
 end;
 

@@ -18,6 +18,7 @@ type
     property Client: TSAVAccessClient read FClient write SetClient;
     property MainIniFile: string read FMainIniFile;
     property ConfigFile: string read FConfigFile write SetConfigFile;
+    procedure Init;
   end;
 
 function Settings: TSettings;
@@ -61,6 +62,11 @@ begin
     ForceDirectories(FClient.ConfigDir);
   FreeAndNil(FClient);
   inherited;
+end;
+
+procedure TSettings.Init;
+begin
+ ;
 end;
 
 procedure TSettings.SetClient(const Value: TSAVAccessClient);
