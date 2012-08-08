@@ -45,12 +45,15 @@ end;
 procedure Tdtmdl1.dsUsersDataChange(Sender: TObject; Field: TField);
 begin
   if dsUsers.DataSet.RecordCount > 0 then
+  begin
     Settings.User.Open(Settings.Base,
       dsUsers.DataSet.fieldbyname(csFieldCaption).AsString,
       dsUsers.DataSet.fieldbyname(csFieldSID).AsString,
       dsUsers.DataSet.fieldbyname(csFieldDescription).AsString,
       dsUsers.DataSet.fieldbyname(csFieldDomain).AsString,
       dsUsers.DataSet.fieldbyname(csFieldVersion).AsString);
+    Settings.User.GetGroups(Frm1.chklstUserGroups.Items);  
+   end;
 end;
 
 procedure Tdtmdl1.dsGroupsDataChange(Sender: TObject; Field: TField);

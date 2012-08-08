@@ -51,6 +51,7 @@ type
     function GetNewVersion: string;
     function WriteVersion(const aFileName: string = ''): Boolean;
     function ReadVersion(const aFileName: string = ''): Boolean;
+    procedure UpdateVersion;
   end;
 
 implementation
@@ -198,6 +199,12 @@ end;
 procedure TSAVAccessContainer.SetContainerType(const Value: Char);
 begin
   FContainerType := Value;
+end;
+
+procedure TSAVAccessContainer.UpdateVersion;
+begin
+  FVersion:=GetNewVersion;
+  WriteVersion;
 end;
 
 end.

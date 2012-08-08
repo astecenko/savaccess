@@ -23,9 +23,8 @@ type
     act1: TAction;
     actUserAdd: TAction;
     pgc1: TPageControl;
-    ts1: TTabSheet;
-    ts2: TTabSheet;
-    ts3: TTabSheet;
+    tsUsers: TTabSheet;
+    tsGroups: TTabSheet;
     dbgrdUser: TDBGrid;
     dbgrdGroup: TDBGrid;
     pnl1: TPanel;
@@ -45,7 +44,6 @@ type
     actDomainShow: TAction;
     dlgOpen1: TOpenDialog;
     dlgSave1: TSaveDialog;
-    dbnvgr1: TDBNavigator;
     dbmmoDESCR: TDBMemo;
     actTemplat: TAction;
     actBaseProperty: TAction;
@@ -55,6 +53,14 @@ type
     spl1: TSplitter;
     pnl3: TPanel;
     chklstGroupUsers: TCheckListBox;
+    pnl4: TPanel;
+    pnl5: TPanel;
+    spl2: TSplitter;
+    chklstUserGroups: TCheckListBox;
+    btnUserGoTo: TBitBtn;
+    btnGroupAdd: TBitBtn;
+    btnGroupDel: TBitBtn;
+    btnGroupGoTo: TBitBtn;
     procedure actCreateBaseExecute(Sender: TObject);
     procedure actUserAddExecute(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -71,6 +77,11 @@ type
     procedure btnUserAddClick(Sender: TObject);
     procedure btnUserDelClick(Sender: TObject);
     procedure chklstGroupUsersClickCheck(Sender: TObject);
+    procedure dbgrdGroupDblClick(Sender: TObject);
+    procedure dbgrdDomainDblClick(Sender: TObject);
+    procedure btnUserGoToClick(Sender: TObject);
+    procedure btnGroupGoToClick(Sender: TObject);
+    procedure btnGroupDelClick(Sender: TObject);
   private
     { Private declarations }
   public
@@ -199,7 +210,7 @@ end;
 procedure TFrm1.actDomainEditExecute(Sender: TObject);
 var
   Frm01: TFrm4;
- UF01: TSAVAccessFilesDBF;
+  UF01: TSAVAccessFilesDBF;
 begin
   Frm01 := TFrm4.Create(Self);
   Frm01.FullAccess(True);
@@ -397,6 +408,40 @@ begin
   Settings.Group.UserSwitch(chklstGroupUsers.Items.ValueFromIndex[chklstGroupUsers.ItemIndex],
     chklstGroupUsers.Checked[chklstGroupUsers.ItemIndex]);
   Settings.Group.GetUsersSID(chklstGroupUsers, True);
+end;
+
+procedure TFrm1.dbgrdGroupDblClick(Sender: TObject);
+begin
+  actGroupEdit.Execute;
+end;
+
+procedure TFrm1.dbgrdDomainDblClick(Sender: TObject);
+begin
+  actDomainEdit.Execute;
+end;
+
+procedure TFrm1.btnUserGoToClick(Sender: TObject);
+begin
+  if (chklstGroupUsers.ItemIndex > -1) and
+    (Settings.Base.TableUsers.Locate(csFieldSID,
+    chklstGroupUsers.Items.ValueFromIndex[chklstGroupUsers.ItemIndex], [])) then
+    pgc1.ActivePageIndex := 0;
+end;
+
+procedure TFrm1.btnGroupGoToClick(Sender: TObject);
+begin
+  if (chklstUserGroups.ItemIndex > -1) and
+    (Settings.Base.TableGroups.Locate(csFieldSID,
+    chklstUserGroups.Items.ValueFromIndex[chklstUserGroups.ItemIndex], [])) then
+    pgc1.ActivePageIndex := 1;
+
+end;
+
+procedure TFrm1.btnGroupDelClick(Sender: TObject);
+begin
+  if (chklstUserGroups.ItemIndex > -1) and
+    (Settings.User.GroupDelete(chklstUserGroups.Items.ValueFromIndex[chklstUserGroups.itemIndex])) then
+    chklstUserGroups.DeleteSelected;
 end;
 
 end.

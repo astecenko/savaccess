@@ -105,7 +105,7 @@ begin
       if Bases.TableUsers.Locate(csFieldSID, List[i], []) then
         s := Bases.TableUsers.FieldByName(csFieldCaption).AsString
       else
-        s := 'Not found';
+        s := csNotFound;
       List[i] := s + '=' + List[i];
     end;
     Bases.TableUsers.RecNo := OldRecNo;

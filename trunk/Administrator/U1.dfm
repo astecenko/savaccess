@@ -44,36 +44,105 @@ object Frm1: TFrm1
     Top = 24
     Width = 648
     Height = 410
-    ActivePage = ts3
+    ActivePage = tsUsers
     Align = alClient
     TabOrder = 2
-    object ts1: TTabSheet
-      Caption = 'ts1'
-    end
-    object ts2: TTabSheet
+    object tsUsers: TTabSheet
       Caption = #1055#1086#1083#1100#1079#1086#1074#1072#1090#1077#1083#1080
       ImageIndex = 1
-      DesignSize = (
-        640
-        382)
-      object dbgrdUser: TDBGrid
+      object spl2: TSplitter
         Left = 0
-        Top = 25
-        Width = 639
-        Height = 190
-        Anchors = [akLeft, akTop, akRight, akBottom]
-        DataSource = dtmdl1.dsUsers
-        Options = [dgTitles, dgIndicator, dgColumnResize, dgColLines, dgRowLines, dgTabs, dgRowSelect, dgConfirmDelete, dgCancelOnExit]
+        Top = 261
+        Width = 640
+        Height = 3
+        Cursor = crVSplit
+        Align = alBottom
+      end
+      object pnl4: TPanel
+        Left = 0
+        Top = 0
+        Width = 640
+        Height = 261
+        Align = alClient
         TabOrder = 0
-        TitleFont.Charset = DEFAULT_CHARSET
-        TitleFont.Color = clWindowText
-        TitleFont.Height = -11
-        TitleFont.Name = 'MS Sans Serif'
-        TitleFont.Style = []
-        OnDblClick = dbgrdUserDblClick
+        DesignSize = (
+          640
+          261)
+        object dbgrdUser: TDBGrid
+          Left = 3
+          Top = 27
+          Width = 634
+          Height = 230
+          Anchors = [akLeft, akTop, akRight, akBottom]
+          DataSource = dtmdl1.dsUsers
+          Options = [dgTitles, dgIndicator, dgColumnResize, dgColLines, dgRowLines, dgTabs, dgRowSelect, dgConfirmDelete, dgCancelOnExit]
+          TabOrder = 0
+          TitleFont.Charset = DEFAULT_CHARSET
+          TitleFont.Color = clWindowText
+          TitleFont.Height = -11
+          TitleFont.Name = 'MS Sans Serif'
+          TitleFont.Style = []
+          OnDblClick = dbgrdUserDblClick
+        end
+      end
+      object pnl5: TPanel
+        Left = 0
+        Top = 264
+        Width = 640
+        Height = 118
+        Align = alBottom
+        TabOrder = 1
+        DesignSize = (
+          640
+          118)
+        object chklstUserGroups: TCheckListBox
+          Left = 3
+          Top = 3
+          Width = 246
+          Height = 112
+          Anchors = [akLeft, akTop, akBottom]
+          ItemHeight = 13
+          TabOrder = 0
+        end
+        object btnGroupAdd: TBitBtn
+          Left = 256
+          Top = 5
+          Width = 25
+          Height = 25
+          Hint = #1042#1082#1083#1102#1095#1080#1090#1100' '#1087#1086#1083#1100#1079#1086#1074#1072#1090#1077#1083#1103' '#1074' '#1075#1088#1091#1087#1087#1091
+          Caption = '+'
+          ParentShowHint = False
+          ShowHint = True
+          TabOrder = 1
+          NumGlyphs = 2
+        end
+        object btnGroupDel: TBitBtn
+          Left = 256
+          Top = 37
+          Width = 25
+          Height = 25
+          Hint = #1048#1089#1082#1083#1102#1095#1080#1090#1100' '#1087#1086#1083#1100#1079#1086#1074#1072#1090#1077#1083#1103' '#1080#1079' '#1075#1088#1091#1087#1087#1099
+          Caption = '-'
+          ParentShowHint = False
+          ShowHint = True
+          TabOrder = 2
+          OnClick = btnGroupDelClick
+        end
+        object btnGroupGoTo: TBitBtn
+          Left = 256
+          Top = 69
+          Width = 25
+          Height = 25
+          Hint = #1055#1077#1088#1077#1081#1090#1080' '#1082' '#1075#1088#1091#1087#1087#1077
+          Caption = '=>'
+          ParentShowHint = False
+          ShowHint = True
+          TabOrder = 3
+          OnClick = btnGroupGoToClick
+        end
       end
     end
-    object ts3: TTabSheet
+    object tsGroups: TTabSheet
       Caption = #1043#1088#1091#1087#1087#1099
       ImageIndex = 2
       object spl1: TSplitter
@@ -129,6 +198,18 @@ object Frm1: TFrm1
           ItemHeight = 13
           TabOrder = 2
         end
+        object btnUserGoTo: TBitBtn
+          Left = 256
+          Top = 69
+          Width = 25
+          Height = 25
+          Hint = #1055#1077#1088#1077#1081#1090#1080' '#1082' '#1087#1086#1083#1100#1079#1086#1074#1072#1090#1077#1083#1102
+          Caption = '=>'
+          ParentShowHint = False
+          ShowHint = True
+          TabOrder = 3
+          OnClick = btnUserGoToClick
+        end
       end
       object pnl3: TPanel
         Left = 0
@@ -147,12 +228,14 @@ object Frm1: TFrm1
           Height = 232
           Anchors = [akLeft, akTop, akRight, akBottom]
           DataSource = dtmdl1.dsGroups
+          Options = [dgTitles, dgIndicator, dgColumnResize, dgColLines, dgRowLines, dgTabs, dgRowSelect, dgConfirmDelete, dgCancelOnExit]
           TabOrder = 0
           TitleFont.Charset = DEFAULT_CHARSET
           TitleFont.Color = clWindowText
           TitleFont.Height = -11
           TitleFont.Name = 'MS Sans Serif'
           TitleFont.Style = []
+          OnDblClick = dbgrdGroupDblClick
           Columns = <
             item
               Expanded = False
@@ -199,15 +282,17 @@ object Frm1: TFrm1
       Left = 1
       Top = 2
       Width = 140
-      Height = 255
+      Height = 287
       Anchors = [akLeft, akTop, akBottom]
       DataSource = dtmdl1.dsDomain
+      Options = [dgTitles, dgIndicator, dgColumnResize, dgColLines, dgRowLines, dgTabs, dgRowSelect, dgConfirmDelete, dgCancelOnExit]
       TabOrder = 0
       TitleFont.Charset = DEFAULT_CHARSET
       TitleFont.Color = clWindowText
       TitleFont.Height = -11
       TitleFont.Name = 'MS Sans Serif'
       TitleFont.Style = []
+      OnDblClick = dbgrdDomainDblClick
       Columns = <
         item
           Expanded = False
@@ -218,16 +303,6 @@ object Frm1: TFrm1
           Visible = True
         end>
     end
-    object dbnvgr1: TDBNavigator
-      Left = 5
-      Top = 264
-      Width = 132
-      Height = 25
-      DataSource = dtmdl1.dsDomain
-      VisibleButtons = [nbPrior, nbNext, nbInsert, nbDelete, nbEdit, nbPost]
-      Anchors = [akLeft, akBottom]
-      TabOrder = 1
-    end
     object dbmmoDESCR: TDBMemo
       Left = 4
       Top = 296
@@ -236,7 +311,7 @@ object Frm1: TFrm1
       Anchors = [akLeft, akBottom]
       DataField = 'DESCR'
       DataSource = dtmdl1.dsDomain
-      TabOrder = 2
+      TabOrder = 1
     end
   end
   object actmgr1: TActionManager

@@ -474,6 +474,7 @@ begin
     FreeAndNil(ini);
     UpdateContainerFile(FUsersDir, SID, FIniFile.ReadString('U', SID, ''));
   end;
+  FDataSet.ApplyUpdates(-1);
 end;
 
 //Обновление файлов определенного контейнера хранилища переданного в aDir+aSID

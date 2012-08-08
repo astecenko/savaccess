@@ -22,19 +22,20 @@ type
     function Load(aSID: string = ''): Boolean; override;
     procedure GetGroups(List: TStrings);
     procedure Clear; override;
+    function GroupDelete(const aSID:string):Boolean;
 
   end;
 
 implementation
 uses SAVLib, SAVLib_DBF, KoaUtils, SysUtils, VKDBFDataSet, VKDBFNTX, VKDBFIndex,
-  VKDBFSorters, UAccessConstant, DB;
+  VKDBFSorters, UAccessConstant, DB, IniFiles;
 
 { TSAVAccessUser }
 
 constructor TSAVAccessUser.Create;
 begin
   inherited Create;
-  ContainerType:='U';
+  ContainerType := 'U';
 end;
 
 procedure TSAVAccessUser.Clear;
@@ -52,8 +53,31 @@ begin
 end;
 
 procedure TSAVAccessUser.GetGroups(List: TStrings);
+var
+  Ini01: TIniFile;
+  list1: TStringList;
+  table1: TVKDBFNTX;
+  i: Integer;
 begin
-
+  List.Clear;
+  Ini01 := TIniFile.Create(IncludeTrailingPathDelimiter(WorkDir) +
+    csContainerCfg);
+  list1 := TStringList.Create;
+  ini01.ReadSectionValues(csIniGroups,list1);
+  FreeAndNil(Ini01);
+  table1 := TVKDBFNTX.Create(nil);
+  SAVLib_DBF.InitOpenDBF(table1, IncludeTrailingPathDelimiter(Bases.JournalsDir)
+    + csGroupsTable, 64);
+  table1.Open;
+  for i := 0 to list1.Count - 1 do
+    if table1.Locate(csFieldSID, list1.Names[i], []) then
+      List.Add(table1.fieldByName(csFieldCaption).AsString + '=' +
+        list1.Names[i])
+    else
+      List.Add(csNotFound + '=' + list1.Names[i]);
+  table1.Close;
+  FreeAndNil(table1);
+  FreeAndNil(list1);
 end;
 
 function TSAVAccessUser.Load(aSID: string = ''): Boolean;
@@ -124,12 +148,33 @@ end;
 procedure TSAVAccessUser.Open(aBase: TSAVAccessBase; const aCaption, aSID:
   string; const
   aDescription: string = ''; const aParam: string = ''; const aVersion:
-    TVersionString =
+  TVersionString =
   '');
 begin
   WorkDir := IncludeTrailingPathDelimiter(aBase.UsersDir) + aSID;
   inherited Open(aBase, aCaption, aSID, aDescription, aParam, aVersion);
   FDomain := aParam;
+end;
+
+function TSAVAccessUser.GroupDelete(const aSID: string): Boolean;
+var
+  Ini01: TIniFile;
+begin
+  Result := True;
+  Ini01 := TIniFile.Create(IncludeTrailingPathDelimiter(WorkDir) +
+    csContainerCfg);
+  Ini01.DeleteKey(csIniGroups, aSID);
+  FreeAndNil(Ini01);
+  try
+    Ini01 := TIniFile.Create(IncludeTrailingPathDelimiter(Bases.GroupsDir) + aSID
+      +
+      '\' + csContainerCfg);
+    Ini01.DeleteKey(csIniUsers, SID);
+  except
+    Result := False;
+  end;
+  if Assigned(Ini01) then
+    FreeAndNil(Ini01);
 end;
 
 end.

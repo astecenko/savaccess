@@ -60,6 +60,7 @@ const
 
   csPattern='pattern';
   csDefaultUser = 'DEFAULT';
+  csNotFound='!!! NOT FOUND !!!';
 
 implementation
 
