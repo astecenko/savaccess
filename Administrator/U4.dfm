@@ -90,6 +90,7 @@ object Frm4: TFrm4
       TitleFont.Height = -11
       TitleFont.Name = 'MS Sans Serif'
       TitleFont.Style = []
+      OnEditButtonClick = dbgrd1EditButtonClick
       Columns = <
         item
           Expanded = False
@@ -124,6 +125,7 @@ object Frm4: TFrm4
           Visible = True
         end
         item
+          ButtonStyle = cbsEllipsis
           Expanded = False
           FieldName = 'ACTION'
           Title.Caption = #1044#1077#1081#1089#1090#1074#1080#1077

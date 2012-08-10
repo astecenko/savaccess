@@ -26,6 +26,8 @@ const
   csOUTable = 'orgunit.dbf'; //Орг.модули (подразделения)
   csProjectsTable = 'projects.dbf'; //Проекты (программы)
   csUsersTable = 'users.dbf'; //Пользователи
+  csExtTable = 'extens.dbf';
+  csActionTable = 'actions.dbf';
 
   { Indexes filename }
 
@@ -38,6 +40,7 @@ const
   csFieldDescription = 'DESCR';
   csFieldDomain='DOMAIN';
   csFieldID = 'ID';
+  csFieldFID = 'FID';
   csFieldIni='INIPATH';
   csFieldParent='PARENT';
   csFieldPath='FILEPATH';

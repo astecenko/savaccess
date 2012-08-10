@@ -44,7 +44,7 @@ object Frm1: TFrm1
     Top = 24
     Width = 648
     Height = 410
-    ActivePage = tsUsers
+    ActivePage = tsGroups
     Align = alClient
     TabOrder = 2
     object tsUsers: TTabSheet
@@ -52,7 +52,7 @@ object Frm1: TFrm1
       ImageIndex = 1
       object spl2: TSplitter
         Left = 0
-        Top = 261
+        Top = 277
         Width = 640
         Height = 3
         Cursor = crVSplit
@@ -62,17 +62,17 @@ object Frm1: TFrm1
         Left = 0
         Top = 0
         Width = 640
-        Height = 261
+        Height = 277
         Align = alClient
         TabOrder = 0
         DesignSize = (
           640
-          261)
+          277)
         object dbgrdUser: TDBGrid
           Left = 3
           Top = 27
           Width = 634
-          Height = 230
+          Height = 246
           Anchors = [akLeft, akTop, akRight, akBottom]
           DataSource = dtmdl1.dsUsers
           Options = [dgTitles, dgIndicator, dgColumnResize, dgColLines, dgRowLines, dgTabs, dgRowSelect, dgConfirmDelete, dgCancelOnExit]
@@ -87,19 +87,19 @@ object Frm1: TFrm1
       end
       object pnl5: TPanel
         Left = 0
-        Top = 264
+        Top = 280
         Width = 640
-        Height = 118
+        Height = 102
         Align = alBottom
         TabOrder = 1
         DesignSize = (
           640
-          118)
+          102)
         object chklstUserGroups: TCheckListBox
           Left = 3
           Top = 3
           Width = 246
-          Height = 112
+          Height = 96
           Anchors = [akLeft, akTop, akBottom]
           ItemHeight = 13
           TabOrder = 0
@@ -147,7 +147,7 @@ object Frm1: TFrm1
       ImageIndex = 2
       object spl1: TSplitter
         Left = 0
-        Top = 261
+        Top = 277
         Width = 640
         Height = 3
         Cursor = crVSplit
@@ -155,14 +155,14 @@ object Frm1: TFrm1
       end
       object pnl2: TPanel
         Left = 0
-        Top = 264
+        Top = 280
         Width = 640
-        Height = 118
+        Height = 102
         Align = alBottom
         TabOrder = 0
         DesignSize = (
           640
-          118)
+          102)
         object btnUserAdd: TBitBtn
           Left = 256
           Top = 5
@@ -192,7 +192,7 @@ object Frm1: TFrm1
           Left = 2
           Top = 2
           Width = 249
-          Height = 113
+          Height = 97
           OnClickCheck = chklstGroupUsersClickCheck
           Anchors = [akLeft, akTop, akBottom]
           ItemHeight = 13
@@ -215,17 +215,17 @@ object Frm1: TFrm1
         Left = 0
         Top = 0
         Width = 640
-        Height = 261
+        Height = 277
         Align = alClient
         TabOrder = 1
         DesignSize = (
           640
-          261)
+          277)
         object dbgrdGroup: TDBGrid
           Left = 0
           Top = 25
           Width = 636
-          Height = 232
+          Height = 248
           Anchors = [akLeft, akTop, akRight, akBottom]
           DataSource = dtmdl1.dsGroups
           Options = [dgTitles, dgIndicator, dgColumnResize, dgColLines, dgRowLines, dgTabs, dgRowSelect, dgConfirmDelete, dgCancelOnExit]
@@ -406,6 +406,9 @@ object Frm1: TFrm1
           item
             Items = <
               item
+                Action = actExtDict
+              end
+              item
                 Action = actTemplat
               end>
             Caption = #1057#1077#1088#1074#1080#1089
@@ -413,7 +416,7 @@ object Frm1: TFrm1
         ActionBar = actmmb1
       end>
     Images = il1
-    Left = 552
+    Left = 544
     Top = 16
     StyleName = 'XP Style'
     object act1: TAction
@@ -515,10 +518,14 @@ object Frm1: TFrm1
       ImageIndex = 16
       OnExecute = actBasePropertyExecute
     end
+    object actExtDict: TAction
+      Category = #1057#1077#1088#1074#1080#1089
+      Caption = #1057#1087#1088#1072#1074#1086#1095#1085#1080#1082' '#1076#1077#1081#1089#1090#1074#1080#1081
+    end
   end
   object il1: TImageList
-    Left = 588
-    Top = 8
+    Left = 572
+    Top = 16
     Bitmap = {
       494C010112001400040010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000005000000001002000000000000050
@@ -1191,15 +1198,15 @@ object Frm1: TFrm1
     DefaultExt = '.savaccess'
     Filter = #1060#1072#1081#1083#1099' '#1082#1086#1085#1092#1080#1075#1091#1088#1072#1094#1080#1081' (*.savaccess)|*.savaccess|'#1042#1089#1077' '#1092#1072#1081#1083#1099' (*.*)|*.*'
     Title = #1054#1090#1082#1088#1099#1090#1100' '#1082#1086#1085#1092#1080#1075#1091#1088#1072#1094#1080#1102
-    Left = 388
-    Top = 24
+    Left = 484
+    Top = 16
   end
   object dlgSave1: TSaveDialog
     DefaultExt = '.savaccess'
     Filter = #1060#1072#1081#1083#1099' '#1082#1086#1085#1092#1080#1075#1091#1088#1072#1094#1080#1081' (*.savaccess)|*.savaccess|'#1042#1089#1077' '#1092#1072#1081#1083#1099' (*.*)|*.*'
     Options = [ofOverwritePrompt, ofHideReadOnly, ofEnableSizing]
     Title = #1057#1086#1093#1088#1072#1085#1080#1090#1100' '#1082#1086#1085#1092#1080#1075#1091#1088#1072#1094#1080#1102
-    Left = 412
+    Left = 516
     Top = 16
   end
 end

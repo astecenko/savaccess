@@ -61,6 +61,7 @@ type
     btnGroupAdd: TBitBtn;
     btnGroupDel: TBitBtn;
     btnGroupGoTo: TBitBtn;
+    actExtDict: TAction;
     procedure actCreateBaseExecute(Sender: TObject);
     procedure actUserAddExecute(Sender: TObject);
     procedure FormCreate(Sender: TObject);
