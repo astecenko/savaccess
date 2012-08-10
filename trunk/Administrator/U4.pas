@@ -41,6 +41,7 @@ type
     procedure actFileEditExecute(Sender: TObject);
     procedure actFileAddExecute(Sender: TObject);
     procedure actFileDeleteExecute(Sender: TObject);
+    procedure dbgrd1EditButtonClick(Sender: TObject);
   private
     FUserFiles: TSAVAccessFilesDBF;
     procedure SetUserFiles(const Value: TSAVAccessFilesDBF);
@@ -182,6 +183,11 @@ begin
     'Удаление файла/каталога', MB_YESNOCANCEL + MB_ICONWARNING +
     MB_DEFBUTTON2) = IDYES then
     UserFiles.DeleteFile;
+end;
+
+procedure TFrm4.dbgrd1EditButtonClick(Sender: TObject);
+begin
+ShowMessage(dbgrd1.SelectedField.Value);
 end;
 
 end.

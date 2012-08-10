@@ -29,6 +29,8 @@ type
     function CreateTableDomains: Boolean;
     function CreateTableOrgUnits: Boolean;
     function CreateTableLinks: Boolean;
+    function CreateTableExtension:Boolean;
+    function CreateTableActions: Boolean;
     procedure SetDomainsDir(const Value: string);
     procedure GetListByName(List: TStrings; const TableName: string);
     procedure SetCaption(const Value: string);
@@ -157,6 +159,8 @@ begin
       CreateTableGroups;
       CreateTableOrgUnits;
       CreateTableLinks;
+      CreateTableActions;
+      CreateTableExtension;
     end;
   end;
   if Result then
@@ -530,6 +534,84 @@ end;
 procedure TSAVAccessBase.SetTableUsers(const Value: TVKDBFNTX);
 begin
   FTableUsers := Value;
+end;
+
+function TSAVAccessBase.CreateTableActions: Boolean;
+var
+  table1: TVKDBFNTX;
+begin
+  table1 := TVKDBFNTX.Create(nil);
+  table1.AccessMode.AccessMode := 66;
+    table1.OEM:=True;
+  table1.DBFFileName := IncludeTrailingPathDelimiter(FJournalsDir) +
+    csActionTable;
+  with table1.DBFFieldDefs.Add as TVKDBFFieldDef do
+  begin
+    Name := csFieldFID;
+    field_type := 'N';
+    len := 6;
+  end;
+  with table1.DBFFieldDefs.Add as TVKDBFFieldDef do
+  begin
+    Name := csFieldAction;
+    field_type := 'N';
+    len := 3;
+  end;
+  with table1.DBFFieldDefs.Add as TVKDBFFieldDef do
+  begin
+    Name := csFieldDescription;
+    field_type := 'C';
+    len := 150;
+  end;
+  Result:=True;
+  try
+  table1.CreateTable;
+  except
+    Result:=False;
+  end;
+  FreeAndNil(table1);
+end;
+
+function TSAVAccessBase.CreateTableExtension: Boolean;
+var
+  table1: TVKDBFNTX;
+begin
+  table1 := TVKDBFNTX.Create(nil);
+  table1.AccessMode.AccessMode := 66;
+    table1.OEM:=True;
+  table1.DBFFileName := IncludeTrailingPathDelimiter(FJournalsDir) +
+    csExtTable;
+  with table1.DBFFieldDefs.Add as TVKDBFFieldDef do
+  begin
+    Name := csFieldID;
+    field_type := 'N';
+    len := 6;
+  end;
+  with table1.DBFFieldDefs.Add as TVKDBFFieldDef do
+  begin
+    Name := csFieldExt;
+    field_type := 'C';
+    len := 10;
+  end;
+  with table1.DBFFieldDefs.Add as TVKDBFFieldDef do
+  begin
+    Name := csFieldType;
+    field_type := 'C';
+    len := 1;
+  end;
+  with table1.DBFFieldDefs.Add as TVKDBFFieldDef do
+  begin
+    Name := csFieldDescription;
+    field_type := 'C';
+    len := 150;
+  end;
+  Result:=True;
+  try
+  table1.CreateTable;
+  except
+    Result:=False;
+  end;
+  FreeAndNil(table1);
 end;
 
 end.
