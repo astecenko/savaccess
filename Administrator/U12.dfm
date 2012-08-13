@@ -13,6 +13,7 @@ object Frm12: TFrm12
   OldCreateOrder = False
   Position = poDesktopCenter
   OnCanResize = FormCanResize
+  OnShow = FormShow
   PixelsPerInch = 96
   TextHeight = 13
   object Splitter1: TSplitter
@@ -51,28 +52,13 @@ object Frm12: TFrm12
       TabOrder = 1
       Kind = bkCancel
     end
-    object btnAdd: TBitBtn
-      Left = 16
+    object txt1: TStaticText
+      Left = 8
       Top = 8
-      Width = 97
-      Height = 25
-      Anchors = [akLeft, akBottom]
-      Caption = #1057#1086#1079#1076#1072#1090#1100
+      Width = 183
+      Height = 17
+      Caption = 'Insert - '#1074#1089#1090#1072#1074#1080#1090#1100';   Ctrl+Del - '#1091#1076#1072#1083#1080#1090#1100
       TabOrder = 2
-      Glyph.Data = {
-        76010000424D7601000000000000760000002800000020000000100000000100
-        04000000000000010000130B0000130B00001000000000000000000000000000
-        800000800000008080008000000080008000808000007F7F7F00BFBFBF000000
-        FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF0033333333B333
-        333B33FF33337F3333F73BB3777BB7777BB3377FFFF77FFFF77333B000000000
-        0B3333777777777777333330FFFFFFFF07333337F33333337F333330FFFFFFFF
-        07333337F33333337F333330FFFFFFFF07333337F33333337F333330FFFFFFFF
-        07333FF7F33333337FFFBBB0FFFFFFFF0BB37777F3333333777F3BB0FFFFFFFF
-        0BBB3777F3333FFF77773330FFFF000003333337F333777773333330FFFF0FF0
-        33333337F3337F37F3333330FFFF0F0B33333337F3337F77FF333330FFFF003B
-        B3333337FFFF77377FF333B000000333BB33337777777F3377FF3BB3333BB333
-        3BB33773333773333773B333333B3333333B7333333733333337}
-      NumGlyphs = 2
     end
   end
   object Panel2: TPanel
@@ -95,6 +81,36 @@ object Frm12: TFrm12
       TitleFont.Height = -11
       TitleFont.Name = 'MS Sans Serif'
       TitleFont.Style = []
+      OnKeyDown = dbgrdExtKeyDown
+      Columns = <
+        item
+          Expanded = False
+          FieldName = 'ID'
+          ReadOnly = True
+          Width = -1
+          Visible = False
+        end
+        item
+          Expanded = False
+          FieldName = 'TYPE'
+          Title.Alignment = taCenter
+          Title.Caption = #1058#1080#1087
+          Visible = True
+        end
+        item
+          Expanded = False
+          FieldName = 'EXT'
+          Title.Alignment = taCenter
+          Title.Caption = #1056#1072#1089#1096#1080#1088'.'
+          Visible = True
+        end
+        item
+          Expanded = False
+          FieldName = 'DESCR'
+          Title.Caption = #1050#1086#1084#1084#1077#1085#1090#1072#1088#1080#1081
+          Width = 550
+          Visible = True
+        end>
     end
   end
   object Panel3: TPanel
@@ -117,6 +133,29 @@ object Frm12: TFrm12
       TitleFont.Height = -11
       TitleFont.Name = 'MS Sans Serif'
       TitleFont.Style = []
+      OnKeyDown = dbgrdActKeyDown
+      Columns = <
+        item
+          Expanded = False
+          FieldName = 'FID'
+          ReadOnly = True
+          Width = -1
+          Visible = False
+        end
+        item
+          Expanded = False
+          FieldName = 'ACTION'
+          Title.Alignment = taCenter
+          Title.Caption = 'ID '#1076#1077#1081#1089#1090#1074#1080#1103
+          Visible = True
+        end
+        item
+          Expanded = False
+          FieldName = 'DESCR'
+          Title.Caption = #1050#1086#1084#1084#1077#1085#1090#1072#1088#1080#1081
+          Width = 575
+          Visible = True
+        end>
     end
   end
   object vkdbfExt: TVKDBFNTX
@@ -124,17 +163,19 @@ object Frm12: TFrm12
     SetDeleted = False
     FastPostRecord = False
     LookupOptions = []
-    TrimInLocate = False
-    TrimCType = False
+    AfterInsert = vkdbfExtAfterInsert
+    AfterDelete = vkdbfExtAfterDelete
+    TrimInLocate = True
+    TrimCType = True
     StorageType = pstFile
     DBFFileName = 'd:\1\TestBase\Journal\extens.dbf'
-    AccessMode.AccessMode = 16
-    AccessMode.OpenRead = True
+    AccessMode.AccessMode = 66
+    AccessMode.OpenRead = False
     AccessMode.OpenWrite = False
-    AccessMode.OpenReadWrite = False
-    AccessMode.ShareExclusive = True
+    AccessMode.OpenReadWrite = True
+    AccessMode.ShareExclusive = False
     AccessMode.ShareDenyWrite = False
-    AccessMode.ShareDenyNone = False
+    AccessMode.ShareDenyNone = True
     Crypt.Active = False
     Crypt.CryptMethod = cmNone
     BufferSize = 4096
@@ -221,17 +262,19 @@ object Frm12: TFrm12
     SetDeleted = False
     FastPostRecord = False
     LookupOptions = []
-    TrimInLocate = False
-    TrimCType = False
+    AfterInsert = vkdbfActAfterInsert
+    AfterDelete = vkdbfActAfterDelete
+    TrimInLocate = True
+    TrimCType = True
     StorageType = pstFile
     DBFFileName = 'd:\1\TestBase\Journal\actions.dbf'
-    AccessMode.AccessMode = 16
-    AccessMode.OpenRead = True
+    AccessMode.AccessMode = 66
+    AccessMode.OpenRead = False
     AccessMode.OpenWrite = False
-    AccessMode.OpenReadWrite = False
-    AccessMode.ShareExclusive = True
+    AccessMode.OpenReadWrite = True
+    AccessMode.ShareExclusive = False
     AccessMode.ShareDenyWrite = False
-    AccessMode.ShareDenyNone = False
+    AccessMode.ShareDenyNone = True
     Crypt.Active = False
     Crypt.CryptMethod = cmNone
     BufferSize = 4096
@@ -299,11 +342,14 @@ object Frm12: TFrm12
       end>
   end
   object dsExt: TDataSource
+    AutoEdit = False
     DataSet = vkdbfExt
+    OnDataChange = dsExtDataChange
     Left = 48
     Top = 48
   end
   object dsAct: TDataSource
+    AutoEdit = False
     DataSet = vkdbfAct
     Left = 56
     Top = 212

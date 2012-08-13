@@ -83,6 +83,7 @@ type
     procedure btnUserGoToClick(Sender: TObject);
     procedure btnGroupGoToClick(Sender: TObject);
     procedure btnGroupDelClick(Sender: TObject);
+    procedure actExtDictExecute(Sender: TObject);
   private
     { Private declarations }
   public
@@ -93,7 +94,7 @@ var
   Frm1: TFrm1;
 
 implementation
-uses U3, U4, U5, U6, U7, U8, U9, U11, DU1, UAccessConstant, UAccessFileDBF,
+uses U3, U4, U5, U6, U7, U8, U9, U11, U12, DU1, UAccessConstant, UAccessFileDBF,
   UAccessGroup;
 
 {$R *.dfm}
@@ -443,6 +444,18 @@ begin
   if (chklstUserGroups.ItemIndex > -1) and
     (Settings.User.GroupDelete(chklstUserGroups.Items.ValueFromIndex[chklstUserGroups.itemIndex])) then
     chklstUserGroups.DeleteSelected;
+end;
+
+procedure TFrm1.actExtDictExecute(Sender: TObject);
+var
+  Form01:TFrm12;
+begin
+Form01:=TFrm12.Create(Self);
+Form01.vkdbfExt.DBFFileName:=IncludeTrailingPathDelimiter(Settings.Base.JournalsDir)+csExtTable;
+Form01.vkdbfAct.DBFFileName:=IncludeTrailingPathDelimiter(Settings.Base.JournalsDir)+csActionTable;
+Form01.ShowModal;
+FreeAndNil(Form01);
+
 end;
 
 end.
