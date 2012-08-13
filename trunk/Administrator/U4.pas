@@ -51,7 +51,7 @@ type
   end;
 
 implementation
-uses UAccessConstant, U10, KoaUtils;
+uses UAccessConstant, U10, KoaUtils, U12;
 
 {$R *.dfm}
 
@@ -103,7 +103,8 @@ begin
   Frm02.cbbType.Text := dsUserFiles.DataSet.fieldbyname(csFieldType).AsString;
   Frm02.seAction.Value :=
     dsUserFiles.DataSet.fieldbyname(csFieldAction).AsInteger;
-  Frm02.edtVersion.Text:=dsUserFiles.DataSet.FieldByName(csFieldVersion).AsString;  
+  Frm02.edtVersion.Text :=
+    dsUserFiles.DataSet.FieldByName(csFieldVersion).AsString;
   if Frm02.ShowModal = mrok then
   begin
     Frm02.edtSrvrFile.Text := AnsiLowerCase(Frm02.edtSrvrFile.Text);
@@ -120,7 +121,8 @@ begin
     dsUserFiles.DataSet.fieldbyname(csFieldType).AsString := Frm02.cbbType.Text;
     dsUserFiles.DataSet.fieldbyname(csFieldAction).AsInteger :=
       Frm02.seAction.Value;
-    dsUserFiles.DataSet.FieldByName(csFieldVersion).AsString:=UserFiles.Container.GetNewVersion;
+    dsUserFiles.DataSet.FieldByName(csFieldVersion).AsString :=
+      UserFiles.Container.GetNewVersion;
     dsUserFiles.DataSet.Post;
   end;
   FreeAndNil(Frm02);
@@ -186,8 +188,30 @@ begin
 end;
 
 procedure TFrm4.dbgrd1EditButtonClick(Sender: TObject);
+var
+  Form03: TFrm12;
 begin
-ShowMessage(dbgrd1.SelectedField.Value);
+  if dbgrd1.SelectedField.FieldName = csFieldAction then
+  begin
+    Form03 := TFrm12.Create(Self);
+    Form03.vkdbfExt.DBFFileName :=
+      IncludeTrailingPathDelimiter(UserFiles.Container.Bases.JournalsDir) +
+        csExtTable;
+    Form03.vkdbfAct.DBFFileName :=
+      IncludeTrailingPathDelimiter(UserFiles.Container.Bases.JournalsDir) +
+        csActionTable;
+    if Form03.ShowModal = mrOk then
+    begin
+      if dbgrd1.DataSource.DataSet.FieldByName(csFieldExt).AsString <> '' then
+        dbgrd1.DataSource.DataSet.FieldByName(csFieldExt).AsString :=
+          Form03.vkdbfExt.FieldByName(csFieldExt).AsString;
+      if dbgrd1.DataSource.DataSet.FieldByName(csFieldAction).AsString <> ''
+        then
+        dbgrd1.DataSource.DataSet.FieldByName(csFieldAction).AsString :=
+          Form03.vkdbfAct.FieldByName(csFieldAction).AsString;
+    end;
+    FreeAndNil(Form03);
+  end;
 end;
 
 end.

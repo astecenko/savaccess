@@ -282,7 +282,7 @@ object Frm1: TFrm1
       Left = 1
       Top = 2
       Width = 140
-      Height = 287
+      Height = 295
       Anchors = [akLeft, akTop, akBottom]
       DataSource = dtmdl1.dsDomain
       Options = [dgTitles, dgIndicator, dgColumnResize, dgColLines, dgRowLines, dgTabs, dgRowSelect, dgConfirmDelete, dgCancelOnExit]
@@ -305,9 +305,9 @@ object Frm1: TFrm1
     end
     object dbmmoDESCR: TDBMemo
       Left = 4
-      Top = 296
+      Top = 306
       Width = 135
-      Height = 105
+      Height = 95
       Anchors = [akLeft, akBottom]
       DataField = 'DESCR'
       DataSource = dtmdl1.dsDomain
@@ -416,7 +416,7 @@ object Frm1: TFrm1
         ActionBar = actmmb1
       end>
     Images = il1
-    Left = 544
+    Left = 616
     Top = 16
     StyleName = 'XP Style'
     object act1: TAction
@@ -521,10 +521,11 @@ object Frm1: TFrm1
     object actExtDict: TAction
       Category = #1057#1077#1088#1074#1080#1089
       Caption = #1057#1087#1088#1072#1074#1086#1095#1085#1080#1082' '#1076#1077#1081#1089#1090#1074#1080#1081
+      OnExecute = actExtDictExecute
     end
   end
   object il1: TImageList
-    Left = 572
+    Left = 580
     Top = 16
     Bitmap = {
       494C010112001400040010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
@@ -1206,7 +1207,7 @@ object Frm1: TFrm1
     Filter = #1060#1072#1081#1083#1099' '#1082#1086#1085#1092#1080#1075#1091#1088#1072#1094#1080#1081' (*.savaccess)|*.savaccess|'#1042#1089#1077' '#1092#1072#1081#1083#1099' (*.*)|*.*'
     Options = [ofOverwritePrompt, ofHideReadOnly, ofEnableSizing]
     Title = #1057#1086#1093#1088#1072#1085#1080#1090#1100' '#1082#1086#1085#1092#1080#1075#1091#1088#1072#1094#1080#1102
-    Left = 516
+    Left = 548
     Top = 16
   end
 end

@@ -25,15 +25,6 @@ object Form1: TForm1
     Anchors = [akLeft, akTop, akRight]
     TabOrder = 0
   end
-  object btn1: TButton
-    Left = 160
-    Top = 8
-    Width = 75
-    Height = 25
-    Caption = 'btn1'
-    TabOrder = 1
-    OnClick = btn1Click
-  end
   object dbgrd1: TDBGrid
     Left = 0
     Top = 264
@@ -41,7 +32,7 @@ object Form1: TForm1
     Height = 102
     Anchors = [akLeft, akTop, akRight, akBottom]
     DataSource = ds1
-    TabOrder = 2
+    TabOrder = 1
     TitleFont.Charset = DEFAULT_CHARSET
     TitleFont.Color = clWindowText
     TitleFont.Height = -11
