@@ -13,6 +13,7 @@ function UACCopyINI(const rNew, rOld: TClientFile; const aDir, aSID:
 begin
   SAVLib_INI.MergeINI(aPath,aDir+rNew.SrvrFile);
   Result:=True;
+  
 end;
 
 end.

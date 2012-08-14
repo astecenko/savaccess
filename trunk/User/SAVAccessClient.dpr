@@ -15,7 +15,9 @@ uses
   UAccessConstant in '..\Administrator\UAccessConstant.pas',
   UAccessContainer in '..\Administrator\UAccessContainer.pas',
   UAccessClient in 'UAccessClient.pas',
-  UAccClient_INI in 'UAccClient_INI.pas';
+  UAccClient_INI in 'UAccClient_INI.pas',
+  PluginManager in '..\PluginAPI\Core\PluginManager.pas',
+  PluginAPI in '..\PluginAPI\Headers\PluginAPI.pas';
 
 {$R *.res}
 
