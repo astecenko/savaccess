@@ -8,8 +8,8 @@ uses
   Forms,
   DU1 in 'DU1.pas' {dtmdl1: TDataModule},
   U7 in 'U7.pas' {Singelton},
-  U1 in 'U1.pas' {Frm1},
-  SAVLib_INI in '..\..\Common\SAVLib_INI.pas';
+  U1 in 'U1.pas' {Frm1};
+
 (*  U12 in 'U12.pas' {Frm12},
   UAccessBase in 'UAccessBase.pas',
   UAccessConstant in 'UAccessConstant.pas',
