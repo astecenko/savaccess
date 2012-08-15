@@ -17,7 +17,8 @@ uses
   UAccessClient in 'UAccessClient.pas',
   UAccClient_INI in 'UAccClient_INI.pas',
   PluginManager in '..\PluginAPI\Core\PluginManager.pas',
-  PluginAPI in '..\PluginAPI\Headers\PluginAPI.pas';
+  PluginAPI in '..\PluginAPI\Headers\PluginAPI.pas',
+  UAccessClientFile in '..\PluginAPI\Headers\UAccessClientFile.pas';
 
 {$R *.res}
 
@@ -26,3 +27,4 @@ begin
   Application.CreateForm(TForm1, Form1);
   Application.Run;
 end.
+

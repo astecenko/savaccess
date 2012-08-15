@@ -1,22 +1,12 @@
 unit UAccessClient;
 
 interface
-uses Classes, UAccessConstant, DBClient, DB, IniFiles, UAccessPattern;
+uses Classes, UAccessConstant, DBClient, DB, IniFiles, UAccessPattern, UAccessClientFile;
 
 type
   TVersionString = string[30];
 
-  TClientFile = record
-    SrvrFile: string[50];
-    Version: string[30];
-    ClntFile: string[254];
-    Ext: string[10];
-    TypeF: Char;
-    Action: Integer;
-    MD5: string[32];
-    Source: Char;
-    SID: string[50];
-  end;
+
 
   TSAVAccessFileProc = function(const rNew, rOld: TClientFile;
     const aDir, aSID: string; const aPath: string = ''): Boolean;
@@ -87,6 +77,8 @@ type
       Boolean;
     procedure UpdateContainerFile(const aDir, aSID, aVersion: string);
     function Update: Boolean;
+    function FindPlugin(const AFileType:Char; AExt: string; AID: Integer; const AGUID:
+  TGUID; out  Obj): Boolean;
     constructor Create(const aConfDirName: string = ''); overload;
     destructor Destroy; override;
 
@@ -94,20 +86,25 @@ type
 
 implementation
 uses SAVLib, SysUtils, SPGetSid, MsAD, VKDBFDataSet, SAVLib_DBF, Variants,
-  KoaUtils, Windows;
+  KoaUtils, Windows,PluginManager, PluginAPI;
 
 { TSAVAccessContainer }
 
 function TSAVAccessClient.AddedProc(const aOld,
   aNew: TClientFile; const aDir, aSID, aPath: string): Boolean;
 var
-  i: Integer;
-  b: Byte;
+  {i: Integer;
+  b: Byte;}
+  Plugin: ISAVAccessFileAct;
 begin
-  b := 0;
+ // b := 0;
   Result := False;
-  i := 0;
-  while (i < FActions.Count) and (b < 1) do
+ // i := 0;
+  if FindPlugin(Char(aNew.TypeF),aNew.Ext,aNew.Action, ISAVAccessFileAct, Plugin) then
+      begin
+        Result:= Plugin.ProcessedFile(aNew,aOld,aDir,aSID,aPath)>0
+      end;
+  {while (i < FActions.Count) and (b < 1) do
   begin
     if (TSAVAccessFileAction(FActions.Items[i]).FileType = aNew.TypeF) and
       (TSAVAccessFileAction(FActions.Items[i]).FFileExt = aNew.Ext) and
@@ -118,7 +115,7 @@ begin
       b := 1;
     end;
     Inc(i);
-  end
+  end }
 end;
 
 function TSAVAccessClient.CheckDomainVersion: Boolean;
@@ -130,6 +127,7 @@ begin
   s := ini.ReadString('main', 'version', '');
   FreeAndNil(ini);
   Result := (s <> '') and (s = FIniFile.ReadString('version', 'domain', ''));
+
 end;
 
 function TSAVAccessClient.CheckGroupVersion(const aSID: string): Boolean;
@@ -240,6 +238,26 @@ begin
   FDataSet.FileName := FConfigDir + csClientData;
   FIniFile := TIniFile.Create(FConfigDir + csContainerCfg);
   FActions := TList.Create;
+  SetErrorMode(SetErrorMode(0) or SEM_NOOPENFILEERRORBOX or
+    SEM_FAILCRITICALERRORS);
+  Plugins.SetVersion(1);
+  // Загрузка всех плагинов. Подразумевается, что они лежат в под-папке Plugins
+  Plugins.LoadPlugins(ExtractFilePath(ParamStr(0)) + 'Plugins', SPluginExt);
+end;
+
+function TSAVAccessClient.FindPlugin(const AFileType:Char; AExt: string; AID: Integer; const AGUID:
+  TGUID; out  Obj): Boolean;
+var
+  X: Integer;
+begin
+  Result := False;
+  for X := 0 to Plugins.Count - 1 do
+    if (Plugins[X].ActionID = AID) and (Plugins[X].Extension = AExt) and (Plugins[x].FileType=AFileType) then
+    begin
+      Result := Supports(Plugins[X], AGUID, Obj);
+      if Result then
+        Break;
+    end;
 end;
 
 destructor TSAVAccessClient.Destroy;
@@ -276,7 +294,7 @@ var
 begin
   Result := True;
   sf := FTemplate.GetPath(aNew.ClntFile);
-  ContDir := IncludeTrailingPathDelimiter(GetDirBySource(aNew.Source)) + aNew.SID
+  ContDir := IncludeTrailingPathDelimiter(GetDirBySource(char(aNew.Source))) + aNew.SID
     + '\f\';
   case aNew.TypeF of
     'F': //Файловая операция
@@ -375,10 +393,10 @@ begin
   Result.Ext := table1.fieldbyname(csFieldExt).AsString;
   Result.Version := table1.fieldbyname(csFieldVersion).AsString;
   Result.ClntFile := table1.fieldbyname(csFieldClntFile).AsString;
-  Result.TypeF := table1.fieldbyname(csFieldType).AsString[1];
+  Result.TypeF := WideChar(table1.fieldbyname(csFieldType).AsString[1]);
   Result.Action := table1.fieldbyname(csFieldAction).AsInteger;
   Result.MD5 := table1.fieldbyname(csFieldMD5).AsString;
-  Result.Source := aSource[1];
+  Result.Source := WideChar(aSource[1]);
   Result.SID := aSID;
 end;
 
