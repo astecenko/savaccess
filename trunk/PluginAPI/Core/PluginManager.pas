@@ -24,19 +24,24 @@ type
     function GetIndex: Integer;
     function GetHandle: HMODULE;
     function GetFileName: String;
-    function GetMask: String;
+//    function GetMask: String;
+    function GetActionID: Integer;
+    function GetExtension: String;
     function GetDescription: String;
-    function GetFilterIndex: Integer;
-    procedure SetFilterIndex(const AValue: Integer);
+    function GetFileType:Char;
+//    function GetFilterIndex: Integer;
+ //   procedure SetFilterIndex(const AValue: Integer);
   // public
     property Index: Integer read GetIndex;
     property Handle: HMODULE read GetHandle;
     property FileName: String read GetFileName;
-
-    property Mask: String read GetMask;
+    property ActionID: Integer read GetActionID;
+    property Extension: String read GetExtension;
+    property FileType: Char read GetFileType;
+//    property Mask: String read GetMask;
     property Description: String read GetDescription;
 
-    property FilterIndex: Integer read GetFilterIndex write SetFilterIndex;
+  //  property FilterIndex: Integer read GetFilterIndex write SetFilterIndex;
   end;
 
   IPluginManager = interface
@@ -108,10 +113,13 @@ type
     FHandle: HMODULE;
     FInit: TInitPluginFunc;
     FDone: TDonePluginFunc;
-    FFilterIndex: Integer;
+//    FFilterIndex: Integer;
     FPlugin: PluginAPI.IPlugin;
     FInfoRetrieved: Boolean;
-    FMask: String;
+//    FMask: String;
+    FActionID: Integer;
+    FExtension:string;
+    FFileType:Char;
     FDescription: String;
     procedure GetInfo;
   protected
@@ -119,10 +127,15 @@ type
     function GetIndex: Integer;
     function GetHandle: HMODULE;
     function GetFileName: String;
-    function GetMask: String;
+//    function GetMask: String;
     function GetDescription: String;
-    function GetFilterIndex: Integer;
-    procedure SetFilterIndex(const AValue: Integer);
+    function GetActionID:integer;
+    function GetExtension:string;
+    function GetFileType:Char;
+
+
+//    function GetFilterIndex: Integer;
+//    procedure SetFilterIndex(const AValue: Integer);
   public
     constructor Create(const APluginManger: TPluginManager; const AFileName: String); virtual;
     destructor Destroy; override;
@@ -370,7 +383,7 @@ begin
   inherited Create;
   FManager := APluginManger;
   FFileName := AFileName;
-  FFilterIndex := -1;
+//  FFilterIndex := -1;
   FHandle := SafeLoadLibrary(AFileName, SEM_NOOPENFILEERRORBOX or SEM_FAILCRITICALERRORS);
   Win32Check(FHandle <> 0);
   FDone := GetProcAddress(FHandle, SPluginDoneFuncName);
@@ -397,10 +410,6 @@ begin
   Result := FFileName;
 end;
 
-function TPlugin.GetFilterIndex: Integer;
-begin
-  Result := FFilterIndex;
-end;
 
 function TPlugin.GetHandle: HMODULE;
 begin
@@ -416,16 +425,19 @@ procedure TPlugin.GetInfo;
 begin
   if FInfoRetrieved then
     Exit;
-  FMask := FPlugin.Mask;
+ // FMask := FPlugin.Mask;
   FDescription := FPlugin.Description;
+  FActionID:=FPlugin.ActionID;
+  FExtension:=FPlugin.Extension;
+  FFileType:=Char(FPlugin.FileType);
   FInfoRetrieved := True;
 end;
 
-function TPlugin.GetMask: String;
+{function TPlugin.GetMask: String;
 begin
   GetInfo;
   Result := FMask;
-end;
+end;}
 
 function TPlugin.QueryInterface(const IID: TGUID; out Obj): HResult;
 begin
@@ -434,15 +446,33 @@ begin
     Result := FPlugin.QueryInterface(IID, Obj);
 end;
 
-procedure TPlugin.SetFilterIndex(const AValue: Integer);
+{procedure TPlugin.SetFilterIndex(const AValue: Integer);
 begin
   FFilterIndex := AValue;
-end;
+end;}
 
 function TPlugin.GetDescription: String;
 begin
   GetInfo;
   Result := FDescription;
+end;
+
+function TPlugin.GetActionID: integer;
+begin
+  GetInfo;
+  Result:=FActionID;
+end;
+
+function TPlugin.GetExtension: string;
+begin
+  GetInfo;
+  Result:=FExtension;
+end;
+
+function TPlugin.GetFileType: Char;
+begin
+   GetInfo;
+  Result:=FFileType;
 end;
 
 { EPluginsLoadError }
