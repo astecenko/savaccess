@@ -16,6 +16,9 @@ inherited Frm5: TFrm5
   inherited edtSID: TEdit
     Anchors = [akLeft, akTop, akRight]
   end
+  inherited chkCopyCaption: TCheckBox
+    Anchors = [akTop, akRight]
+  end
   inherited dbnvgr1: TDBNavigator
     Hints.Strings = ()
   end

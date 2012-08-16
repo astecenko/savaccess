@@ -13,8 +13,6 @@ type
     vkdbfUsers: TVKDBFNTX;
     dsGroups: TDataSource;
     vkdbfGroups: TVKDBFNTX;
-    dsUsersGroup: TDataSource;
-    vkdbfUsersGroup: TVKDBFNTX;
     procedure dsDomainDataChange(Sender: TObject; Field: TField);
     procedure dsUsersDataChange(Sender: TObject; Field: TField);
     procedure dsGroupsDataChange(Sender: TObject; Field: TField);

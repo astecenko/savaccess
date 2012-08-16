@@ -11,6 +11,7 @@ object Frm4: TFrm4
   Font.Name = 'MS Sans Serif'
   Font.Style = []
   OldCreateOrder = False
+  OnClose = FormClose
   OnShow = FormShow
   DesignSize = (
     792
@@ -312,6 +313,7 @@ object Frm4: TFrm4
     TabOrder = 12
   end
   object dsUserFiles: TDataSource
+    OnStateChange = dsUserFilesStateChange
     Left = 584
     Top = 6
   end
