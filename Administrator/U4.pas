@@ -42,11 +42,17 @@ type
     procedure actFileAddExecute(Sender: TObject);
     procedure actFileDeleteExecute(Sender: TObject);
     procedure dbgrd1EditButtonClick(Sender: TObject);
+    procedure dsUserFilesStateChange(Sender: TObject);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
   private
     FUserFiles: TSAVAccessFilesDBF;
+    FDataSetUpdated: Boolean;
     procedure SetUserFiles(const Value: TSAVAccessFilesDBF);
+    procedure SetDataSetUpdated(const Value: Boolean);
   public
     property UserFiles: TSAVAccessFilesDBF read FUserFiles write SetUserFiles;
+    property DataSetUpdated: Boolean read FDataSetUpdated write
+      SetDataSetUpdated;
     procedure FullAccess(const bParam: Boolean = True);
   end;
 
@@ -58,6 +64,7 @@ uses UAccessConstant, U10, KoaUtils, U12;
 procedure TFrm4.btnCloseClick(Sender: TObject);
 begin
   Close;
+
 end;
 
 procedure TFrm4.edtCaptionChange(Sender: TObject);
@@ -84,6 +91,7 @@ procedure TFrm4.FormShow(Sender: TObject);
 begin
   if Assigned(UserFiles) then
     dsUserFiles.DataSet := FUserFiles.DataSource;
+  FDataSetUpdated := False;
 end;
 
 procedure TFrm4.actFileEditExecute(Sender: TObject);
@@ -124,6 +132,7 @@ begin
     dsUserFiles.DataSet.FieldByName(csFieldVersion).AsString :=
       UserFiles.Container.GetNewVersion;
     dsUserFiles.DataSet.Post;
+    // UserFiles.Container.UpdateVersion;
   end;
   FreeAndNil(Frm02);
 end;
@@ -133,7 +142,9 @@ var
   i: Integer;
   s: string;
   s2: string;
+  b: Boolean;
 begin
+  b := False;
   if dlgOpen1.Execute then
   begin
     i := 0;
@@ -155,6 +166,7 @@ begin
               try
                 fDeleteFile(UserFiles.FileDir + s);
                 fCopyFile(dlgOpen1.Files[i], UserFiles.FileDir + s);
+                b := True;
               except
                 ShowMessage('Ошибка при обработке файла "' + s + '"'#10#13 +
                   SysErrorMessage(GetLastError));
@@ -166,16 +178,24 @@ begin
               if UserFiles.AppendAndCopyFile(dlgOpen1.Files[i], s2 + s) = False
                 then
                 ShowMessage('Ошибка при обработке файла "' + dlgOpen1.Files[i] +
-                  '"'#10#13 + SysErrorMessage(GetLastError));
+                  '"'#10#13 + SysErrorMessage(GetLastError))
+              else
+                b := True;
             end;
         end;
       end
-      else if UserFiles.AppendAndCopyFile(dlgOpen1.Files[i]) = False then
-        ShowMessage('Ошибка при обработке файла "' + dlgOpen1.Files[i] +
-          '"'#10#13 + SysErrorMessage(GetLastError));
+      else
+      begin
+        if UserFiles.AppendAndCopyFile(dlgOpen1.Files[i]) = False then
+          ShowMessage('Ошибка при обработке файла "' + dlgOpen1.Files[i] +
+            '"'#10#13 + SysErrorMessage(GetLastError))
+        else
+          b := True;
+      end;
       Inc(i);
     end;
   end;
+  // if b then UserFiles.Container.UpdateVersion;
 end;
 
 procedure TFrm4.actFileDeleteExecute(Sender: TObject);
@@ -196,10 +216,10 @@ begin
     Form03 := TFrm12.Create(Self);
     Form03.vkdbfExt.DBFFileName :=
       IncludeTrailingPathDelimiter(UserFiles.Container.Bases.JournalsDir) +
-        csExtTable;
+      csExtTable;
     Form03.vkdbfAct.DBFFileName :=
       IncludeTrailingPathDelimiter(UserFiles.Container.Bases.JournalsDir) +
-        csActionTable;
+      csActionTable;
     if Form03.ShowModal = mrOk then
     begin
       if dbgrd1.DataSource.DataSet.FieldByName(csFieldExt).AsString <> '' then
@@ -212,6 +232,23 @@ begin
     end;
     FreeAndNil(Form03);
   end;
+end;
+
+procedure TFrm4.dsUserFilesStateChange(Sender: TObject);
+begin
+  if dsUserFiles.State in [dsInsert, dsEdit] then
+    DataSetUpdated := True;
+end;
+
+procedure TFrm4.SetDataSetUpdated(const Value: Boolean);
+begin
+  FDataSetUpdated := Value;
+end;
+
+procedure TFrm4.FormClose(Sender: TObject; var Action: TCloseAction);
+begin
+  if DataSetUpdated then
+    UserFiles.Container.UpdateVersion;
 end;
 
 end.

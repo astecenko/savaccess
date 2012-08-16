@@ -62,6 +62,7 @@ type
     btnGroupDel: TBitBtn;
     btnGroupGoTo: TBitBtn;
     actExtDict: TAction;
+    lst1: TListBox;
     procedure actCreateBaseExecute(Sender: TObject);
     procedure actUserAddExecute(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -84,6 +85,7 @@ type
     procedure btnGroupGoToClick(Sender: TObject);
     procedure btnGroupDelClick(Sender: TObject);
     procedure actExtDictExecute(Sender: TObject);
+    procedure btnGroupAddClick(Sender: TObject);
   private
     { Private declarations }
   public
@@ -95,7 +97,7 @@ var
 
 implementation
 uses U3, U4, U5, U6, U7, U8, U9, U11, U12, DU1, UAccessConstant, UAccessFileDBF,
-  UAccessGroup;
+  UAccessGroup, UAccessBase;
 
 {$R *.dfm}
 
@@ -377,6 +379,7 @@ begin
      Settings.User.Save;
      dbgrdUser.DataSource.DataSet.Close;
      dbgrdUser.DataSource.DataSet.Open;*)
+    // Settings.Group.UpdateVersion;
   end;
   FreeAndNil(Frm01);
   FreeAndNil(UF01);
@@ -456,6 +459,23 @@ Form01.vkdbfAct.DBFFileName:=IncludeTrailingPathDelimiter(Settings.Base.Journals
 Form01.ShowModal;
 FreeAndNil(Form01);
 
+end;
+
+procedure TFrm1.btnGroupAddClick(Sender: TObject);
+var
+  Form01: TFrm11;
+begin
+  Form01 := TFrm11.Create(Self);
+  Form01.vkdbfntx2.DBFFileName := Settings.Base.TableGroups.DBFFileName;
+  Form01.vkdbfntx2.Open;
+  if (Form01.ShowModal = mrOk) and (Form01.vkdbfntx2.RecNo > 0) then
+  begin
+    Settings.Base.TableGroups.RecNo:=Form01.vkdbfntx2.RecNo;
+    Settings.Group.UserAdd(Settings.User.SID);
+    Settings.User.GetGroups(chklstUserGroups.Items);
+  end;
+  Form01.vkdbfntx2.Close;
+  FreeAndNil(Form01);
 end;
 
 end.

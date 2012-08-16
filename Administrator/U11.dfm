@@ -17,11 +17,18 @@ object Frm11: TFrm11
   PixelsPerInch = 96
   TextHeight = 13
   object lbl1: TLabel
-    Left = 16
-    Top = 8
-    Width = 16
+    Left = 0
+    Top = 2
+    Width = 22
     Height = 13
-    Caption = 'lbl1'
+    Caption = #1048#1084#1103
+  end
+  object lbl2: TLabel
+    Left = 280
+    Top = 2
+    Width = 18
+    Height = 13
+    Caption = 'SID'
   end
   object btnOk: TBitBtn
     Left = 396
@@ -56,6 +63,29 @@ object Frm11: TFrm11
     TitleFont.Height = -11
     TitleFont.Name = 'MS Sans Serif'
     TitleFont.Style = []
+  end
+  object edtName: TEdit
+    Left = 24
+    Top = 2
+    Width = 241
+    Height = 21
+    TabOrder = 3
+  end
+  object edtSID: TEdit
+    Left = 304
+    Top = 2
+    Width = 225
+    Height = 21
+    TabOrder = 4
+  end
+  object btn1: TButton
+    Left = 536
+    Top = 2
+    Width = 75
+    Height = 25
+    Caption = #1053#1072#1081#1090#1080
+    TabOrder = 5
+    OnClick = btn1Click
   end
   object ds1: TDataSource
     DataSet = vkdbfntx2

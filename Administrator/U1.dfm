@@ -26,14 +26,13 @@ object Frm1: TFrm1
     Top = 0
     Width = 792
     Height = 24
-    UseSystemFont = False
     ActionManager = actmgr1
     Caption = 'actmmb1'
     ColorMap.HighlightColor = 14410210
     ColorMap.BtnSelectedColor = clBtnFace
     ColorMap.UnusedColor = 14410210
     Font.Charset = DEFAULT_CHARSET
-    Font.Color = clWindowText
+    Font.Color = clMenuText
     Font.Height = -11
     Font.Name = 'Tahoma'
     Font.Style = []
@@ -114,6 +113,7 @@ object Frm1: TFrm1
           ParentShowHint = False
           ShowHint = True
           TabOrder = 1
+          OnClick = btnGroupAddClick
           NumGlyphs = 2
         end
         object btnGroupDel: TBitBtn
@@ -209,6 +209,14 @@ object Frm1: TFrm1
           ShowHint = True
           TabOrder = 3
           OnClick = btnUserGoToClick
+        end
+        object lst1: TListBox
+          Left = 352
+          Top = 24
+          Width = 121
+          Height = 97
+          ItemHeight = 13
+          TabOrder = 4
         end
       end
       object pnl3: TPanel

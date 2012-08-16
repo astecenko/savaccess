@@ -2,7 +2,7 @@ library INI1;
 
 uses
   SysUtils,
-  Classes, ActiveX, AxCtrls, SAVLib_INI,
+  SAVLib_INI,
   PluginAPI in '..\PluginAPI\Headers\PluginAPI.pas',
   UAccessClientFile in '..\PluginAPI\Headers\UAccessClientFile.pas';
 
@@ -36,24 +36,6 @@ begin
   Assert(FCore.Version >= 1);
 end;
 
-{procedure TPlugin.ExportRTF(const ARTF: IStream; const AFileName: WideString);
-var
-  FS: TFileStream;
-  RTFStream: TOleStream;
-begin
-  FS := TFileStream.Create(AFileName, fmCreate or fmShareExclusive);
-  try
-    RTFStream := TOleStream.Create(ARTF);
-    try
-      FS.CopyFrom(RTFStream, 0);
-    finally
-      FreeAndNil(RTFStream);
-    end;
-  finally
-    FreeAndNil(FS);
-  end;
-end;  }
-
 function TPlugin.GetActionID: Integer;
 begin
   Result := 1;
@@ -61,10 +43,8 @@ end;
 
 function TPlugin.GetDescription: WideString;
 begin
-  Result := 'Rich Text (RTF)';
+  Result := 'Ini merging';
 end;
-
-// _________________________________________________________________
 
 function Init(const ACore: ICore): IPlugin; safecall;
 begin
@@ -80,8 +60,6 @@ exports
   Init name SPluginInitFuncName,
   Done name SPluginDoneFuncName;
 
-//begin
-//  ReportMemoryLeaksOnShutdown := True;
 
 function TPlugin.GetExtension: WideString;
 begin
