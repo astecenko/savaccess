@@ -15,6 +15,7 @@ const
   csTemplateMain='main.tpl';
   csContainerCfg='container.cfg';
   csClientData='clientdata.cds';
+  csWorkGroupsLst='workgroups.lst';
 
   { Tables filename }
 
