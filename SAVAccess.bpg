@@ -9,7 +9,7 @@ MAKE = $(ROOT)\bin\make.exe -$(MAKEFLAGS) -f$**
 DCC = $(ROOT)\bin\dcc32.exe $**
 BRCC = $(ROOT)\bin\brcc32.exe $**
 #------------------------------------------------------------------------------
-PROJECTS = SAVAccessClient.exe SAVAccessAdmin.exe INI1.rep LST1.dll TXT1.ext
+PROJECTS = SAVAccessClient.exe SAVAccessAdmin.exe INI1.rep TXT1.ext
 #------------------------------------------------------------------------------
 default: $(PROJECTS)
 #------------------------------------------------------------------------------
@@ -21,9 +21,6 @@ SAVAccessAdmin.exe: Administrator\SAVAccessAdmin.dpr
   $(DCC)
 
 INI1.rep: Plugins\INI1.dpr
-  $(DCC)
-
-LST1.dll: Plugins\LST1.dpr
   $(DCC)
 
 TXT1.ext: Plugins\TXT1.dpr

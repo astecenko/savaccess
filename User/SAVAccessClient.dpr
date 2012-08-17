@@ -16,8 +16,7 @@ uses
   UAccessContainer in '..\Administrator\UAccessContainer.pas',
   UAccessClient in 'UAccessClient.pas',
   PluginManager in '..\PluginAPI\Core\PluginManager.pas',
-  PluginAPI in '..\PluginAPI\Headers\PluginAPI.pas',
-  UAccessClientFile in '..\PluginAPI\Headers\UAccessClientFile.pas';
+  PluginAPI in '..\PluginAPI\Headers\PluginAPI.pas';
 
 {$R *.res}
 

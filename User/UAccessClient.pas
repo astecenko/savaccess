@@ -1,17 +1,15 @@
 unit UAccessClient;
 
 interface
-uses Classes, UAccessConstant, DBClient, DB, IniFiles, UAccessPattern, UAccessClientFile;
+uses Classes, UAccessConstant, DBClient, DB, IniFiles, UAccessPattern,PluginAPI;
 
 type
   TVersionString = string[30];
 
+ { TSAVAccessFileProc = function(const rNew, rOld: TClientFile;
+    const aDir, aSID: string; const aPath: string = ''): Boolean;}
 
-
-  TSAVAccessFileProc = function(const rNew, rOld: TClientFile;
-    const aDir, aSID: string; const aPath: string = ''): Boolean;
-
-  TSAVAccessFileAction = class
+ { TSAVAccessFileAction = class
   private
     procedure SetFileAction(const Value: Integer);
     procedure SetFileExt(const Value: string);
@@ -28,7 +26,7 @@ type
     property FileProc: TSAVAccessFileProc read FFileProc write FFileProc;
     constructor Create(const AFileType, AFileExt: string; const AFileAct:
       Integer; AFunc: TSAVAccessFileProc);
-  end;
+  end;         }
 
   TSAVAccessClient = class(TObject)
   private
@@ -64,21 +62,25 @@ type
     property IniFile: TIniFile read FIniFile write SetIniFile;
     procedure LoadFromFile(const aFileName: string);
     procedure SortListVal(Source: TStrings);
-    function Record2ClientFile(table1: TDataSet; const aSID, aSource: string):
+    function Record2ClientFile(table1: TDataSet; const aSID, aSource: string;
+      const DefaultAction: Integer = -1):
       TClientFile;
     procedure ClientFile2Record(table1: TDataSet; const ClntFile1: TClientFile);
     function CheckDomainVersion: Boolean; //True = Equal
     function CheckUserVersion: Boolean;
     function GetDirBySource(const aSource: Char): string;
     function CheckGroupVersion(const aSID: string): Boolean;
-    function FileProcessing(const aOld, aNew: TClientFile): Boolean;
+    function FileProcessing(const aOld, aNew: TClientFile; const DeleteOnly:
+      Boolean = False): Boolean;
     function AddedProc(const aOld, aNew: TClientFile; const aDir, aSID, aPath:
       string):
       Boolean;
     procedure UpdateContainerFile(const aDir, aSID, aVersion: string);
+    procedure DeleteContainerFile(const aDir, aSID: string);
     function Update: Boolean;
-    function FindPlugin(const AFileType:Char; AExt: string; AID: Integer; const AGUID:
-  TGUID; out  Obj): Boolean;
+    function FindPlugin(const AFileType: Char; AExt: string; AID: Integer; const
+      AGUID:
+      TGUID; out Obj): Boolean;
     constructor Create(const aConfDirName: string = ''); overload;
     destructor Destroy; override;
 
@@ -86,7 +88,7 @@ type
 
 implementation
 uses SAVLib, SysUtils, SPGetSid, MsAD, VKDBFDataSet, SAVLib_DBF, Variants,
-  KoaUtils, Windows,PluginManager, PluginAPI;
+  KoaUtils, Windows, PluginManager;
 
 { TSAVAccessContainer }
 
@@ -97,25 +99,14 @@ var
   b: Byte;}
   Plugin: ISAVAccessFileAct;
 begin
- // b := 0;
+  // b := 0;
   Result := False;
- // i := 0;
-  if FindPlugin(Char(aNew.TypeF),aNew.Ext,aNew.Action, ISAVAccessFileAct, Plugin) then
-      begin
-        Result:= Plugin.ProcessedFile(aNew,aOld,aDir,aSID,aPath)>0
-      end;
-  {while (i < FActions.Count) and (b < 1) do
+  // i := 0;
+  if FindPlugin(Char(aNew.TypeF), aNew.Ext, aNew.Action, ISAVAccessFileAct,
+    Plugin) then
   begin
-    if (TSAVAccessFileAction(FActions.Items[i]).FileType = aNew.TypeF) and
-      (TSAVAccessFileAction(FActions.Items[i]).FFileExt = aNew.Ext) and
-      (TSAVAccessFileAction(FActions.Items[i]).FFileAction = aNew.Action) then
-    begin
-      Result := TSAVAccessFileAction(FActions.Items[i]).FileProc(aNew, aOld,
-        aDir, aSID, aPath);
-      b := 1;
-    end;
-    Inc(i);
-  end }
+    Result := Plugin.ProcessedFile(aNew, aOld, aDir, aSID, aPath) > 0
+  end;
 end;
 
 function TSAVAccessClient.CheckDomainVersion: Boolean;
@@ -245,14 +236,16 @@ begin
   Plugins.LoadPlugins(ExtractFilePath(ParamStr(0)) + 'Plugins', SPluginExt);
 end;
 
-function TSAVAccessClient.FindPlugin(const AFileType:Char; AExt: string; AID: Integer; const AGUID:
-  TGUID; out  Obj): Boolean;
+function TSAVAccessClient.FindPlugin(const AFileType: Char; AExt: string; AID:
+  Integer; const AGUID:
+  TGUID; out Obj): Boolean;
 var
   X: Integer;
 begin
   Result := False;
   for X := 0 to Plugins.Count - 1 do
-    if (Plugins[X].ActionID = AID) and (Plugins[X].Extension = AExt) and (Plugins[x].FileType=AFileType) then
+    if (Plugins[X].ActionID = AID) and (Plugins[X].Extension = AExt) and
+      (Plugins[x].FileType = AFileType) then
     begin
       Result := Supports(Plugins[X], AGUID, Obj);
       if Result then
@@ -287,14 +280,15 @@ begin
 end;
 
 function TSAVAccessClient.FileProcessing(const aOld,
-  aNew: TClientFile): Boolean;
+  aNew: TClientFile; const DeleteOnly: Boolean = False): Boolean;
 var
   hFile: Cardinal;
   sf, ContDir: string;
 begin
   Result := True;
   sf := FTemplate.GetPath(aNew.ClntFile);
-  ContDir := IncludeTrailingPathDelimiter(GetDirBySource(char(aNew.Source))) + aNew.SID
+  ContDir := IncludeTrailingPathDelimiter(GetDirBySource(char(aNew.Source))) +
+    aNew.SID
     + '\f\';
   case aNew.TypeF of
     'F': //Файловая операция
@@ -325,27 +319,28 @@ begin
               end;
           end
       end;
-    'C': //Операция с каталогом
+    'D': //Операция с каталогом
       begin
-        case aNew.Action of
-          0: // Удаление
+        if DeleteOnly = False then
+          case aNew.Action of
+            0: // Удаление
+              begin
+                if DirectoryExists(sf) then
+                  Result := fRemoveDir(sf)
+              end;
+            { 1: // Копирование -
+               begin
+                 fCopyDir();
+               end;}
+            2: // Создать пустую директорию
+              begin
+                Result := ForceDirectories(ExcludeTrailingPathDelimiter(sf));
+              end;
+          else
             begin
-              if DirectoryExists(sf) then
-                Result := fRemoveDir(sf)
+              ;
             end;
-          { 1: // Копирование -
-             begin
-               fCopyDir();
-             end;}
-          2: // Создать пустую директорию
-            begin
-              Result := ForceDirectories(ExcludeTrailingPathDelimiter(sf));
-            end;
-        else
-          begin
-            ;
-          end;
-        end
+          end
       end;
   else
     begin
@@ -380,21 +375,25 @@ begin
     if Assigned(FTemplate) then
       FreeAndNil(FTemplate);
 
-    FTemplate := TPathTemplate.Create(IncludeTrailingPathDelimiter(FJournalsDir) + csTemplateMain, False);
+    FTemplate := TPathTemplate.Create(IncludeTrailingPathDelimiter(FJournalsDir)
+      + csTemplateMain, False);
   end
   else
     raise Exception.Create('Нет доступа к файлу ' + aFileName);
 end;
 
 function TSAVAccessClient.Record2ClientFile(table1: TDataSet; const aSID,
-  aSource: string): TClientFile;
+  aSource: string; const DefaultAction: Integer = -1): TClientFile;
 begin
   Result.SrvrFile := table1.fieldbyname(csFieldSrvrFile).AsString;
   Result.Ext := table1.fieldbyname(csFieldExt).AsString;
   Result.Version := table1.fieldbyname(csFieldVersion).AsString;
   Result.ClntFile := table1.fieldbyname(csFieldClntFile).AsString;
   Result.TypeF := WideChar(table1.fieldbyname(csFieldType).AsString[1]);
-  Result.Action := table1.fieldbyname(csFieldAction).AsInteger;
+  if DefaultAction > -1 then
+    Result.Action := DefaultAction
+  else
+    Result.Action := table1.FieldByName(csFieldAction).AsInteger;
   Result.MD5 := table1.fieldbyname(csFieldMD5).AsString;
   Result.Source := WideChar(aSource[1]);
   Result.SID := aSID;
@@ -467,30 +466,77 @@ end;
 function TSAVAccessClient.Update: Boolean;
 var
   ini: TIniFile;
-  list1: TStringList;
-  sUserIni: string;
-  i: Integer;
+  list1, oldGroups: TStringList;
+  sUserIni, WorkLst, sVersion: string;
+  i, j: Integer;
+  b,
+    DelGroups // есть удаленные группы
+  : Boolean;
 begin
-
-  UpdateContainerFile(FDomainsDir, Domain, FIniFile.ReadString('D', Domain,
-    ''));
+  Result := True;
+  WorkLst := FConfigDir + csWorkGroupsLst;
   sUserIni := IncludeTrailingPathDelimiter(FUsersDir) + FSID + '\' +
     csContainerCfg;
-  if FileExists(sUserIni) then
+  list1 := TStringList.Create;
+  DelGroups := False;
+  b := FileExists(sUserIni);
+  if b then
   begin
     ini := TIniFile.Create(sUserIni);
-    list1 := TStringList.Create;
-    ini.ReadSection('groups', list1);
-    SortListVal(list1);
-    list1.SaveToFile(FConfigDir + 'workgroups.lst');
-    for i := 0 to list1.Count - 1 do
-    begin //work with groups SID from LOW to HIGH priority
-      UpdateContainerFile(FGroupsDir, list1[i], FIniFile.ReadString('G',
-        list1[i], ''));
-    end;
-    FreeAndNil(list1);
+    ini.ReadSectionValues('groups', list1);
     FreeAndNil(ini);
-    UpdateContainerFile(FUsersDir, SID, FIniFile.ReadString('U', SID, ''));
+  end;
+  SortListVal(list1);
+  if FileExists(WorkLst) then
+  begin
+    oldGroups := TStringList.Create;
+    oldGroups.LoadFromFile(WorkLst);
+    for i := Pred(oldGroups.Count) downto 0 do
+    begin
+      j := 0;
+      while j < list1.Count do
+        if list1.Names[j] = oldGroups.Names[i] then
+        begin
+          oldGroups.Delete(i);
+          j := list1.Count;
+        end
+        else
+          Inc(j);
+    end;
+    if oldGroups.Count > 0 then // есть группы из которых пользователь был удален
+    begin
+      for i := 0 to pred(oldGroups.Count) do
+        DeleteContainerFile(FGroupsDir, oldGroups.Names[i]);
+      DelGroups := True;
+    end;
+    FreeAndNil(oldGroups);
+  end;
+  try
+    list1.SaveToFile(WorkLst);
+  except
+    Result := False;
+  end;
+  if DelGroups then
+    sVersion := ''
+  else
+    sVersion := FIniFile.ReadString('D', Domain, '');
+  UpdateContainerFile(FDomainsDir, Domain, sVersion);
+  for i := 0 to list1.Count - 1 do
+  begin //work with groups SID from LOW to HIGH priority
+    if DelGroups then
+      sVersion := ''
+    else
+      sVersion := FIniFile.ReadString('G', list1.Names[i], '');
+    UpdateContainerFile(FGroupsDir, list1.Names[i], sVersion);
+  end;
+  FreeAndNil(list1);
+  if b then
+  begin
+    if DelGroups then
+      sVersion := ''
+    else
+      sVersion := FIniFile.ReadString('U', SID, '');
+    UpdateContainerFile(FUsersDir, SID, sVersion);
   end;
   FDataSet.ApplyUpdates(-1);
 end;
@@ -545,8 +591,7 @@ begin
     while not (table1.Eof) do
     begin
       if FDataSet.Locate(csFieldSrvrFile + ';' + csFieldExt + ';' + csFieldType
-        +
-        ';' + csFieldSource + ';' + csFieldSID,
+        + ';' + csFieldSource + ';' + csFieldSID,
         varArrayOf([table1.fieldbyname(csFieldSrvrFile).AsString,
         table1.fieldbyname(csFieldExt).AsString,
           table1.fieldbyname(csFieldType).AsString, c, aSID]), []) then
@@ -581,30 +626,42 @@ begin
   end;
 end;
 
-{ TSAVAccessFileAction }
-
-constructor TSAVAccessFileAction.Create(const AFileType, AFileExt: string;
-  const AFileAct: Integer; AFunc: TSAVAccessFileProc);
+procedure TSAVAccessClient.DeleteContainerFile(const aDir, aSID: string);
+var
+  ini: TIniFile;
+  c: Char;
+  s: string;
+  sPath: string;
+  table1: TVKDBFNTX;
 begin
-  FFileType := AFileType;
-  FFileExt := AFileExt;
-  FFileAction := AFileAct;
-  FFileProc := AFunc;
-end;
-
-procedure TSAVAccessFileAction.SetFileAction(const Value: Integer);
-begin
-  FFileAction := Value;
-end;
-
-procedure TSAVAccessFileAction.SetFileExt(const Value: string);
-begin
-  FFileExt := Value;
-end;
-
-procedure TSAVAccessFileAction.SetFileType(const Value: string);
-begin
-  FFileType := Value;
+  s := '';
+  sPath := IncludeTrailingPathDelimiter(IncludeTrailingPathDelimiter(aDir) +
+    aSID);
+  ini := TIniFile.Create(sPath + csContainerCfg);
+  c := Ini.ReadString('main', 'type', ' ')[1];
+  FreeAndNil(ini);
+  if FileExists(sPath + csFilesTable) {and (vers <> aVersion)} then
+  begin
+    table1 := TVKDBFNTX.Create(nil);
+    InitOpenDBF(table1, sPath + csFilesTable, 64);
+    table1.Open;
+    while not (table1.Eof) do
+    begin
+      if FileProcessing(Record2ClientFile(table1, aSID, c, 0),
+        Record2ClientFile(table1, aSID, c, 0), True) then
+      begin
+        while FDataSet.Locate(csFieldClntFile + ';' + csFieldType,
+          varArrayOf([table1.fieldbyname(csFieldClntFile).AsString,
+          table1.fieldbyname(csFieldType).AsString]), []) do
+          FDataSet.Delete;
+      end;
+      table1.Next;
+    end;
+    table1.Close;
+    FreeAndNil(table1);
+  end;
+  FIniFile.DeleteKey(c, aSID);
+  FDataSet.ApplyUpdates(-1);
 end;
 
 end.

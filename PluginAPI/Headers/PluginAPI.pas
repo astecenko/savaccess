@@ -3,9 +3,21 @@ unit PluginAPI;
 interface
 
 uses
-  ActiveX,UAccessClientFile;
+  ActiveX;
 
 type
+  TClientFile = record
+    SrvrFile: WideString;
+    Version: WideString;
+    ClntFile: WideString;
+    Ext: WideString;
+    TypeF: WideChar;
+    Action: Integer;
+    MD5: WideString;
+    Source: WideChar;
+    SID: WideString;
+  end;
+
   ICore = interface
   ['{26D3EED3-A843-4E9C-83C1-FEE1ED544490}']
   // private

@@ -120,7 +120,7 @@ object Frm4: TFrm4
           FieldName = 'TYPE'
           PickList.Strings = (
             'F'
-            'C')
+            'D')
           Title.Caption = #1058#1080#1087
           Width = 35
           Visible = True
