@@ -1,23 +1,23 @@
-unit U3;
+unit cU2;
 
 interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, ComCtrls, Grids, DBGrids;
+  Dialogs, StdCtrls, Buttons, Mask;
 
 type
-  TFrm3 = class(TForm)
-    stat1: TStatusBar;
-    dbgrd1: TDBGrid;
+  TForm2 = class(TForm)
+    lbl1: TLabel;
+    medt1: TMaskEdit;
+    mmo1: TMemo;
+    btnRing: TBitBtn;
+    btnCancel: TBitBtn;
   private
     { Private declarations }
   public
     { Public declarations }
   end;
-
-var
-  Frm3: TFrm3;
 
 implementation
 

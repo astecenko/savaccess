@@ -1,32 +1,33 @@
 unit UAccessClient;
 
 interface
-uses Classes, UAccessConstant, DBClient, DB, IniFiles, UAccessPattern,PluginAPI;
+uses Classes, UAccessConstant, DBClient, DB, IniFiles, UAccessPattern,
+  PluginAPI;
 
 type
   TVersionString = string[30];
 
- { TSAVAccessFileProc = function(const rNew, rOld: TClientFile;
-    const aDir, aSID: string; const aPath: string = ''): Boolean;}
+  { TSAVAccessFileProc = function(const rNew, rOld: TClientFile;
+     const aDir, aSID: string; const aPath: string = ''): Boolean;}
 
- { TSAVAccessFileAction = class
-  private
-    procedure SetFileAction(const Value: Integer);
-    procedure SetFileExt(const Value: string);
-    procedure SetFileType(const Value: string);
-  protected
-    FFileType: string;
-    FFileAction: Integer;
-    FFileExt: string;
-    FFileProc: TSAVAccessFileProc;
-  public
-    property FileType: string read FFileType write SetFileType;
-    property FileAction: Integer read FFileAction write SetFileAction;
-    property FileExt: string read FFileExt write SetFileExt;
-    property FileProc: TSAVAccessFileProc read FFileProc write FFileProc;
-    constructor Create(const AFileType, AFileExt: string; const AFileAct:
-      Integer; AFunc: TSAVAccessFileProc);
-  end;         }
+  { TSAVAccessFileAction = class
+   private
+     procedure SetFileAction(const Value: Integer);
+     procedure SetFileExt(const Value: string);
+     procedure SetFileType(const Value: string);
+   protected
+     FFileType: string;
+     FFileAction: Integer;
+     FFileExt: string;
+     FFileProc: TSAVAccessFileProc;
+   public
+     property FileType: string read FFileType write SetFileType;
+     property FileAction: Integer read FFileAction write SetFileAction;
+     property FileExt: string read FFileExt write SetFileExt;
+     property FileProc: TSAVAccessFileProc read FFileProc write FFileProc;
+     constructor Create(const AFileType, AFileExt: string; const AFileAct:
+       Integer; AFunc: TSAVAccessFileProc);
+   end;         }
 
   TSAVAccessClient = class(TObject)
   private
@@ -163,6 +164,8 @@ begin
     FConfigDir := GetCurrentDir;
   FConfigDir :=
     IncludeTrailingPathDelimiter(IncludeTrailingPathDelimiter(FConfigDir) + s);
+  if not (DirectoryExists(ConfigDir)) then
+    ForceDirectories(ConfigDir);
   FSID := SPGetSid.GetCurrentUserSid;
   FWorkstation := MsAD.GetCurrentComputerName;
   FUser := MsAD.GetCurrentUserName;
@@ -583,10 +586,10 @@ begin
   c := Ini.ReadString('main', 'type', ' ')[1];
   vers := Ini.ReadString('main', 'version', '');
   FreeAndNil(ini);
-  if (FileExists(sPath + csFilesTable)) and (vers <> aVersion) then
+  if (FileExists(sPath + csTableFiles)) and (vers <> aVersion) then
   begin
     table1 := TVKDBFNTX.Create(nil);
-    InitOpenDBF(table1, sPath + csFilesTable, 64);
+    InitOpenDBF(table1, sPath + csTableFiles, 64);
     table1.Open;
     while not (table1.Eof) do
     begin
@@ -631,37 +634,42 @@ var
   ini: TIniFile;
   c: Char;
   s: string;
-  sPath: string;
+  sPath, sPathIni: string;
   table1: TVKDBFNTX;
 begin
-  s := '';
   sPath := IncludeTrailingPathDelimiter(IncludeTrailingPathDelimiter(aDir) +
     aSID);
-  ini := TIniFile.Create(sPath + csContainerCfg);
-  c := Ini.ReadString('main', 'type', ' ')[1];
-  FreeAndNil(ini);
-  if FileExists(sPath + csFilesTable) {and (vers <> aVersion)} then
+  sPathINI := sPath + csContainerCfg;
+  if FileExists(sPathIni) then
   begin
-    table1 := TVKDBFNTX.Create(nil);
-    InitOpenDBF(table1, sPath + csFilesTable, 64);
-    table1.Open;
-    while not (table1.Eof) do
+    s := '';
+    ini := TIniFile.Create(sPathIni);
+    c := Ini.ReadString('main', 'type', ' ')[1];
+    FreeAndNil(ini);
+    if FileExists(sPath + csTableFiles) {and (vers <> aVersion)} then
     begin
-      if FileProcessing(Record2ClientFile(table1, aSID, c, 0),
-        Record2ClientFile(table1, aSID, c, 0), True) then
+      table1 := TVKDBFNTX.Create(nil);
+      InitOpenDBF(table1, sPath + csTableFiles, 64);
+      table1.Open;
+      while not (table1.Eof) do
       begin
-        while FDataSet.Locate(csFieldClntFile + ';' + csFieldType,
-          varArrayOf([table1.fieldbyname(csFieldClntFile).AsString,
-          table1.fieldbyname(csFieldType).AsString]), []) do
-          FDataSet.Delete;
+        if FileProcessing(Record2ClientFile(table1, aSID, c, 0),
+          Record2ClientFile(table1, aSID, c, 0), True) then
+        begin
+          while FDataSet.Locate(csFieldClntFile + ';' + csFieldType,
+            varArrayOf([table1.fieldbyname(csFieldClntFile).AsString,
+            table1.fieldbyname(csFieldType).AsString]), []) do
+            FDataSet.Delete;
+        end;
+        table1.Next;
       end;
-      table1.Next;
+      table1.Close;
+      FreeAndNil(table1);
+      FDataSet.ApplyUpdates(-1);
     end;
-    table1.Close;
-    FreeAndNil(table1);
+    if c <> ' ' then
+      FIniFile.DeleteKey(c, aSID);
   end;
-  FIniFile.DeleteKey(c, aSID);
-  FDataSet.ApplyUpdates(-1);
 end;
 
 end.

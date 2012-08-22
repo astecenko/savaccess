@@ -12,6 +12,7 @@ type
     btnSelectUser: TBitBtn;
     edtDomain: TEdit;
     procedure btnSelectUserClick(Sender: TObject);
+    procedure FormShow(Sender: TObject);
   private
     { Private declarations }
   public
@@ -38,6 +39,12 @@ begin
     chkCopyCaption.Checked:=False;
   end;
   FreeAndNil(Frm02);
+end;
+
+procedure TFrm6.FormShow(Sender: TObject);
+begin
+  inherited;
+  edtDomain.Text:=DomainSID;
 end;
 
 end.

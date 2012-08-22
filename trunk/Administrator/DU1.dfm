@@ -294,5 +294,41 @@ object dtmdl1: Tdtmdl1
         NativeStepAutoInc = 1
         Tag = 0
       end>
-  end 
+  end
+  object dsADGroups: TDataSource
+    DataSet = vkdbfADGroups
+    Left = 256
+    Top = 8
+  end
+  object vkdbfADGroups: TVKDBFNTX
+    OEM = True
+    SetDeleted = False
+    FastPostRecord = False
+    LookupOptions = []
+    TrimInLocate = True
+    TrimCType = True
+    StorageType = pstFile
+    AccessMode.AccessMode = 66
+    AccessMode.OpenRead = True
+    AccessMode.OpenWrite = False
+    AccessMode.OpenReadWrite = True
+    AccessMode.ShareExclusive = False
+    AccessMode.ShareDenyWrite = False
+    AccessMode.ShareDenyNone = True
+    Crypt.Active = False
+    Crypt.CryptMethod = cmNone
+    BufferSize = 4096
+    WaitBusyRes = 3000
+    CreateNow = False
+    DbfVersion = xClipper
+    LobBlockSize = 512
+    LockProtocol = lpClipperLock
+    LobLockProtocol = lpClipperLock
+    FoxTableFlag.TableFlag = 0
+    FoxTableFlag.HasGotIndex = False
+    FoxTableFlag.HasGotMemo = False
+    FoxTableFlag.ItIsDatabase = False
+    Left = 256
+    Top = 56
+  end
 end

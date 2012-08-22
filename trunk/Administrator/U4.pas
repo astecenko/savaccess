@@ -44,20 +44,30 @@ type
     procedure dbgrd1EditButtonClick(Sender: TObject);
     procedure dsUserFilesStateChange(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    procedure FormCreate(Sender: TObject);
   private
     FUserFiles: TSAVAccessFilesDBF;
     FDataSetUpdated: Boolean;
+    FDomainSID:string;
+    FUserSID:string;
+    FGroupSID:string;
     procedure SetUserFiles(const Value: TSAVAccessFilesDBF);
     procedure SetDataSetUpdated(const Value: Boolean);
+    procedure SetDomainSID(const Value: string);
+    procedure SetGroupSID(const Value: string);
+    procedure SetUserSID(const Value: string);
   public
     property UserFiles: TSAVAccessFilesDBF read FUserFiles write SetUserFiles;
     property DataSetUpdated: Boolean read FDataSetUpdated write
       SetDataSetUpdated;
+    property DomainSID:string read FDomainSID write SetDomainSID;
+    property UserSID:string read FUserSID write SetUserSID;
+    property GroupSID:string read FGroupSID write SetGroupSID;
     procedure FullAccess(const bParam: Boolean = True);
   end;
 
 implementation
-uses UAccessConstant, U10, KoaUtils, U12;
+uses UAccessConstant, U10, KoaUtils, U12,SAVLib;
 
 {$R *.dfm}
 
@@ -70,7 +80,7 @@ end;
 procedure TFrm4.edtCaptionChange(Sender: TObject);
 begin
   if (chkCopyCaption.Checked) and (edtSID.ReadOnly = False) then
-    edtSID.Text := edtCaption.Text;
+    edtSID.Text := SAVLib.TranslitRus2Lat(edtCaption.Text);
 end;
 
 procedure TFrm4.FullAccess(const bParam: Boolean);
@@ -216,10 +226,10 @@ begin
     Form03 := TFrm12.Create(Self);
     Form03.vkdbfExt.DBFFileName :=
       IncludeTrailingPathDelimiter(UserFiles.Container.Bases.JournalsDir) +
-      csExtTable;
+      csTableExt;
     Form03.vkdbfAct.DBFFileName :=
       IncludeTrailingPathDelimiter(UserFiles.Container.Bases.JournalsDir) +
-      csActionTable;
+      csTableAction;
     if Form03.ShowModal = mrOk then
     begin
       if dbgrd1.DataSource.DataSet.FieldByName(csFieldExt).AsString <> '' then
@@ -249,6 +259,28 @@ procedure TFrm4.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
   if DataSetUpdated then
     UserFiles.Container.UpdateVersion;
+end;
+
+procedure TFrm4.SetDomainSID(const Value: string);
+begin
+  FDomainSID := Value;
+end;
+
+procedure TFrm4.SetGroupSID(const Value: string);
+begin
+  FGroupSID := Value;
+end;
+
+procedure TFrm4.SetUserSID(const Value: string);
+begin
+  FUserSID := Value;
+end;
+
+procedure TFrm4.FormCreate(Sender: TObject);
+begin
+FUserSID:='';
+FDomainSID:='';
+FGroupSID:='';
 end;
 
 end.

@@ -26,13 +26,14 @@ object Frm1: TFrm1
     Top = 0
     Width = 792
     Height = 24
+    UseSystemFont = False
     ActionManager = actmgr1
     Caption = 'actmmb1'
     ColorMap.HighlightColor = 14410210
     ColorMap.BtnSelectedColor = clBtnFace
     ColorMap.UnusedColor = 14410210
     Font.Charset = DEFAULT_CHARSET
-    Font.Color = clMenuText
+    Font.Color = clWindowText
     Font.Height = -11
     Font.Name = 'Tahoma'
     Font.Style = []
@@ -43,7 +44,7 @@ object Frm1: TFrm1
     Top = 24
     Width = 648
     Height = 410
-    ActivePage = tsGroups
+    ActivePage = tsADGroups
     Align = alClient
     TabOrder = 2
     object tsUsers: TTabSheet
@@ -275,6 +276,50 @@ object Frm1: TFrm1
         end
       end
     end
+    object tsADGroups: TTabSheet
+      Caption = #1043#1088#1091#1087#1087#1099' '#1076#1086#1084#1077#1085#1072
+      ImageIndex = 2
+      object spl3: TSplitter
+        Left = 0
+        Top = 277
+        Width = 640
+        Height = 3
+        Cursor = crVSplit
+        Align = alBottom
+      end
+      object pnl6: TPanel
+        Left = 0
+        Top = 280
+        Width = 640
+        Height = 102
+        Align = alBottom
+        TabOrder = 0
+      end
+      object pnl7: TPanel
+        Left = 0
+        Top = 0
+        Width = 640
+        Height = 277
+        Align = alClient
+        TabOrder = 1
+        DesignSize = (
+          640
+          277)
+        object dbgrdADGroups: TDBGrid
+          Left = 0
+          Top = 32
+          Width = 636
+          Height = 241
+          Anchors = [akLeft, akTop, akRight, akBottom]
+          TabOrder = 0
+          TitleFont.Charset = DEFAULT_CHARSET
+          TitleFont.Color = clWindowText
+          TitleFont.Height = -11
+          TitleFont.Name = 'MS Sans Serif'
+          TitleFont.Style = []
+        end
+      end
+    end
   end
   object pnl1: TPanel
     Left = 0
@@ -388,6 +433,12 @@ object Frm1: TFrm1
               item
                 Action = actGroupShow
                 ImageIndex = 10
+              end
+              item
+                Caption = '-'
+              end
+              item
+                Action = actADGroupAdd
               end>
             Caption = #1043#1088#1091#1087#1087#1072
           end
@@ -418,6 +469,19 @@ object Frm1: TFrm1
               end
               item
                 Action = actTemplat
+              end
+              item
+                Action = actSupport
+              end
+              item
+                Action = actAD1
+                Caption = '&Active Directory'
+              end
+              item
+                Caption = '-'
+              end
+              item
+                Action = act2
               end>
             Caption = #1057#1077#1088#1074#1080#1089
           end>
@@ -530,6 +594,25 @@ object Frm1: TFrm1
       Category = #1057#1077#1088#1074#1080#1089
       Caption = #1057#1087#1088#1072#1074#1086#1095#1085#1080#1082' '#1076#1077#1081#1089#1090#1074#1080#1081
       OnExecute = actExtDictExecute
+    end
+    object actSupport: TAction
+      Category = #1057#1077#1088#1074#1080#1089
+      Caption = #1055#1086#1076#1076#1077#1088#1078#1082#1072' '#1087#1086#1083#1100#1079#1086#1074#1072#1090#1077#1083#1077#1081
+    end
+    object actADGroupAdd: TAction
+      Category = #1043#1088#1091#1087#1087#1072
+      Caption = #1044#1086#1073#1072#1074#1080#1090#1100' '#1076#1086#1084#1077#1085#1085#1091#1102' '#1075#1088#1091#1087#1087#1091
+      OnExecute = actADGroupAddExecute
+    end
+    object actAD1: TAction
+      Category = #1057#1077#1088#1074#1080#1089
+      Caption = 'Active Directory'
+      OnExecute = actAD1Execute
+    end
+    object act2: TAction
+      Category = #1057#1077#1088#1074#1080#1089
+      Caption = #1042#1088#1077#1084#1077#1085#1085#1072#1103
+      OnExecute = act2Execute
     end
   end
   object il1: TImageList

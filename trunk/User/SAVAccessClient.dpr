@@ -4,6 +4,11 @@ program SAVAccessClient;
 
 uses
   FastMM4,
+  madExcept,
+  madLinkDisAsm,
+  madListHardware,
+  madListProcesses,
+  madListModules,
   FastCode,
   FastMove,
   VCLFixPack,

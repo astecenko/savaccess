@@ -13,10 +13,12 @@ type
     FJournalsDir: string;
     FUsersDir: string;
     FGroupsDir: string;
+    FADGroupsDir: string;
     FDomainsDir: string;
     FTableUsers: TVKDBFNTX;
     FTableDomains: TVKDBFNTX;
     FTableGroups: TVKDBFNTX;
+    FTableADGroups: TVKDBFNTX;
     FCaption: string;
     procedure SetStoragePath(const Value: string);
     function StorageCheck: Boolean;
@@ -26,10 +28,12 @@ type
     procedure SetUsersDir(const Value: string);
     function CreateTableUsers: Boolean;
     function CreateTableGroups: Boolean;
+    //function CreateTableADGroups: Boolean;
     function CreateTableDomains: Boolean;
     function CreateTableOrgUnits: Boolean;
     function CreateTableLinks: Boolean;
-    function CreateTableExtension:Boolean;
+    function CreateTableSupport: Boolean;
+    function CreateTableExtension: Boolean;
     function CreateTableActions: Boolean;
     procedure SetDomainsDir(const Value: string);
     procedure GetListByName(List: TStrings; const TableName: string);
@@ -37,6 +41,8 @@ type
     procedure SetTableDomains(const Value: TVKDBFNTX);
     procedure SetTableGroups(const Value: TVKDBFNTX);
     procedure SetTableUsers(const Value: TVKDBFNTX);
+    procedure SetADGroupsDir(const Value: string);
+    procedure SetTableADGroups(const Value: TVKDBFNTX);
   protected
 
   public
@@ -44,16 +50,19 @@ type
     property JournalsDir: string read FJournalsDir write SetJournalsDir;
     property UsersDir: string read FUsersDir write SetUsersDir;
     property GroupsDir: string read FGroupsDir write SetGroupsDir;
+    property ADGroupsDir: string read FADGroupsDir write SetADGroupsDir;
     property DomainsDir: string read FDomainsDir write SetDomainsDir;
     property Caption: string read FCaption write SetCaption;
     property TableUsers: TVKDBFNTX read FTableUsers write SetTableUsers;
     property TableDomains: TVKDBFNTX read FTableDomains write SetTableDomains;
     property TableGroups: TVKDBFNTX read FTableGroups write SetTableGroups;
+    property TableADGroups: TVKDBFNTX read FTableADGroups write SetTableADGroups;
     constructor Create; overload;
     constructor Create(const aPath: string; const bCanCreate: Boolean = False;
       const aJournals: string = ''; const aDomains: string = ''; const aGroups:
-      string = ''; const aUsers: string = '');
+      string = ''; const aUsers: string = ''; const aADGroups: string = '');
       overload;
+    function CreateTableADGroups: Boolean;
     function CreateStorage: Boolean;
     procedure GetGroups(List: TStrings);
     procedure GetUsers(List: TStrings);
@@ -74,11 +83,13 @@ begin
   FGroupsDir := csDefGroupDir;
   FDomainsDir := csDefDomainDir;
   FUsersDir := csDefUserDir;
+  FADGroupsDir := csDefADGroupDir;
 end;
 
 constructor TSAVAccessBase.Create(const aPath: string; const bCanCreate: Boolean
   = False; const aJournals: string = ''; const aDomains: string = ''; const
-  aGroups: string = ''; const aUsers: string = '');
+  aGroups: string = ''; const aUsers: string = ''; const aADGroups: string =
+    '');
 var
   s: string;
 begin
@@ -101,6 +112,10 @@ begin
     FUsersDir := ExcludeTrailingPathDelimiter(aUsers)
   else
     FUsersDir := s + FUsersDir;
+  if aADGroups <> '' then
+    FADGroupsDir := ExcludeTrailingPathDelimiter(aADGroups)
+  else
+    FADGroupsDir := s + FADGroupsDir;
   if bCanCreate then
     if not (CreateStorage) then
       raise Exception.Create('Ошибка при создании хранилища ' + FStoragePath);
@@ -139,7 +154,7 @@ begin
   Result := (DirectoryExists(FStoragePath)) and (DirectoryExists(FUsersDir)) and
     (DirectoryExists(FGroupsDir)) and (DirectoryExists(FJournalsDir)) and
     (DirectoryExists(FDomainsDir)) and
-    (FileExists(IncludeTrailingPathDelimiter(FJournalsDir) + csDomainsTable));
+    (FileExists(IncludeTrailingPathDelimiter(FJournalsDir) + csTableDomains));
 end;
 
 function TSAVAccessBase.CreateStorage: Boolean;
@@ -151,16 +166,19 @@ begin
       (ForceDirectories(ExcludeTrailingPathDelimiter(FJournalsDir))) and
       (ForceDirectories(ExcludeTrailingPathDelimiter(FUsersDir))) and
       (ForceDirectories(ExcludeTrailingPathDelimiter(FGroupsDir))) and
-      (ForceDirectories(ExcludeTrailingPathDelimiter(FDomainsDir)));
+      (ForceDirectories(ExcludeTrailingPathDelimiter(FDomainsDir))) and
+        (ForceDirectories(ExcludeTrailingPathDelimiter(FADGroupsDir)));
     if Result then
     begin
       CreateTableDomains;
       CreateTableUsers;
       CreateTableGroups;
+      CreateTableADGroups;
       CreateTableOrgUnits;
       CreateTableLinks;
       CreateTableActions;
       CreateTableExtension;
+      CreateTableSupport;
     end;
   end;
   if Result then
@@ -170,7 +188,7 @@ begin
       FTableDomains.Close;
       ClearStructDBF(FTableDomains);
       InitOpenDBF(FTableDomains, IncludeTrailingPathDelimiter(FJournalsDir) +
-        csDomainsTable, 66);
+        csTableDomains, 66);
       FTableDomains.Open;
     end;
     if Assigned(FTableUsers) then
@@ -178,7 +196,7 @@ begin
       FTableUsers.Close;
       ClearStructDBF(FTableUsers);
       InitOpenDBF(FTableUsers, IncludeTrailingPathDelimiter(FJournalsDir) +
-        csUsersTable, 66);
+        csTableUsers, 66);
       FTableUsers.Open;
       {with FTableUsers.Indexes.Add as TVKNTXIndex do
       begin
@@ -199,8 +217,16 @@ begin
       FTableGroups.Close;
       ClearStructDBF(FTableGroups);
       InitOpenDBF(FTableGroups, IncludeTrailingPathDelimiter(FJournalsDir) +
-        csGroupsTable, 66);
+        csTableGroups, 66);
       FTableGroups.Open;
+    end;
+    if Assigned(FTableADGroups) then
+    begin
+      FTableADGroups.Close;
+      ClearStructDBF(FTableADGroups);
+      InitOpenDBF(FTableADGroups, IncludeTrailingPathDelimiter(FJournalsDir) +
+        csTableADGroups, 66);
+      FTableADGroups.Open;
     end;
   end;
 end;
@@ -211,8 +237,8 @@ var
 begin
   table1 := TVKDBFNTX.Create(nil);
   table1.DBFFileName := IncludeTrailingPathDelimiter(FJournalsDir) +
-    csDomainsTable;
-  table1.OEM:=True;
+    csTableDomains;
+  table1.OEM := True;
   table1.AccessMode.AccessMode := 66;
   with table1.DBFFieldDefs.Add as TVKDBFFieldDef do
   begin
@@ -256,12 +282,12 @@ begin
     field_type := 'C';
     len := 250;
   end;
-  Result:=True;
+  Result := True;
   try
-  table1.CreateTable;
+    table1.CreateTable;
   except
-    Result:=False;
-  end;  
+    Result := False;
+  end;
   FreeAndNil(table1);
   (*viborka.Open;
   with viborka.Indexes.Add as TVKNTXIndex do
@@ -288,9 +314,9 @@ var
 begin
   table1 := TVKDBFNTX.Create(nil);
   table1.AccessMode.AccessMode := 66;
-    table1.OEM:=True;
+  table1.OEM := True;
   table1.DBFFileName := IncludeTrailingPathDelimiter(FJournalsDir) +
-    csGroupsTable;
+    csTableGroups;
   with table1.DBFFieldDefs.Add as TVKDBFFieldDef do
   begin
     Name := csFieldID;
@@ -327,11 +353,11 @@ begin
     field_type := 'N';
     len := 6;
   end;
-  Result:=True;
+  Result := True;
   try
-  table1.CreateTable;
+    table1.CreateTable;
   except
-    Result:=False;
+    Result := False;
   end;
   FreeAndNil(table1);
 end;
@@ -342,9 +368,9 @@ var
 begin
   table1 := TVKDBFNTX.Create(nil);
   table1.AccessMode.AccessMode := 66;
-    table1.OEM:=True;
+  table1.OEM := True;
   table1.DBFFileName := IncludeTrailingPathDelimiter(FJournalsDir) +
-    csOULinkTable;
+    csTableOULink;
   with table1.DBFFieldDefs.Add as TVKDBFFieldDef do
   begin
     Name := csFieldParent;
@@ -357,18 +383,18 @@ begin
     field_type := 'N';
     len := 6;
   end;
-  Result:=True;
+  Result := True;
   try
-  table1.CreateTable;
+    table1.CreateTable;
   except
-    Result:=False;
+    Result := False;
   end;
   FreeAndNil(table1);
 end;
 
 function TSAVAccessBase.CreateTableOrgUnits: Boolean;
 begin
-  Result:=False;
+  Result := False;
 end;
 
 function TSAVAccessBase.CreateTableUsers: Boolean;
@@ -377,9 +403,9 @@ var
 begin
   table1 := TVKDBFNTX.Create(nil);
   table1.AccessMode.AccessMode := 66;
-    table1.OEM:=True;
+  table1.OEM := True;
   table1.DBFFileName := IncludeTrailingPathDelimiter(FJournalsDir) +
-    csUsersTable;
+    csTableUsers;
   with table1.DBFFieldDefs.Add as TVKDBFFieldDef do
   begin
     Name := csFieldID;
@@ -416,21 +442,21 @@ begin
     field_type := 'C';
     len := 200;
   end;
-  Result:=True;
+  Result := True;
   try
-  table1.CreateTable;
+    table1.CreateTable;
   except
-    Result:=False;
+    Result := False;
   end;
- { table1.Open;
-  with table1.Indexes.Add as TVKNTXIndex do
-  begin
-    NTXFileName := IncludeTrailingPathDelimiter(FJournalsDir) + csUsersSIDIndex;
-    KeyExpresion := csFieldSID;
-    Unique:=True;
-    CreateIndex(True);
-  end;
-  table1.Close;}
+  { table1.Open;
+   with table1.Indexes.Add as TVKNTXIndex do
+   begin
+     NTXFileName := IncludeTrailingPathDelimiter(FJournalsDir) + csUsersSIDIndex;
+     KeyExpresion := csFieldSID;
+     Unique:=True;
+     CreateIndex(True);
+   end;
+   table1.Close;}
   FreeAndNil(table1);
 end;
 
@@ -446,7 +472,7 @@ var
 begin
   table1 := TVKDBFNTX.Create(nil);
   table1.AccessMode.AccessMode := 64;
-    table1.OEM:=True;
+  table1.OEM := True;
   table1.DBFFileName := IncludeTrailingPathDelimiter(FJournalsDir) +
     TableName;
   table1.Open;
@@ -461,17 +487,17 @@ end;
 
 procedure TSAVAccessBase.GetGroups(List: TStrings);
 begin
-  GetListByName(List, csGroupsTable);
+  GetListByName(List, csTableGroups);
 end;
 
 procedure TSAVAccessBase.GetUsers(List: TStrings);
 begin
-  GetListByName(List, csUsersTable);
+  GetListByName(List, csTableUsers);
 end;
 
 procedure TSAVAccessBase.GetDomains(List: TStrings);
 begin
-  GetListByName(List, csDomainsTable);
+  GetListByName(List, csTableDomains);
 end;
 
 procedure TSAVAccessBase.LoadFromFile(const aFileName: string);
@@ -542,9 +568,9 @@ var
 begin
   table1 := TVKDBFNTX.Create(nil);
   table1.AccessMode.AccessMode := 66;
-    table1.OEM:=True;
+  table1.OEM := True;
   table1.DBFFileName := IncludeTrailingPathDelimiter(FJournalsDir) +
-    csActionTable;
+    csTableAction;
   with table1.DBFFieldDefs.Add as TVKDBFFieldDef do
   begin
     Name := csFieldFID;
@@ -563,11 +589,11 @@ begin
     field_type := 'C';
     len := 150;
   end;
-  Result:=True;
+  Result := True;
   try
-  table1.CreateTable;
+    table1.CreateTable;
   except
-    Result:=False;
+    Result := False;
   end;
   FreeAndNil(table1);
 end;
@@ -578,9 +604,9 @@ var
 begin
   table1 := TVKDBFNTX.Create(nil);
   table1.AccessMode.AccessMode := 66;
-    table1.OEM:=True;
+  table1.OEM := True;
   table1.DBFFileName := IncludeTrailingPathDelimiter(FJournalsDir) +
-    csExtTable;
+    csTableExt;
   with table1.DBFFieldDefs.Add as TVKDBFFieldDef do
   begin
     Name := csFieldID;
@@ -605,13 +631,113 @@ begin
     field_type := 'C';
     len := 150;
   end;
-  Result:=True;
+  Result := True;
   try
-  table1.CreateTable;
+    table1.CreateTable;
   except
-    Result:=False;
+    Result := False;
   end;
   FreeAndNil(table1);
+end;
+
+function TSAVAccessBase.CreateTableSupport: Boolean;
+var
+  table1: TVKDBFNTX;
+begin
+  table1 := TVKDBFNTX.Create(nil);
+  table1.AccessMode.AccessMode := 66;
+  table1.OEM := True;
+  table1.DBFFileName := IncludeTrailingPathDelimiter(FJournalsDir) +
+    csTableSupport;
+  with table1.DBFFieldDefs.Add as TVKDBFFieldDef do
+  begin
+    Name := csFieldID;
+    field_type := 'N';
+    len := 8;
+  end;
+  with table1.DBFFieldDefs.Add as TVKDBFFieldDef do
+  begin
+    Name := csFieldAction;
+    field_type := 'C';
+    len := 250;
+  end;
+  with table1.DBFFieldDefs.Add as TVKDBFFieldDef do
+  begin
+    Name := csFieldDescription;
+    field_type := 'C';
+    len := 100;
+  end;
+  Result := True;
+  try
+    table1.CreateTable;
+  except
+    Result := False;
+  end;
+  FreeAndNil(table1);
+end;
+
+function TSAVAccessBase.CreateTableADGroups: Boolean;
+var
+  table1: TVKDBFNTX;
+begin
+  table1 := TVKDBFNTX.Create(nil);
+  table1.AccessMode.AccessMode := 66;
+  table1.OEM := True;
+  table1.DBFFileName := IncludeTrailingPathDelimiter(FJournalsDir) +
+    csTableADGroups;
+  with table1.DBFFieldDefs.Add as TVKDBFFieldDef do
+  begin
+    Name := csFieldID;
+    field_type := 'N';
+    len := 6;
+  end;
+  with table1.DBFFieldDefs.Add as TVKDBFFieldDef do
+  begin
+    Name := csFieldSID;
+    field_type := 'C';
+    len := 50;
+  end;
+  with table1.DBFFieldDefs.Add as TVKDBFFieldDef do
+  begin
+    Name := csFieldVersion;
+    field_type := 'C';
+    len := 30;
+  end;
+  with table1.DBFFieldDefs.Add as TVKDBFFieldDef do
+  begin
+    Name := csFieldCaption;
+    field_type := 'C';
+    len := 50;
+  end;
+  with table1.DBFFieldDefs.Add as TVKDBFFieldDef do
+  begin
+    Name := csFieldDescription;
+    field_type := 'C';
+    len := 200;
+  end;
+  with table1.DBFFieldDefs.Add as TVKDBFFieldDef do
+  begin
+    Name := csFieldPrority;
+    field_type := 'N';
+    len := 6;
+  end;
+  Result := True;
+  try
+    table1.CreateTable;
+  except
+    Result := False;
+  end;
+  FreeAndNil(table1);
+end;
+
+procedure TSAVAccessBase.SetADGroupsDir(const Value: string);
+begin
+  FADGroupsDir := GetFullPath(Value);
+end;
+
+procedure TSAVAccessBase.SetTableADGroups(const Value: TVKDBFNTX);
+begin
+  FTableADGroups := Value;
 end;
 
 end.
