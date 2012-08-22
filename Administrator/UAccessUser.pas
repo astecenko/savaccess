@@ -67,7 +67,7 @@ begin
   FreeAndNil(Ini01);
   table1 := TVKDBFNTX.Create(nil);
   SAVLib_DBF.InitOpenDBF(table1, IncludeTrailingPathDelimiter(Bases.JournalsDir)
-    + csGroupsTable, 64);
+    + csTableGroups, 64);
   table1.Open;
   for i := 0 to list1.Count - 1 do
     if table1.Locate(csFieldSID, list1.Names[i], []) then
@@ -92,7 +92,7 @@ begin
     s := aSID;
   table1 := TVKDBFNTX.Create(nil);
   SAVLib_DBF.InitOpenDBF(table1, IncludeTrailingPathDelimiter(Bases.JournalsDir)
-    + csUsersTable, 64);
+    + csTableUsers, 64);
   table1.Open;
   Result := table1.Locate(csFieldSID, s, []);
   if Result then
@@ -116,7 +116,7 @@ begin
   inherited;
   table1 := TVKDBFNTX.Create(nil);
   SAVLib_DBF.InitOpenDBF(table1, IncludeTrailingPathDelimiter(Bases.JournalsDir)
-    + csUsersTable, 66);
+    + csTableUsers, 66);
   table1.Open;
   if not (table1.Locate(csFieldSID, SID, [])) then
   begin

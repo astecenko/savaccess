@@ -12,12 +12,18 @@ type
     FConfigFile: string;
     FClient: TSAVAccessClient;
     FMainIniFile: string;
+    FInUpdating:Boolean;
+    FLastUpdate:TDateTime;
     procedure SetConfigFile(const Value: string);
     procedure SetClient(const Value: TSAVAccessClient);
+    procedure SetInUpdating(const Value: Boolean);
+    procedure SetLastUpdate(const Value: TDateTime);
   public
     property Client: TSAVAccessClient read FClient write SetClient;
     property MainIniFile: string read FMainIniFile;
     property ConfigFile: string read FConfigFile write SetConfigFile;
+    property InUpdating: Boolean read FInUpdating write SetInUpdating;
+    property LastUpdate:TDateTime read FLastUpdate write SetLastUpdate;
     procedure Init;
   end;
 
@@ -36,6 +42,8 @@ end;
 constructor TSettings.Create;
 begin
   inherited;
+  FInUpdating:=False;
+  FLastUpdate:=EncodeDate(2000,1,1);
   FClient := TSAVAccessClient.Create('NEVZ\OASUP\Client');
   if (ParamCount > 0) and (FileExists(ParamStr(1))) then
     FConfigFile := ParamStr(1)
@@ -59,8 +67,6 @@ end;
 
 destructor TSettings.Destroy;
 begin
-  if not (DirectoryExists(FClient.ConfigDir)) then
-    ForceDirectories(FClient.ConfigDir);
   FreeAndNil(FClient);
   inherited;
 end;
@@ -78,6 +84,16 @@ end;
 procedure TSettings.SetConfigFile(const Value: string);
 begin
   FConfigFile := Value;
+end;
+
+procedure TSettings.SetInUpdating(const Value: Boolean);
+begin
+  FInUpdating := Value;
+end;
+
+procedure TSettings.SetLastUpdate(const Value: TDateTime);
+begin
+  FLastUpdate := Value;
 end;
 
 end.

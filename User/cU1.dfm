@@ -2,7 +2,7 @@ object Form1: TForm1
   Left = 192
   Top = 133
   Width = 606
-  Height = 395
+  Height = 201
   Caption = 'Form1'
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -12,33 +12,8 @@ object Form1: TForm1
   Font.Style = []
   OldCreateOrder = False
   OnCreate = FormCreate
-  DesignSize = (
-    598
-    368)
   PixelsPerInch = 96
   TextHeight = 13
-  object mmo1: TMemo
-    Left = 0
-    Top = 56
-    Width = 593
-    Height = 201
-    Anchors = [akLeft, akTop, akRight]
-    TabOrder = 0
-  end
-  object dbgrd1: TDBGrid
-    Left = 0
-    Top = 264
-    Width = 598
-    Height = 102
-    Anchors = [akLeft, akTop, akRight, akBottom]
-    DataSource = ds1
-    TabOrder = 1
-    TitleFont.Charset = DEFAULT_CHARSET
-    TitleFont.Color = clWindowText
-    TitleFont.Height = -11
-    TitleFont.Name = 'MS Sans Serif'
-    TitleFont.Style = []
-  end
   object jvTray: TJvTrayIcon
     Active = True
     IconIndex = 0
@@ -76,5 +51,79 @@ object Form1: TForm1
     Aggregates = <>
     Params = <>
     Left = 128
+  end
+  object idtcpsrvr1: TIdTCPServer
+    Bindings = <>
+    CommandHandlers = <
+      item
+        CmdDelimiter = ' '
+        Command = 'QUIT'
+        Disconnect = True
+        Name = 'cmdhQuit'
+        ParamDelimiter = ' '
+        ReplyExceptionCode = 0
+        ReplyNormal.NumericCode = 200
+        ReplyNormal.Text.Strings = (
+          'Good Bye')
+        ReplyNormal.TextCode = '200'
+        Tag = 0
+      end
+      item
+        CmdDelimiter = ' '
+        Command = 'UPDATE'
+        Disconnect = False
+        Name = 'cmdhUpdate'
+        OnCommand = idtcpsrvr1cmdhUpdateCommand
+        ParamDelimiter = ' '
+        ReplyExceptionCode = 0
+        ReplyNormal.NumericCode = 200
+        ReplyNormal.TextCode = '200'
+        Tag = 0
+      end
+      item
+        CmdDelimiter = ' '
+        Command = 'LAST'
+        Disconnect = False
+        Name = 'cmdhLast'
+        OnCommand = idtcpsrvr1cmdhLastCommand
+        ParamDelimiter = ' '
+        ReplyExceptionCode = 0
+        ReplyNormal.NumericCode = 200
+        ReplyNormal.TextCode = '200'
+        Tag = 0
+      end
+      item
+        CmdDelimiter = ' '
+        Command = 'HELP'
+        Disconnect = False
+        Name = 'cmdhHelp'
+        ParamDelimiter = ' '
+        ReplyExceptionCode = 0
+        ReplyNormal.NumericCode = 200
+        ReplyNormal.Text.Strings = (
+          'Help follows')
+        ReplyNormal.TextCode = '200'
+        Response.Strings = (
+          
+            'Help - Display a list of supported commands and basic help on ea' +
+            'ch'
+          'Update - Run Update action or send status'
+          'Last - Display last run Update date and time'
+          'Quit - Terminate the session and disconnect')
+        Tag = 0
+      end>
+    DefaultPort = 45890
+    Greeting.NumericCode = 200
+    Greeting.Text.Strings = (
+      'Hello')
+    Greeting.TextCode = '200'
+    MaxConnectionReply.NumericCode = 0
+    ReplyExceptionCode = 500
+    ReplyTexts = <>
+    ReplyUnknownCommand.NumericCode = 400
+    ReplyUnknownCommand.Text.Strings = (
+      'Unknown Command')
+    ReplyUnknownCommand.TextCode = '400'
+    Left = 176
   end
 end

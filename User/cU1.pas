@@ -5,7 +5,8 @@ interface
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, JvComponentBase, JvTrayIcon, ActnList, StdActns, Menus, cUSettings,
-  StdCtrls, Grids, DBGrids, DB, DBClient;
+  StdCtrls, Grids, DBGrids, DB, DBClient, IdBaseComponent, IdComponent,
+  IdTCPServer, ExtCtrls;
 
 type
   TForm1 = class(TForm)
@@ -17,13 +18,14 @@ type
     N2: TMenuItem;
     N3: TMenuItem;
     N4: TMenuItem;
-    mmo1: TMemo;
     ds1: TDataSource;
-    dbgrd1: TDBGrid;
     ds2: TClientDataSet;
+    idtcpsrvr1: TIdTCPServer;
     procedure actExitExecute(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure N4Click(Sender: TObject);
+    procedure idtcpsrvr1cmdhUpdateCommand(ASender: TIdCommand);
+    procedure idtcpsrvr1cmdhLastCommand(ASender: TIdCommand);
   private
     { Private declarations }
   public
@@ -48,12 +50,40 @@ begin
   Settings.Init;
   Settings.Client.LoadFromFile(Settings.ConfigFile);
   ds1.DataSet := Settings.Client.DataSet;
+  Settings.InUpdating := True;
   Settings.Client.Update;
+  Settings.LastUpdate:=Now;
+  Settings.InUpdating := False;
+  Application.Terminate;
 end;
 
 procedure TForm1.N4Click(Sender: TObject);
 begin
   Form1.Show;
+end;
+
+procedure TForm1.idtcpsrvr1cmdhUpdateCommand(ASender: TIdCommand);
+begin
+  if not (Settings.InUpdating) then
+  begin
+    ASender.Reply.NumericCode:=201;
+    ASender.Reply.Text.Text := 'Update start';
+    Settings.InUpdating := True;
+    Settings.Client.Update;
+    Settings.LastUpdate := Now;
+    Settings.InUpdating := False;
+  end
+  else
+    begin
+    ASender.Reply.NumericCode:=204;
+    ASender.Reply.Text.Text := 'Update in process';
+    end;
+
+end;
+
+procedure TForm1.idtcpsrvr1cmdhLastCommand(ASender: TIdCommand);
+begin
+ASender.Reply.Text.Text:=DateTimeToStr(Settings.LastUpdate);
 end;
 
 end.

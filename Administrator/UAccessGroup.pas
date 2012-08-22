@@ -125,7 +125,7 @@ begin
     s := aSID;
   table1 := TVKDBFNTX.Create(nil);
   InitOpenDBF(table1, IncludeTrailingPathDelimiter(Bases.JournalsDir)
-    + csGroupsTable, 66);
+    + csTableGroups, 66);
   table1.Open;
   Result := table1.Locate(csFieldSID, s, []);
   if Result then
@@ -158,7 +158,7 @@ begin
   inherited;
   table1 := TVKDBFNTX.Create(nil);
   SAVLib_DBF.InitOpenDBF(table1, IncludeTrailingPathDelimiter(Bases.JournalsDir)
-    + csGroupsTable, 66);
+    + csTableGroups, 66);
   table1.Open;
   if (SID = '') or (not (table1.Locate(csFieldSID, SID, []))) then
   begin

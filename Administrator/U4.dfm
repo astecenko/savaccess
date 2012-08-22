@@ -12,6 +12,7 @@ object Frm4: TFrm4
   Font.Style = []
   OldCreateOrder = False
   OnClose = FormClose
+  OnCreate = FormCreate
   OnShow = FormShow
   DesignSize = (
     792

@@ -28,7 +28,7 @@ begin
   FTable := TVKDBFNTX.Create(nil);
   FTable.AfterDelete:=DataSourceAfterDelete;
   FTable.DBFFileName := IncludeTrailingPathDelimiter(Container.WorkDir) +
-    csFilesTable;
+    csTableFiles;
   TablePrepare(False);
   if FileExists(FTable.DBFFileName) = False then
     TableCreate;

@@ -8,7 +8,10 @@ uses
   Forms,
   DU1 in 'DU1.pas' {dtmdl1: TDataModule},
   U7 in 'U7.pas' {Singelton},
-  U1 in 'U1.pas' {Frm1};
+  U1 in 'U1.pas' {Frm1},
+  U4 in 'U4.pas' {Frm4},
+  U15 in 'U15.pas' {Frm15},
+  UAccessADGroup in 'UAccessADGroup.pas';
 
 (*  U12 in 'U12.pas' {Frm12},
   UAccessBase in 'UAccessBase.pas',

@@ -3,7 +3,7 @@ object Frm8: TFrm8
   Top = 207
   BorderStyle = bsDialog
   Caption = #1061#1088#1072#1085#1080#1083#1080#1097#1077
-  ClientHeight = 187
+  ClientHeight = 228
   ClientWidth = 508
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -14,7 +14,7 @@ object Frm8: TFrm8
   OldCreateOrder = False
   DesignSize = (
     508
-    187)
+    228)
   PixelsPerInch = 96
   TextHeight = 13
   object lbl1: TLabel
@@ -54,7 +54,7 @@ object Frm8: TFrm8
   end
   object lbl6: TLabel
     Left = 8
-    Top = 128
+    Top = 168
     Width = 411
     Height = 26
     Caption = 
@@ -63,38 +63,45 @@ object Frm8: TFrm8
       #1083#1100#1096#1080#1093' '#1087#1088#1077#1076#1087#1088#1080#1103#1090#1080#1081')'
     WordWrap = True
   end
+  object lbl7: TLabel
+    Left = 0
+    Top = 128
+    Width = 130
+    Height = 13
+    Caption = #1050#1072#1090#1072#1083#1086#1075' '#1076#1086#1084#1077#1085#1085#1099#1093' '#1075#1088#1091#1087#1087'*'
+  end
   object edtBase: TEdit
-    Left = 128
+    Left = 136
     Top = 8
-    Width = 350
+    Width = 342
     Height = 21
     TabOrder = 0
   end
   object edtJournals: TEdit
-    Left = 128
+    Left = 136
     Top = 32
-    Width = 350
+    Width = 342
     Height = 21
     TabOrder = 1
   end
   object edtDomains: TEdit
-    Left = 128
+    Left = 136
     Top = 56
-    Width = 350
+    Width = 342
     Height = 21
     TabOrder = 2
   end
   object edtUsers: TEdit
-    Left = 128
+    Left = 136
     Top = 80
-    Width = 350
+    Width = 342
     Height = 21
     TabOrder = 3
   end
   object edtGroups: TEdit
-    Left = 128
+    Left = 136
     Top = 104
-    Width = 350
+    Width = 342
     Height = 21
     TabOrder = 4
   end
@@ -150,7 +157,7 @@ object Frm8: TFrm8
   end
   object btnOk: TBitBtn
     Left = 256
-    Top = 160
+    Top = 200
     Width = 113
     Height = 25
     TabOrder = 10
@@ -158,11 +165,28 @@ object Frm8: TFrm8
   end
   object btnCancel: TBitBtn
     Left = 392
-    Top = 160
+    Top = 200
     Width = 113
     Height = 25
     Caption = #1054#1090#1084#1077#1085#1072
     TabOrder = 11
     Kind = bkCancel
+  end
+  object edtADGroups: TEdit
+    Left = 136
+    Top = 128
+    Width = 342
+    Height = 21
+    TabOrder = 12
+  end
+  object btn6: TButton
+    Left = 479
+    Top = 128
+    Width = 25
+    Height = 20
+    Anchors = [akTop, akRight]
+    Caption = '...'
+    TabOrder = 13
+    OnClick = btn5Click
   end
 end

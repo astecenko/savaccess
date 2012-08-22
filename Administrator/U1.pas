@@ -63,6 +63,15 @@ type
     btnGroupGoTo: TBitBtn;
     actExtDict: TAction;
     lst1: TListBox;
+    actSupport: TAction;
+    tsADGroups: TTabSheet;
+    pnl6: TPanel;
+    spl3: TSplitter;
+    pnl7: TPanel;
+    dbgrdADGroups: TDBGrid;
+    actADGroupAdd: TAction;
+    actAD1: TAction;
+    act2: TAction;
     procedure actCreateBaseExecute(Sender: TObject);
     procedure actUserAddExecute(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -86,6 +95,9 @@ type
     procedure btnGroupDelClick(Sender: TObject);
     procedure actExtDictExecute(Sender: TObject);
     procedure btnGroupAddClick(Sender: TObject);
+    procedure actADGroupAddExecute(Sender: TObject);
+    procedure actAD1Execute(Sender: TObject);
+    procedure act2Execute(Sender: TObject);
   private
     { Private declarations }
   public
@@ -96,8 +108,8 @@ var
   Frm1: TFrm1;
 
 implementation
-uses U3, U4, U5, U6, U7, U8, U9, U11, U12, DU1, UAccessConstant, UAccessFileDBF,
-  UAccessGroup, UAccessBase;
+uses U3, U4, U5, U6, U7, U8, U9, U11, U12, U15, DU1,U1AD, UAccessConstant,
+  UAccessFileDBF, UAccessGroup, UAccessBase;
 
 {$R *.dfm}
 
@@ -122,6 +134,7 @@ begin
   list[3] := Settings.Base.UsersDir;
   list[4] := Settings.Base.GroupsDir;
   list[5] := Settings.Base.DomainsDir;
+  
   if (Frm01.ShowModal = mrok) and (Frm01.edtBase.Text <> '') and
     (dlgSave1.Execute) then
   begin
@@ -158,7 +171,8 @@ begin
   ShowMessage(Settings.Base.UsersDir);
   Frm01 := TFrm6.Create(Self);
   Frm01.FullAccess(False);
-  Frm01.edtDomain.Text := Settings.Domain.SID;
+  Frm01.chkCopyCaption.Enabled:=False;
+  Frm01.DomainSID := Settings.Domain.SID;
   if (Frm01.ShowModal = mrok) and (Frm01.edtSID.Text <> '') then
   begin
     Settings.User.Clear;
@@ -275,7 +289,7 @@ var
 begin
   Frm01 := TFrm6.Create(Self);
   Frm01.FullAccess(True);
-  Frm01.edtDomain.Text := Settings.Domain.SID;
+  Frm01.DomainSID := Settings.Domain.SID;
   UF01 := TSAVAccessFilesDBF.Create(Settings.User);
   Frm01.edtCaption.Text := Settings.User.Caption;
   Frm01.edtSID.Text := Settings.User.SID;
@@ -451,13 +465,15 @@ end;
 
 procedure TFrm1.actExtDictExecute(Sender: TObject);
 var
-  Form01:TFrm12;
+  Form01: TFrm12;
 begin
-Form01:=TFrm12.Create(Self);
-Form01.vkdbfExt.DBFFileName:=IncludeTrailingPathDelimiter(Settings.Base.JournalsDir)+csExtTable;
-Form01.vkdbfAct.DBFFileName:=IncludeTrailingPathDelimiter(Settings.Base.JournalsDir)+csActionTable;
-Form01.ShowModal;
-FreeAndNil(Form01);
+  Form01 := TFrm12.Create(Self);
+  Form01.vkdbfExt.DBFFileName :=
+    IncludeTrailingPathDelimiter(Settings.Base.JournalsDir) + csTableExt;
+  Form01.vkdbfAct.DBFFileName :=
+    IncludeTrailingPathDelimiter(Settings.Base.JournalsDir) + csTableAction;
+  Form01.ShowModal;
+  FreeAndNil(Form01);
 
 end;
 
@@ -470,12 +486,53 @@ begin
   Form01.vkdbfntx2.Open;
   if (Form01.ShowModal = mrOk) and (Form01.vkdbfntx2.RecNo > 0) then
   begin
-    Settings.Base.TableGroups.RecNo:=Form01.vkdbfntx2.RecNo;
+    Settings.Base.TableGroups.RecNo := Form01.vkdbfntx2.RecNo;
     Settings.Group.UserAdd(Settings.User.SID);
     Settings.User.GetGroups(chklstUserGroups.Items);
   end;
   Form01.vkdbfntx2.Close;
   FreeAndNil(Form01);
+end;
+
+procedure TFrm1.actADGroupAddExecute(Sender: TObject);
+var
+  Frm01: TFrm15;
+begin
+  Frm01 := TFrm15.Create(Self);
+  Frm01.FullAccess(False);
+  Frm01.edtSID.Hint :=
+    'Если не заполнен, цифровой ID будет сгенерирован автоматически при добавлении';
+  Frm01.edtSID.ShowHint := True;
+  Frm01.chkCopyCaption.Enabled:=False;
+  Frm01.DomainSID := Settings.Domain.SID;
+  if Frm01.ShowModal = mrok then
+  begin
+  (*  // dbgrdDomain.DataSource.DataSet.DisableControls;
+    Settings.Group.Clear;
+    if Trim(Frm01.edtCaption.Text) = '' then
+      Frm01.edtCaption.Text := 'Новая группа';
+    Settings.Group.Open(Settings.Base, Frm01.edtCaption.Text,
+      Frm01.edtSID.Text, Frm01.edtDescription.Text, Frm01.sePriority.Text);
+    Settings.Group.Save;
+    Settings.Base.TableGroups.Close;
+    Settings.Base.TableGroups.Open; *)
+  end;
+  FreeAndNil(Frm01);
+end;
+
+procedure TFrm1.actAD1Execute(Sender: TObject);
+var
+  Frm02:TFrmAD;
+begin
+  Frm02:=TFrmAD.Create(Self);
+  Frm02.ShowModal;
+  FreeAndNil(Frm02);
+end;
+
+procedure TFrm1.act2Execute(Sender: TObject);
+begin
+Settings.Base.CreateTableADGroups
+
 end;
 
 end.

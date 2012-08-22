@@ -26,6 +26,9 @@ type
     btn5: TButton;
     btnOk: TBitBtn;
     btnCancel: TBitBtn;
+    edtADGroups: TEdit;
+    lbl7: TLabel;
+    btn6: TButton;
     procedure btn1Click(Sender: TObject);
     procedure btn2Click(Sender: TObject);
     procedure btn3Click(Sender: TObject);
@@ -72,7 +75,7 @@ end;
 
 procedure TFrm8.btn5Click(Sender: TObject);
 begin
-  edtGroups.Text := SelDirectoryPath;
+  edtADGroups.Text := SelDirectoryPath;
 end;
 
 end.

@@ -5,7 +5,7 @@ interface
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, Grids, StdCtrls, ComObj, ComCtrls, ActiveX, DBGrids, DB, ADODB,
-  Buttons;
+  Buttons, ExtCtrls;
 
 type
   TFrmAD = class(TForm)
@@ -24,10 +24,20 @@ type
     edtDescription: TEdit;
     lbl1: TLabel;
     edtUserDomain: TEdit;
+    mmo1: TMemo;
+    edtDomainNBS: TEdit;
+    pnl1: TPanel;
+    pnl2: TPanel;
+    spl1: TSplitter;
+    pnl3: TPanel;
+    mmo2: TMemo;
+    spl2: TSplitter;
     //procedure btn1Click(Sender: TObject);
     procedure btn2Click(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure dbgrd1DblClick(Sender: TObject);
+    procedure FormShow(Sender: TObject);
+    procedure ds1DataChange(Sender: TObject; Field: TField);
   private
     { Private declarations }
   public
@@ -114,11 +124,13 @@ procedure TFrmAD.FormCreate(Sender: TObject);
 begin
   con1.Connected := True;
   GetCurrentComputerName;
+
 end;
 
 procedure TFrmAD.dbgrd1DblClick(Sender: TObject);
 var
-  s: string;
+  s, sdns: string;
+  i: Integer;
 begin
   if ds1.DataSet.RecordCount > 0 then
   begin
@@ -126,8 +138,8 @@ begin
     s := ds1.DataSet.fieldbyname('CN').AsString;
     edtCaption.Text := s;
     s := '';
-    s := MsAD.GetSID(ds1.DataSet.FieldByName('sAMAccountName').AsString,
-      GetDNSDomainName(CurrentDomainName));
+    sdns := GetDNSDomainName(edtDomainNBS.Text);
+    s := MsAD.GetSID(ds1.DataSet.FieldByName('sAMAccountName').AsString, sdns);
     edtSID.Text := s;
     s := '';
     try
@@ -136,7 +148,27 @@ begin
       //      ShowMessage('Ошибка: '+SysErrorMessage(GetLastError));
     end;
     edtDescription.Text := s;
+    mmo1.Lines.Clear;
+    GetAllUserGroups(ds1.DataSet.FieldByName('sAMAccountName').AsString,
+      GetDomainController(edtDomainNBS.Text), mmo1.Lines);
+    for i := 0 to pred(mmo1.Lines.Count) do
+      mmo1.Lines[i] := mmo1.Lines[i] + '=' + GetSID(mmo1.Lines[i], sdns);
   end;
+end;
+
+procedure TFrmAD.FormShow(Sender: TObject);
+begin
+  edtDomainNBS.Text := CurrentDomainName;
+  if edtUserDomain.Text = '' then
+    edtUserDomain.Text := edtDomainNBS.Text;
+end;
+
+procedure TFrmAD.ds1DataChange(Sender: TObject; Field: TField);
+begin
+  if not (ds1.DataSet.IsEmpty) then
+    mmo2.Text := ds1.DataSet.fieldbyname('distinguishedName').AsString
+  else
+    mmo2.Text := '';
 end;
 
 end.

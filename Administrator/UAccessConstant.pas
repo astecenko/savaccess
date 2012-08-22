@@ -9,6 +9,8 @@ const
   csDefDomainDir='Domains';
   csDefJournalDir='Journal';
   csDefGroupDir='Groups';
+  csDefADGroupDir='ADGroups';
+
 
   { Default filenames }
 
@@ -19,16 +21,18 @@ const
 
   { Tables filename }
 
-  csDomainsTable = 'domains.dbf'; //Домены
-  csFilesTable = 'files.dbf'; //Настройки к файлам
-  csGroupsTable = 'groups.dbf'; //Группы доступа
-  csIniTable = 'ini.dbf'; //Настройки к ini-файлам
-  csOULinkTable = 'ou-links.dbf'; //Связи орг.модулей
-  csOUTable = 'orgunit.dbf'; //Орг.модули (подразделения)
-  csProjectsTable = 'projects.dbf'; //Проекты (программы)
-  csUsersTable = 'users.dbf'; //Пользователи
-  csExtTable = 'extens.dbf';
-  csActionTable = 'actions.dbf';
+  csTableDomains = 'domains.dbf'; //Домены
+  csTableFiles = 'files.dbf'; //Настройки к файлам
+  csTableGroups = 'groups.dbf'; //Группы доступа
+  csTableADGroups = 'adgroups.dbf'; //Группы доступа
+  csTableIni = 'ini.dbf'; //Настройки к ini-файлам
+  csTableOULink = 'ou-links.dbf'; //Связи орг.модулей
+  csTableOU = 'orgunit.dbf'; //Орг.модули (подразделения)
+  csTableProjects = 'projects.dbf'; //Проекты (программы)
+  csTableUsers = 'users.dbf'; //Пользователи
+  csTableExt = 'extens.dbf';
+  csTableAction = 'actions.dbf';
+  csTableSupport = 'support.dbf';
 
   { Indexes filename }
 
