@@ -23,7 +23,7 @@ type
     procedure GetGroups(List: TStrings);
     procedure Clear; override;
     function GroupDelete(const aSID:string):Boolean;
-
+    procedure UpdateVersion; override;
   end;
 
 implementation
@@ -175,6 +175,25 @@ begin
   end;
   if Assigned(Ini01) then
     FreeAndNil(Ini01);
+end;
+
+procedure TSAVAccessUser.UpdateVersion;
+var
+  table1: TVKDBFNTX;
+begin
+  inherited;
+  table1 := TVKDBFNTX.Create(nil);
+  InitOpenDBF(table1, IncludeTrailingPathDelimiter(Bases.JournalsDir)
+    + csTableUsers, 66);
+  table1.Open;
+  if table1.Locate(csFieldSID, SID, []) then
+  begin
+    table1.Edit;
+    table1.FieldByName(csFieldVersion).AsString := Version;
+    table1.Post;
+  end;
+  table1.Close;
+  FreeAndNil(table1);
 end;
 
 end.

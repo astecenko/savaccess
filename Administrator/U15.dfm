@@ -1,6 +1,5 @@
 inherited Frm15: TFrm15
   Caption = 'Frm15'
-  OnCreate = FormCreate
   PixelsPerInch = 96
   TextHeight = 13
   inherited dbnvgr1: TDBNavigator

@@ -6,29 +6,31 @@ uses Classes, UAccessBase, UAccessContainer;
 type
   TSAVAccessDomain = class(TSAVAccessContainer)
   private
-
+    FGroups: TStringList;
+    procedure SetGroups(const Value: TStringList);
   protected
 
   public
+    property Groups: TStringList read FGroups write SetGroups;
     constructor Create; overload;
     constructor Create(aBase: TSAVAccessBase; const aCaption, aSID,
-      aDescription:
-      string);
-      overload;
+      aDescription: string); overload;
+    destructor Destroy; override;
     procedure Save; override;
     function Load(aSID: string = ''): Boolean; override;
-    procedure GetGroups(List: TStrings);
+    procedure GetGroups(List: TStrings; const aWithSID: Boolean = False);
     procedure GetUsers(List: TStrings);
     procedure GetUsersFromAD(List: TStrings);
+    procedure Clear; override;
     procedure Open(aBase: TSAVAccessBase; const aCaption, aSID: string; const
       aDescription: string = ''; const aParam: string = ''; const aVersion:
       TVersionString = ''); override;
-
+    procedure UpdateVersion; override;
   end;
 
 implementation
 uses SAVLib, SAVLib_DBF, KoaUtils, SysUtils, VKDBFDataSet, VKDBFNTX, VKDBFIndex,
-  VKDBFSorters, UAccessConstant, DB;
+  VKDBFSorters, UAccessConstant, MsAD;
 
 { TSAVAccessDomain }
 
@@ -36,6 +38,13 @@ constructor TSAVAccessDomain.Create;
 begin
   inherited Create;
   ContainerType := 'D';
+  FGroups := TStringList.Create;
+end;
+
+procedure TSAVAccessDomain.Clear;
+begin
+  inherited;
+  FGroups.Clear;
 end;
 
 constructor TSAVAccessDomain.Create(aBase: TSAVAccessBase; const aCaption,
@@ -46,9 +55,10 @@ begin
   Save;
 end;
 
-procedure TSAVAccessDomain.GetGroups(List: TStrings);
+procedure TSAVAccessDomain.GetGroups(List: TStrings; const aWithSID: Boolean =
+  False);
 begin
-
+  GetAllGroups(SID, List, aWithSID);
 end;
 
 procedure TSAVAccessDomain.GetUsers(List: TStrings);
@@ -94,6 +104,7 @@ procedure TSAVAccessDomain.Open(aBase: TSAVAccessBase; const aCaption,
 begin
   WorkDir := IncludeTrailingPathDelimiter(aBase.DomainsDir) + aSID;
   inherited Open(aBase, aCaption, aSID, aDescription, aParam, aVersion);
+  GetGroups(FGroups, True);
 end;
 
 procedure TSAVAccessDomain.Save;
@@ -125,6 +136,36 @@ begin
   ForceDirectories(WorkDir);
   WriteVersion;
 
+end;
+
+procedure TSAVAccessDomain.SetGroups(const Value: TStringList);
+begin
+  FGroups := Value;
+end;
+
+destructor TSAVAccessDomain.Destroy;
+begin
+  FreeAndNil(FGroups);
+  inherited;
+end;
+
+procedure TSAVAccessDomain.UpdateVersion;
+var
+  table1: TVKDBFNTX;
+begin
+  inherited;
+  table1 := TVKDBFNTX.Create(nil);
+  InitOpenDBF(table1, IncludeTrailingPathDelimiter(Bases.JournalsDir)
+    + csTableDomains, 66);
+  table1.Open;
+  if table1.Locate(csFieldSID, SID, []) then
+  begin
+    table1.Edit;
+    table1.FieldByName(csFieldVersion).AsString := Version;
+    table1.Post;
+  end;
+  table1.Close;
+  FreeAndNil(table1);
 end;
 
 end.

@@ -27,6 +27,7 @@ type
       Boolean = False);
       overload;
     procedure Clear; override;
+    procedure UpdateVersion; override;
 
   end;
 
@@ -60,7 +61,6 @@ procedure TSAVAccessADGroup.GetUsersSID(List: TStrings; const aDomain: string;
   False);
 var
   i: Integer;
-  s: string;
   adns: string;
 begin
   List.Clear;
@@ -82,7 +82,7 @@ begin
     s := aSID;
   table1 := TVKDBFNTX.Create(nil);
   InitOpenDBF(table1, IncludeTrailingPathDelimiter(Bases.JournalsDir)
-    + csTableGroups, 66);
+    + csTableADGroups, 66);
   table1.Open;
   Result := table1.Locate(csFieldSID, s, []);
   if Result then
@@ -92,7 +92,7 @@ begin
     Description := table1.FieldByName(csFieldDescription).AsString;
     ID := table1.FieldByName(csFieldID).AsInteger;
     Priority := table1.FieldByName(csFieldPrority).AsInteger;
-    WorkDir := IncludeTrailingPathDelimiter(Bases.GroupsDir) + SID;
+    WorkDir := IncludeTrailingPathDelimiter(Bases.ADGroupsDir) + SID;
     ReadVersion;
   end;
   table1.Close;
@@ -102,9 +102,9 @@ end;
 procedure TSAVAccessADGroup.Open(aBase: TSAVAccessBase; const aCaption, aSID,
   aDescription, aParam: string; const aVersion: TVersionString);
 begin
-  WorkDir := IncludeTrailingPathDelimiter(aBase.GroupsDir) + aSID;
+  WorkDir := IncludeTrailingPathDelimiter(aBase.ADGroupsDir) + aSID;
   inherited Open(aBase, aCaption, aSID, aDescription, aParam, aVersion);
-  FPriority := StrToInt(aParam);
+  FPriority := StrToIntDef(aParam, 0);
 end;
 
 procedure TSAVAccessADGroup.Save;
@@ -115,9 +115,9 @@ begin
   inherited;
   table1 := TVKDBFNTX.Create(nil);
   SAVLib_DBF.InitOpenDBF(table1, IncludeTrailingPathDelimiter(Bases.JournalsDir)
-    + csTableGroups, 66);
+    + csTableADGroups, 66);
   table1.Open;
-  if (SID = '') or (not (table1.Locate(csFieldSID, SID, []))) then
+  if not (table1.Locate(csFieldSID, SID, [])) then
   begin
     table1.Append;
     j := table1.GetNextAutoInc(csFieldID);
@@ -137,7 +137,7 @@ begin
   table1.Post;
   table1.Close;
   FreeAndNil(table1);
-  WorkDir := IncludeTrailingPathDelimiter(Bases.GroupsDir) + SID;
+  WorkDir := IncludeTrailingPathDelimiter(Bases.ADGroupsDir) + SID;
   ForceDirectories(WorkDir);
   WriteVersion;
 end;
@@ -145,6 +145,25 @@ end;
 procedure TSAVAccessADGroup.SetPriority(const Value: Integer);
 begin
   FPriority := Value;
+end;
+
+procedure TSAVAccessADGroup.UpdateVersion;
+var
+  table1: TVKDBFNTX;
+begin
+  inherited;
+  table1 := TVKDBFNTX.Create(nil);
+  InitOpenDBF(table1, IncludeTrailingPathDelimiter(Bases.JournalsDir)
+    + csTableADGroups, 66);
+  table1.Open;
+  if table1.Locate(csFieldSID, SID, []) then
+  begin
+    table1.Edit;
+    table1.FieldByName(csFieldVersion).AsString := Version;
+    table1.Post;
+  end;
+  table1.Close;
+  FreeAndNil(table1);
 end;
 
 end.

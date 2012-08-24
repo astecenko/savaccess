@@ -18,6 +18,7 @@ type
     procedure dsDomainDataChange(Sender: TObject; Field: TField);
     procedure dsUsersDataChange(Sender: TObject; Field: TField);
     procedure dsGroupsDataChange(Sender: TObject; Field: TField);
+    procedure dsADGroupsDataChange(Sender: TObject; Field: TField);
   private
     { Private declarations }
   public
@@ -67,6 +68,20 @@ begin
       dsGroups.DataSet.fieldbyname(csFieldPrority).AsString,
       dsGroups.DataSet.fieldbyname(csFieldVersion).AsString);
     Settings.Group.GetUsersSID(Frm1.chklstGroupUsers,True);
+  end
+end;
+
+procedure Tdtmdl1.dsADGroupsDataChange(Sender: TObject; Field: TField);
+begin
+ if dsADGroups.DataSet.RecordCount > 0 then
+  begin
+    Settings.ADGroup.Open(Settings.Base,
+      dsADGroups.DataSet.fieldbyname(csFieldCaption).AsString,
+      dsADGroups.DataSet.fieldbyname(csFieldSID).AsString,
+      dsADGroups.DataSet.fieldbyname(csFieldDescription).AsString,
+      dsADGroups.DataSet.fieldbyname(csFieldPrority).AsString,
+      dsADGroups.DataSet.fieldbyname(csFieldVersion).AsString);
+    Settings.ADGroup.GetUsersSID(Frm1.lstADGroupUsers.Items,Settings.Domain.SID,True);
   end
 end;
 

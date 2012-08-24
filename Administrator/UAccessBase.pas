@@ -56,7 +56,8 @@ type
     property TableUsers: TVKDBFNTX read FTableUsers write SetTableUsers;
     property TableDomains: TVKDBFNTX read FTableDomains write SetTableDomains;
     property TableGroups: TVKDBFNTX read FTableGroups write SetTableGroups;
-    property TableADGroups: TVKDBFNTX read FTableADGroups write SetTableADGroups;
+    property TableADGroups: TVKDBFNTX read FTableADGroups write
+      SetTableADGroups;
     constructor Create; overload;
     constructor Create(const aPath: string; const bCanCreate: Boolean = False;
       const aJournals: string = ''; const aDomains: string = ''; const aGroups:
@@ -69,6 +70,7 @@ type
     procedure GetDomains(List: TStrings);
     procedure SaveToFile(const aFileName: string);
     procedure LoadFromFile(const aFileName: string);
+    procedure DirectoryInit;
 
   end;
 
@@ -89,7 +91,7 @@ end;
 constructor TSAVAccessBase.Create(const aPath: string; const bCanCreate: Boolean
   = False; const aJournals: string = ''; const aDomains: string = ''; const
   aGroups: string = ''; const aUsers: string = ''; const aADGroups: string =
-    '');
+  '');
 var
   s: string;
 begin
@@ -153,7 +155,7 @@ function TSAVAccessBase.StorageCheck: Boolean;
 begin
   Result := (DirectoryExists(FStoragePath)) and (DirectoryExists(FUsersDir)) and
     (DirectoryExists(FGroupsDir)) and (DirectoryExists(FJournalsDir)) and
-    (DirectoryExists(FDomainsDir)) and
+    (DirectoryExists(FDomainsDir)) and (DirectoryExists(FADGroupsDir)) and
     (FileExists(IncludeTrailingPathDelimiter(FJournalsDir) + csTableDomains));
 end;
 
@@ -167,7 +169,7 @@ begin
       (ForceDirectories(ExcludeTrailingPathDelimiter(FUsersDir))) and
       (ForceDirectories(ExcludeTrailingPathDelimiter(FGroupsDir))) and
       (ForceDirectories(ExcludeTrailingPathDelimiter(FDomainsDir))) and
-        (ForceDirectories(ExcludeTrailingPathDelimiter(FADGroupsDir)));
+      (ForceDirectories(ExcludeTrailingPathDelimiter(FADGroupsDir)));
     if Result then
     begin
       CreateTableDomains;
@@ -513,6 +515,7 @@ begin
     FUsersDir := list.Values['users'];
     FJournalsDir := list.Values['journals'];
     FGroupsDir := list.Values['groups'];
+    FADGroupsDir := list.Values['adgroups'];
     FDomainsDir := list.Values['domains'];
     FreeAndNil(list);
     CreateStorage;
@@ -530,6 +533,7 @@ begin
   list.Add('journals=' + FJournalsDir);
   list.Add('domains=' + FDomainsDir);
   list.Add('groups=' + FGroupsDir);
+  list.Add('adgroups=' + FADGroupsDir);
   list.Add('users=' + FUsersDir);
   try
     list.SaveToFile(aFileName);
@@ -738,6 +742,23 @@ end;
 procedure TSAVAccessBase.SetTableADGroups(const Value: TVKDBFNTX);
 begin
   FTableADGroups := Value;
+end;
+
+procedure TSAVAccessBase.DirectoryInit;
+var
+  s: string;
+begin
+  s := IncludeTrailingPathDelimiter(FStoragePath);
+  if FJournalsDir = '' then
+    FJournalsDir := s + FJournalsDir;
+  if FGroupsDir = '' then
+    FGroupsDir := s + FGroupsDir;
+  if FADGroupsDir = '' then
+    FADGroupsDir := s + FADGroupsDir;
+  if FDomainsDir = '' then
+    FDomainsDir := s + FDomainsDir;
+  if FUsersDir = '' then
+    FUsersDir := s + FUsersDir;
 end;
 
 end.
