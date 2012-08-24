@@ -51,7 +51,8 @@ type
     function GetNewVersion: string;
     function WriteVersion(const aFileName: string = ''): Boolean;
     function ReadVersion(const aFileName: string = ''): Boolean;
-    procedure UpdateVersion;
+    procedure UpdateVersion; virtual;
+
   end;
 
 implementation

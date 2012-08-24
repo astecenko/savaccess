@@ -231,9 +231,9 @@ object Frm1: TFrm1
           640
           277)
         object dbgrdGroup: TDBGrid
-          Left = 0
+          Left = 3
           Top = 25
-          Width = 636
+          Width = 633
           Height = 248
           Anchors = [akLeft, akTop, akRight, akBottom]
           DataSource = dtmdl1.dsGroups
@@ -255,6 +255,13 @@ object Frm1: TFrm1
             end
             item
               Expanded = False
+              FieldName = 'DESCR'
+              Title.Caption = #1050#1086#1084#1084#1077#1085#1090#1072#1088#1080#1080
+              Width = 300
+              Visible = True
+            end
+            item
+              Expanded = False
               FieldName = 'ID'
               ReadOnly = True
               Width = 50
@@ -264,13 +271,6 @@ object Frm1: TFrm1
               Expanded = False
               FieldName = 'PRIORITY'
               Title.Caption = #1055#1088#1080#1086#1088#1080#1090#1077#1090
-              Visible = True
-            end
-            item
-              Expanded = False
-              FieldName = 'DESCR'
-              Title.Caption = #1050#1086#1084#1084#1077#1085#1090#1072#1088#1080#1080
-              Width = 300
               Visible = True
             end>
         end
@@ -294,6 +294,18 @@ object Frm1: TFrm1
         Height = 102
         Align = alBottom
         TabOrder = 0
+        DesignSize = (
+          640
+          102)
+        object lstADGroupUsers: TListBox
+          Left = 2
+          Top = 2
+          Width = 247
+          Height = 97
+          Anchors = [akLeft, akTop, akRight, akBottom]
+          ItemHeight = 13
+          TabOrder = 0
+        end
       end
       object pnl7: TPanel
         Left = 0
@@ -306,17 +318,52 @@ object Frm1: TFrm1
           640
           277)
         object dbgrdADGroups: TDBGrid
-          Left = 0
+          Left = 3
           Top = 32
-          Width = 636
+          Width = 633
           Height = 241
           Anchors = [akLeft, akTop, akRight, akBottom]
+          DataSource = dtmdl1.dsADGroups
+          Options = [dgTitles, dgIndicator, dgColumnResize, dgColLines, dgRowLines, dgTabs, dgRowSelect, dgConfirmDelete, dgCancelOnExit]
           TabOrder = 0
           TitleFont.Charset = DEFAULT_CHARSET
           TitleFont.Color = clWindowText
           TitleFont.Height = -11
           TitleFont.Name = 'MS Sans Serif'
           TitleFont.Style = []
+          Columns = <
+            item
+              Expanded = False
+              FieldName = 'NAME'
+              Title.Caption = #1043#1088#1091#1087#1087#1072
+              Width = 100
+              Visible = True
+            end
+            item
+              Expanded = False
+              FieldName = 'DESCR'
+              Title.Caption = #1050#1086#1084#1084#1077#1085#1090#1072#1088#1080#1081
+              Width = 150
+              Visible = True
+            end
+            item
+              Expanded = False
+              FieldName = 'ID'
+              Visible = False
+            end
+            item
+              Expanded = False
+              FieldName = 'SID'
+              Width = 265
+              Visible = True
+            end
+            item
+              Expanded = False
+              FieldName = 'VERSION'
+              Title.Caption = #1042#1077#1088#1089#1080#1103
+              Width = 90
+              Visible = True
+            end>
         end
       end
     end
@@ -439,6 +486,9 @@ object Frm1: TFrm1
               end
               item
                 Action = actADGroupAdd
+              end
+              item
+                Action = actADGroupEdit
               end>
             Caption = #1043#1088#1091#1087#1087#1072
           end
@@ -612,7 +662,11 @@ object Frm1: TFrm1
     object act2: TAction
       Category = #1057#1077#1088#1074#1080#1089
       Caption = #1042#1088#1077#1084#1077#1085#1085#1072#1103
-      OnExecute = act2Execute
+    end
+    object actADGroupEdit: TAction
+      Category = #1043#1088#1091#1087#1087#1072
+      Caption = #1056#1077#1076#1072#1082#1090#1080#1088#1086#1074#1072#1090#1100' '#1076#1086#1084#1077#1085#1085#1091#1102' '#1075#1088#1091#1087#1087#1091
+      OnExecute = actADGroupEditExecute
     end
   end
   object il1: TImageList

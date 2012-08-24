@@ -297,6 +297,7 @@ object dtmdl1: Tdtmdl1
   end
   object dsADGroups: TDataSource
     DataSet = vkdbfADGroups
+    OnDataChange = dsADGroupsDataChange
     Left = 256
     Top = 8
   end
@@ -308,6 +309,7 @@ object dtmdl1: Tdtmdl1
     TrimInLocate = True
     TrimCType = True
     StorageType = pstFile
+    DBFFileName = 'd:\1\TestBase\Journal\adgroups.dbf'
     AccessMode.AccessMode = 66
     AccessMode.OpenRead = True
     AccessMode.OpenWrite = False
@@ -320,7 +322,7 @@ object dtmdl1: Tdtmdl1
     BufferSize = 4096
     WaitBusyRes = 3000
     CreateNow = False
-    DbfVersion = xClipper
+    DbfVersion = xBaseIII
     LobBlockSize = 512
     LockProtocol = lpClipperLock
     LobLockProtocol = lpClipperLock
@@ -330,5 +332,102 @@ object dtmdl1: Tdtmdl1
     FoxTableFlag.ItIsDatabase = False
     Left = 256
     Top = 56
+    DBFFieldDefs = <
+      item
+        FieldFlag.FieldFlag = 0
+        FieldFlag.System = False
+        FieldFlag.CanStoreNull = False
+        FieldFlag.BinaryColumn = False
+        FieldFlag.AutoIncrement = False
+        Name = 'ID'
+        field_type = 'N'
+        extend_type = dbftUndefined
+        len = 6
+        dec = 0
+        NextAutoInc = 0
+        NativeNextAutoInc = 1
+        NativeStepAutoInc = 1
+        Tag = 0
+      end
+      item
+        FieldFlag.FieldFlag = 0
+        FieldFlag.System = False
+        FieldFlag.CanStoreNull = False
+        FieldFlag.BinaryColumn = False
+        FieldFlag.AutoIncrement = False
+        Name = 'SID'
+        field_type = 'C'
+        extend_type = dbftUndefined
+        len = 50
+        dec = 0
+        NextAutoInc = 0
+        NativeNextAutoInc = 1
+        NativeStepAutoInc = 1
+        Tag = 0
+      end
+      item
+        FieldFlag.FieldFlag = 0
+        FieldFlag.System = False
+        FieldFlag.CanStoreNull = False
+        FieldFlag.BinaryColumn = False
+        FieldFlag.AutoIncrement = False
+        Name = 'VERSION'
+        field_type = 'C'
+        extend_type = dbftUndefined
+        len = 30
+        dec = 0
+        NextAutoInc = 0
+        NativeNextAutoInc = 1
+        NativeStepAutoInc = 1
+        Tag = 0
+      end
+      item
+        FieldFlag.FieldFlag = 0
+        FieldFlag.System = False
+        FieldFlag.CanStoreNull = False
+        FieldFlag.BinaryColumn = False
+        FieldFlag.AutoIncrement = False
+        Name = 'NAME'
+        field_type = 'C'
+        extend_type = dbftUndefined
+        len = 50
+        dec = 0
+        NextAutoInc = 0
+        NativeNextAutoInc = 1
+        NativeStepAutoInc = 1
+        Tag = 0
+      end
+      item
+        FieldFlag.FieldFlag = 0
+        FieldFlag.System = False
+        FieldFlag.CanStoreNull = False
+        FieldFlag.BinaryColumn = False
+        FieldFlag.AutoIncrement = False
+        Name = 'DESCR'
+        field_type = 'C'
+        extend_type = dbftUndefined
+        len = 200
+        dec = 0
+        NextAutoInc = 0
+        NativeNextAutoInc = 1
+        NativeStepAutoInc = 1
+        Tag = 0
+      end
+      item
+        FieldFlag.FieldFlag = 0
+        FieldFlag.System = False
+        FieldFlag.CanStoreNull = False
+        FieldFlag.BinaryColumn = False
+        FieldFlag.AutoIncrement = False
+        Name = 'PRIORITY'
+        field_type = 'N'
+        extend_type = dbftUndefined
+        len = 6
+        dec = 0
+        NextAutoInc = 0
+        NativeNextAutoInc = 1
+        NativeStepAutoInc = 1
+        Tag = 0
+      end>
   end
 end

@@ -72,6 +72,8 @@ type
     actADGroupAdd: TAction;
     actAD1: TAction;
     act2: TAction;
+    lstADGroupUsers: TListBox;
+    actADGroupEdit: TAction;
     procedure actCreateBaseExecute(Sender: TObject);
     procedure actUserAddExecute(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -97,7 +99,7 @@ type
     procedure btnGroupAddClick(Sender: TObject);
     procedure actADGroupAddExecute(Sender: TObject);
     procedure actAD1Execute(Sender: TObject);
-    procedure act2Execute(Sender: TObject);
+    procedure actADGroupEditExecute(Sender: TObject);
   private
     { Private declarations }
   public
@@ -108,15 +110,15 @@ var
   Frm1: TFrm1;
 
 implementation
-uses U3, U4, U5, U6, U7, U8, U9, U11, U12, U15, DU1,U1AD, UAccessConstant,
-  UAccessFileDBF, UAccessGroup, UAccessBase;
+uses U3, U4, U5, U6, U7, U8, U9, U11, U12, U15, DU1, U1AD, UAccessConstant,
+  UAccessFileDBF, UAccessGroup, UAccessBase, StrUtils;
 
 {$R *.dfm}
 
 procedure TFrm1.actCreateBaseExecute(Sender: TObject);
 var
   Frm01: TFrm8;
-  list: array[1..5] of string;
+  list: array[1..6] of string;
 
   function CheckOnEmpty(const edit1, deftext: string): string;
   begin
@@ -134,7 +136,8 @@ begin
   list[3] := Settings.Base.UsersDir;
   list[4] := Settings.Base.GroupsDir;
   list[5] := Settings.Base.DomainsDir;
-  
+  list[6] := Settings.Base.ADGroupsDir;
+
   if (Frm01.ShowModal = mrok) and (Frm01.edtBase.Text <> '') and
     (dlgSave1.Execute) then
   begin
@@ -159,6 +162,7 @@ begin
       Settings.Base.UsersDir := list[3];
       Settings.Base.GroupsDir := list[4];
       Settings.Base.DomainsDir := list[5];
+      Settings.Base.ADGroupsDir := list[6];
     end;
   end;
   FreeAndNil(Frm01);
@@ -171,7 +175,7 @@ begin
   ShowMessage(Settings.Base.UsersDir);
   Frm01 := TFrm6.Create(Self);
   Frm01.FullAccess(False);
-  Frm01.chkCopyCaption.Enabled:=False;
+  Frm01.chkCopyCaption.Enabled := False;
   Frm01.DomainSID := Settings.Domain.SID;
   if (Frm01.ShowModal = mrok) and (Frm01.edtSID.Text <> '') then
   begin
@@ -249,6 +253,7 @@ begin
      dbgrdUser.DataSource.DataSet.Close;
      dbgrdUser.DataSource.DataSet.Open;*)
   end;
+  DU1.dtmdl1.dsDomain.DataSet.Refresh;
   FreeAndNil(Frm01);
   FreeAndNil(UF01);
 end;
@@ -308,6 +313,7 @@ begin
      dbgrdUser.DataSource.DataSet.Close;
      dbgrdUser.DataSource.DataSet.Open;*)
   end;
+  DU1.dtmdl1.dsUsers.DataSet.Refresh;
   FreeAndNil(Frm01);
   FreeAndNil(UF01);
 end;
@@ -330,10 +336,12 @@ begin
   Memo1.Lines.Add('Файл конфигурации: ' + Settings.ConfigFile);
   Memo1.Lines.Add('');
   Memo1.Lines.Add('--- ДИРЕКТОРИИ ---');
+  Memo1.Lines.Add('Корень хранилища: ' + Settings.Base.StoragePath);
   Memo1.Lines.Add('Таблицы: ' + Settings.Base.JournalsDir);
   Memo1.Lines.Add('Домены: ' + Settings.Base.DomainsDir);
-  Memo1.Lines.Add('Пользователи: ' + Settings.Base.UsersDir);
+  Memo1.Lines.Add('Доменные группы: ' + Settings.Base.ADGroupsDir);
   Memo1.Lines.Add('Группы: ' + Settings.Base.GroupsDir);
+  Memo1.Lines.Add('Пользователи: ' + Settings.Base.UsersDir);
   Memo1.Lines.Add('');
   Memo1.Lines.Add('Версия: ');
   Form1.ShowModal;
@@ -395,6 +403,7 @@ begin
      dbgrdUser.DataSource.DataSet.Open;*)
     // Settings.Group.UpdateVersion;
   end;
+  DU1.dtmdl1.dsGroups.DataSet.Refresh;
   FreeAndNil(Frm01);
   FreeAndNil(UF01);
 end;
@@ -503,36 +512,59 @@ begin
   Frm01.edtSID.Hint :=
     'Если не заполнен, цифровой ID будет сгенерирован автоматически при добавлении';
   Frm01.edtSID.ShowHint := True;
-  Frm01.chkCopyCaption.Enabled:=False;
+  Frm01.chkCopyCaption.Enabled := False;
   Frm01.DomainSID := Settings.Domain.SID;
+  Frm01.cbbGroupCn.Items.Assign(Settings.Domain.Groups);
   if Frm01.ShowModal = mrok then
   begin
-  (*  // dbgrdDomain.DataSource.DataSet.DisableControls;
-    Settings.Group.Clear;
-    if Trim(Frm01.edtCaption.Text) = '' then
-      Frm01.edtCaption.Text := 'Новая группа';
-    Settings.Group.Open(Settings.Base, Frm01.edtCaption.Text,
-      Frm01.edtSID.Text, Frm01.edtDescription.Text, Frm01.sePriority.Text);
-    Settings.Group.Save;
-    Settings.Base.TableGroups.Close;
-    Settings.Base.TableGroups.Open; *)
+    // dbgrdDomain.DataSource.DataSet.DisableControls;
+    Settings.ADGroup.Clear;
+    Settings.ADGroup.Open(Settings.Base, Frm01.edtCaption.Text,
+      Frm01.edtSID.Text, Frm01.edtDescription.Text);
+    Settings.ADGroup.Save;
+    Settings.Base.TableADGroups.Close;
+    Settings.Base.TableADGroups.Open;
   end;
   FreeAndNil(Frm01);
 end;
 
 procedure TFrm1.actAD1Execute(Sender: TObject);
 var
-  Frm02:TFrmAD;
+  Frm02: TFrmAD;
 begin
-  Frm02:=TFrmAD.Create(Self);
+  Frm02 := TFrmAD.Create(Self);
   Frm02.ShowModal;
   FreeAndNil(Frm02);
 end;
 
-procedure TFrm1.act2Execute(Sender: TObject);
+procedure TFrm1.actADGroupEditExecute(Sender: TObject);
+var
+  Frm01: TFrm15;
+  UF01: TSAVAccessFilesDBF;
 begin
-Settings.Base.CreateTableADGroups
-
+  Frm01 := TFrm15.Create(Self);
+  Frm01.FullAccess(True);
+  UF01 := TSAVAccessFilesDBF.Create(Settings.ADGroup);
+  Frm01.edtCaption.Text := Settings.ADGroup.Caption;
+  Frm01.edtSID.Text := Settings.ADGroup.SID;
+  Frm01.edtDescription.Text := Settings.ADGroup.Description;
+  Frm01.edtSID.ReadOnly := True;
+  Frm01.UserFiles := UF01;
+  if Frm01.ShowModal = mrok then
+  begin
+    (* Settings.User.Clear;
+     if Trim(Frm01.edtCaption.Text) = '' then
+       Frm01.edtCaption.Text := Frm01.edtSID.Text;
+     Settings.User.Open(Settings.Base, Frm01.edtCaption.Text,
+       Frm01.edtSID.Text, Frm01.edtDescription.Text,Settings.Domain.SID);
+     Settings.User.Save;
+     dbgrdUser.DataSource.DataSet.Close;
+     dbgrdUser.DataSource.DataSet.Open;*)
+    // Settings.Group.UpdateVersion;
+  end;
+  DU1.dtmdl1.dsADGroups.DataSet.Refresh;
+  FreeAndNil(Frm01);
+  FreeAndNil(UF01);
 end;
 
 end.

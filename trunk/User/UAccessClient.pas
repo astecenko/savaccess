@@ -41,12 +41,14 @@ type
     FJournalsDir: string;
     FUsersDir: string;
     FGroupsDir: string;
+    FADGroupsDir:string;
     FTemplate: TPathTemplate;
     FDomainsDir: string;
     FActions: TList;
     procedure SetDataSet(const Value: TClientDataSet);
     procedure SetIniFile(const Value: TIniFile);
     procedure SetActions(const Value: TList);
+    procedure SetADGroupsDir(const Value: string);
 
   public
     property ConfigDir: string read FConfigDir;
@@ -58,6 +60,7 @@ type
     property JournalsDir: string read FJournalsDir;
     property UsersDir: string read FUsersDir;
     property GroupsDir: string read FGroupsDir;
+    property ADGroupsDir: string read FADGroupsDir write SetADGroupsDir;
     property DomainsDir: string read FDomainsDir;
     property Workstation: string read FWorkstation;
     property IniFile: TIniFile read FIniFile write SetIniFile;
@@ -359,6 +362,7 @@ begin
     'D': Result := FDomainsDir;
     'G': Result := FGroupsDir;
     'U': Result := FUsersDir;
+    'A': Result := FADGroupsDir;
   end;
 end;
 
@@ -373,6 +377,7 @@ begin
     FUsersDir := list.Values['users'];
     FJournalsDir := list.Values['journals'];
     FGroupsDir := list.Values['groups'];
+    FADGroupsDir := list.Values['adgroups'];
     FDomainsDir := list.Values['domains'];
     FreeAndNil(list);
     if Assigned(FTemplate) then
@@ -469,7 +474,7 @@ end;
 function TSAVAccessClient.Update: Boolean;
 var
   ini: TIniFile;
-  list1, oldGroups: TStringList;
+  list1, oldGroups, ADGroups, ADOldGroups: TStringList;
   sUserIni, WorkLst, sVersion: string;
   i, j: Integer;
   b,
@@ -670,6 +675,11 @@ begin
     if c <> ' ' then
       FIniFile.DeleteKey(c, aSID);
   end;
+end;
+
+procedure TSAVAccessClient.SetADGroupsDir(const Value: string);
+begin
+  FADGroupsDir := Value;
 end;
 
 end.
