@@ -21,13 +21,14 @@ uses
   UAccessContainer in '..\Administrator\UAccessContainer.pas',
   UAccessClient in 'UAccessClient.pas',
   PluginManager in '..\PluginAPI\Core\PluginManager.pas',
-  PluginAPI in '..\PluginAPI\Headers\PluginAPI.pas';
+  PluginAPI in '..\PluginAPI\Headers\PluginAPI.pas',
+  UAccessSimple in 'UAccessSimple.pas';
 
 {$R *.res}
 
 begin
   Application.Initialize;
-  Application.CreateForm(TForm1, Form1);
+  Application.CreateForm(TSAVClntFrm1, SAVClntFrm1);
   Application.Run;
 end.
 

@@ -71,7 +71,7 @@ function NetUserGetInfo(servername, username: pwidechar; level: dword; var
   bufptr: pUSER_INFO_10): dword; stdcall; external 'Netapi32.dll';
  }
 implementation
-uses MsAD;
+uses MsAD, UAccessConstant;
 {$R *.dfm}
 
 (*procedure TForm1.btn1Click(Sender: TObject);
@@ -135,21 +135,21 @@ begin
   if ds1.DataSet.RecordCount > 0 then
   begin
     s := '';
-    s := ds1.DataSet.fieldbyname('CN').AsString;
+    s := ds1.DataSet.fieldbyname(csFieldCN).AsString;
     edtCaption.Text := s;
     s := '';
     sdns := GetDNSDomainName(edtDomainNBS.Text);
-    s := MsAD.GetSID(ds1.DataSet.FieldByName('sAMAccountName').AsString, sdns);
+    s := MsAD.GetSID(ds1.DataSet.FieldByName(csFieldSAMAccount).AsString, sdns);
     edtSID.Text := s;
     s := '';
     try
-      s := ds1.DataSet.fieldbyname('description').AsString;
+      s := ds1.DataSet.fieldbyname(csFieldADDescription).AsString;
     except
       //      ShowMessage('Ошибка: '+SysErrorMessage(GetLastError));
     end;
     edtDescription.Text := s;
     mmo1.Lines.Clear;
-    GetAllUserGroups(ds1.DataSet.FieldByName('sAMAccountName').AsString,
+    GetAllUserGroups(ds1.DataSet.FieldByName(csFieldSAMAccount).AsString,
       GetDomainController(edtDomainNBS.Text), mmo1.Lines);
     for i := 0 to pred(mmo1.Lines.Count) do
       mmo1.Lines[i] := mmo1.Lines[i] + '=' + GetSID(mmo1.Lines[i], sdns);
@@ -166,7 +166,7 @@ end;
 procedure TFrmAD.ds1DataChange(Sender: TObject; Field: TField);
 begin
   if not (ds1.DataSet.IsEmpty) then
-    mmo2.Text := ds1.DataSet.fieldbyname('distinguishedName').AsString
+    mmo2.Text := ds1.DataSet.fieldbyname(csFieldDisting).AsString
   else
     mmo2.Text := '';
 end;

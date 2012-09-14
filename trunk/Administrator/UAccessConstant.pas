@@ -18,6 +18,9 @@ const
   csContainerCfg='container.cfg';
   csClientData='clientdata.cds';
   csWorkGroupsLst='workgroups.lst';
+  csWorkADGroupsLst='workgadroups.lst';
+  csManagersList='managers.pwd';
+  csTCPLog='ip.log';
 
   { Tables filename }
 
@@ -59,10 +62,20 @@ const
   csFieldAction='ACTION';
   csFieldMD5='MD5';
   csFieldSource='SOURCE';
+  csFieldSAMAccount='sAMAccountName';
+  csFieldADDescription='description';
+  csFieldCN='CN';
+  csFieldDisting='distinguishedName';
 
    { ini-files }
    csIniUsers='users';
    csIniGroups='groups';
+   csIniADGroups='adgroups';
+
+   {  errors}
+
+   csOpenError='Ошибка открытия ';
+   csSaveError='Ошибка сохранения ';
 
   { Others }
 

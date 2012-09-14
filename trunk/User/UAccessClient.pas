@@ -41,7 +41,7 @@ type
     FJournalsDir: string;
     FUsersDir: string;
     FGroupsDir: string;
-    FADGroupsDir:string;
+    FADGroupsDir: string;
     FTemplate: TPathTemplate;
     FDomainsDir: string;
     FActions: TList;
@@ -155,9 +155,66 @@ end;
 
 constructor TSAVAccessClient.Create(const aConfDirName: string);
 var
-  s: string;
+  datFile: string;
+  procedure CreatDS;
+  begin
+    with FDataSet.FieldDefs.AddFieldDef as TFieldDef do
+    begin
+      DisplayName := csFieldSrvrFile;
+      DataType := ftString;
+      Size := 50;
+    end;
+    with FDataSet.FieldDefs.AddFieldDef as TFieldDef do
+    begin
+      DisplayName := csFieldVersion;
+      DataType := ftString;
+      Size := 30;
+    end;
+    with FDataSet.FieldDefs.AddFieldDef as TFieldDef do
+    begin
+      DisplayName := csFieldClntFile;
+      DataType := ftString;
+      Size := 2047;
+    end;
+    with FDataSet.FieldDefs.AddFieldDef as TFieldDef do
+    begin
+      DisplayName := csFieldExt;
+      DataType := ftString;
+      Size := 10;
+    end;
+    with FDataSet.FieldDefs.AddFieldDef as TFieldDef do
+    begin
+      DisplayName := csFieldType;
+      DataType := ftString;
+      Size := 1;
+    end;
+    with FDataSet.FieldDefs.AddFieldDef as TFieldDef do
+    begin
+      DisplayName := csFieldAction;
+      DataType := ftInteger;
+    end;
+    with FDataSet.FieldDefs.AddFieldDef as TFieldDef do
+    begin
+      DisplayName := csFieldMD5;
+      DataType := ftString;
+      Size := 32;
+    end;
+    with FDataSet.FieldDefs.AddFieldDef as TFieldDef do
+    begin
+      DisplayName := csFieldSID;
+      DataType := ftString;
+      Size := 50;
+    end;
+    with FDataSet.FieldDefs.AddFieldDef as TFieldDef do
+    begin
+      DisplayName := csFieldSource;
+      DataType := ftString;
+      Size := 1;
+    end;
+    FDataSet.CreateDataSet;
+  end;
 begin
-  if aConfDirName = '' then
+  {if aConfDirName = '' then
     s := 'SAVAccessClient'
   else
     s := aConfDirName;
@@ -167,6 +224,8 @@ begin
     FConfigDir := GetCurrentDir;
   FConfigDir :=
     IncludeTrailingPathDelimiter(IncludeTrailingPathDelimiter(FConfigDir) + s);
+  }
+  FConfigDir := IncludeTrailingPathDelimiter(aConfDirName);
   if not (DirectoryExists(ConfigDir)) then
     ForceDirectories(ConfigDir);
   FSID := SPGetSid.GetCurrentUserSid;
@@ -174,72 +233,23 @@ begin
   FUser := MsAD.GetCurrentUserName;
   FDomain := MsAD.CurrentDomainName;
   FDataSet := TClientDataSet.Create(nil);
-  with FDataSet.FieldDefs.AddFieldDef as TFieldDef do
-  begin
-    DisplayName := csFieldSrvrFile;
-    DataType := ftString;
-    Size := 50;
-  end;
-  with FDataSet.FieldDefs.AddFieldDef as TFieldDef do
-  begin
-    DisplayName := csFieldVersion;
-    DataType := ftString;
-    Size := 30;
-  end;
-  with FDataSet.FieldDefs.AddFieldDef as TFieldDef do
-  begin
-    DisplayName := csFieldClntFile;
-    DataType := ftString;
-    Size := 2047;
-  end;
-  with FDataSet.FieldDefs.AddFieldDef as TFieldDef do
-  begin
-    DisplayName := csFieldExt;
-    DataType := ftString;
-    Size := 10;
-  end;
-  with FDataSet.FieldDefs.AddFieldDef as TFieldDef do
-  begin
-    DisplayName := csFieldType;
-    DataType := ftString;
-    Size := 1;
-  end;
-  with FDataSet.FieldDefs.AddFieldDef as TFieldDef do
-  begin
-    DisplayName := csFieldAction;
-    DataType := ftInteger;
-  end;
-  with FDataSet.FieldDefs.AddFieldDef as TFieldDef do
-  begin
-    DisplayName := csFieldMD5;
-    DataType := ftString;
-    Size := 32;
-  end;
-  with FDataSet.FieldDefs.AddFieldDef as TFieldDef do
-  begin
-    DisplayName := csFieldSID;
-    DataType := ftString;
-    Size := 50;
-  end;
-  with FDataSet.FieldDefs.AddFieldDef as TFieldDef do
-  begin
-    DisplayName := csFieldSource;
-    DataType := ftString;
-    Size := 1;
-  end;
-  FDataSet.CreateDataSet;
-  if FileExists(FConfigDir + csClientData) then
-    FDataSet.LoadFromFile(FConfigDir + csClientData);
+
+  datFile := FConfigDir + csClientData;
+  if FileExists(datFile) then
+    try
+      FDataSet.LoadFromFile(datFile);
+    except
+      FDataSet.Close;
+      Windows.DeleteFile(PChar(datFile));
+      CreatDS;
+    end
+  else
+    CreatDS;
   FDataSet.Open;
   FDataSet.LogChanges := False;
-  FDataSet.FileName := FConfigDir + csClientData;
+  FDataSet.FileName := datFile;
   FIniFile := TIniFile.Create(FConfigDir + csContainerCfg);
   FActions := TList.Create;
-  SetErrorMode(SetErrorMode(0) or SEM_NOOPENFILEERRORBOX or
-    SEM_FAILCRITICALERRORS);
-  Plugins.SetVersion(1);
-  // Загрузка всех плагинов. Подразумевается, что они лежат в под-папке Plugins
-  Plugins.LoadPlugins(ExtractFilePath(ParamStr(0)) + 'Plugins', SPluginExt);
 end;
 
 function TSAVAccessClient.FindPlugin(const AFileType: Char; AExt: string; AID:
@@ -475,7 +485,7 @@ function TSAVAccessClient.Update: Boolean;
 var
   ini: TIniFile;
   list1, oldGroups, ADGroups, ADOldGroups: TStringList;
-  sUserIni, WorkLst, sVersion: string;
+  sUserIni, WorkLst, ADWorkLst, sDNS: string;
   i, j: Integer;
   b,
     DelGroups // есть удаленные группы
@@ -483,16 +493,47 @@ var
 begin
   Result := True;
   WorkLst := FConfigDir + csWorkGroupsLst;
+  ADWorkLst := FConfigDir + csWorkADGroupsLst;
   sUserIni := IncludeTrailingPathDelimiter(FUsersDir) + FSID + '\' +
     csContainerCfg;
+  sDNS := GetDNSDomainName(Domain);
   list1 := TStringList.Create;
+  ADGroups := TStringList.Create;
   DelGroups := False;
   b := FileExists(sUserIni);
   if b then
   begin
     ini := TIniFile.Create(sUserIni);
-    ini.ReadSectionValues('groups', list1);
+    ini.ReadSectionValues(csIniGroups, list1);
     FreeAndNil(ini);
+  end;
+  GetAllUserGroups(User, GetDomainController(Domain), ADGroups);
+  for i := 0 to pred(ADGroups.Count) do
+    ADGroups[i] := GetSID(ADGroups[i], sdns) + '=' + ADGroups[i];
+  if FileExists(ADWorkLst) then
+  begin
+    ADOldGroups := TStringList.Create;
+    ADOldGroups.LoadFromFile(ADWorkLst);
+    for i := Pred(ADOldGroups.Count) downto 0 do
+    begin
+      j := 0;
+      while j < ADGroups.Count do
+        if ADGroups.Names[j] = ADOldGroups.Names[i] then
+        begin
+          ADOldGroups.Delete(i);
+          j := ADGroups.Count;
+        end
+        else
+          Inc(j);
+    end;
+    if ADOldGroups.Count > 0 then
+      // есть группы из которых пользователь был удален
+    begin
+      for i := 0 to pred(ADOldGroups.Count) do
+        DeleteContainerFile(FADGroupsDir, ADOldGroups.Names[i]);
+      DelGroups := True;
+    end;
+    FreeAndNil(ADOldGroups);
   end;
   SortListVal(list1);
   if FileExists(WorkLst) then
@@ -520,31 +561,38 @@ begin
     FreeAndNil(oldGroups);
   end;
   try
+    ADGroups.SaveToFile(ADWorkLst);
     list1.SaveToFile(WorkLst);
   except
     Result := False;
   end;
   if DelGroups then
-    sVersion := ''
+  begin
+    UpdateContainerFile(FDomainsDir, Domain, '');
+    for i := 0 to pred(ADGroups.Count) do
+      UpdateContainerFile(FADGroupsDir, ADGroups.Names[i], '');
+    for i := 0 to pred(list1.Count) do
+      UpdateContainerFile(FGroupsDir, list1.Names[i], '');
+  end
   else
-    sVersion := FIniFile.ReadString('D', Domain, '');
-  UpdateContainerFile(FDomainsDir, Domain, sVersion);
-  for i := 0 to list1.Count - 1 do
-  begin //work with groups SID from LOW to HIGH priority
-    if DelGroups then
-      sVersion := ''
-    else
-      sVersion := FIniFile.ReadString('G', list1.Names[i], '');
-    UpdateContainerFile(FGroupsDir, list1.Names[i], sVersion);
+  begin
+    UpdateContainerFile(FDomainsDir, Domain, FIniFile.ReadString('D', Domain,
+      ''));
+    for i := 0 to pred(ADGroups.Count) do
+      UpdateContainerFile(FADGroupsDir, ADGroups.Names[i],
+        FIniFile.ReadString('A', ADGroups.Names[i], ''));
+    for i := 0 to pred(list1.Count) do
+      UpdateContainerFile(FGroupsDir, list1.Names[i], FIniFile.ReadString('G',
+        list1.Names[i], ''));
   end;
+  FreeAndNil(ADGroups);
   FreeAndNil(list1);
   if b then
   begin
     if DelGroups then
-      sVersion := ''
+      UpdateContainerFile(FUsersDir, SID, '')
     else
-      sVersion := FIniFile.ReadString('U', SID, '');
-    UpdateContainerFile(FUsersDir, SID, sVersion);
+      UpdateContainerFile(FUsersDir, SID, FIniFile.ReadString('U', SID, ''));
   end;
   FDataSet.ApplyUpdates(-1);
 end;
@@ -557,7 +605,7 @@ var
   ini: TIniFile;
   c: Char;
   s, vers: string;
-  sPath: string;
+  sPath, sLocIni: string;
   table1: TVKDBFNTX;
 
   procedure FileInfoMove(aFrom, aTo: TDataSet; const aFull: Boolean);
@@ -587,50 +635,54 @@ begin
   s := '';
   sPath := IncludeTrailingPathDelimiter(IncludeTrailingPathDelimiter(aDir) +
     aSID);
-  ini := TIniFile.Create(sPath + csContainerCfg);
-  c := Ini.ReadString('main', 'type', ' ')[1];
-  vers := Ini.ReadString('main', 'version', '');
-  FreeAndNil(ini);
-  if (FileExists(sPath + csTableFiles)) and (vers <> aVersion) then
+  sLocIni := sPath + csContainerCfg;
+  if FileExists(sLocIni) then
   begin
-    table1 := TVKDBFNTX.Create(nil);
-    InitOpenDBF(table1, sPath + csTableFiles, 64);
-    table1.Open;
-    while not (table1.Eof) do
+    ini := TIniFile.Create(sLocIni);
+    c := Ini.ReadString('main', 'type', ' ')[1];
+    vers := Ini.ReadString('main', 'version', '');
+    FreeAndNil(ini);
+    if (FileExists(sPath + csTableFiles)) and (vers <> aVersion) then
     begin
-      if FDataSet.Locate(csFieldSrvrFile + ';' + csFieldExt + ';' + csFieldType
-        + ';' + csFieldSource + ';' + csFieldSID,
-        varArrayOf([table1.fieldbyname(csFieldSrvrFile).AsString,
-        table1.fieldbyname(csFieldExt).AsString,
-          table1.fieldbyname(csFieldType).AsString, c, aSID]), []) then
+      table1 := TVKDBFNTX.Create(nil);
+      InitOpenDBF(table1, sPath + csTableFiles, 64);
+      table1.Open;
+      while not (table1.Eof) do
       begin
-        if FDataSet.fieldbyname(csFieldVersion).AsString <>
-          table1.fieldbyname(csFieldVersion).AsString then
+        if FDataSet.Locate(csFieldSrvrFile + ';' + csFieldExt + ';' + csFieldType
+          + ';' + csFieldSource + ';' + csFieldSID,
+          varArrayOf([table1.fieldbyname(csFieldSrvrFile).AsString,
+          table1.fieldbyname(csFieldExt).AsString,
+            table1.fieldbyname(csFieldType).AsString, c, aSID]), []) then
         begin
-          if FileProcessing(Record2ClientFile(FDataSet, aSID, c),
+          if FDataSet.fieldbyname(csFieldVersion).AsString <>
+            table1.fieldbyname(csFieldVersion).AsString then
+          begin
+            if FileProcessing(Record2ClientFile(FDataSet, aSID, c),
+              Record2ClientFile(table1, aSID, c)) then
+            begin
+              FDataSet.Edit;
+              FileInfoMove(table1, FDataSet, False);
+              FDataSet.Post;
+            end;
+          end
+        end
+        else
+        begin
+          if FileProcessing(Record2ClientFile(table1, aSID, c),
             Record2ClientFile(table1, aSID, c)) then
           begin
-            FDataSet.Edit;
-            FileInfoMove(table1, FDataSet, False);
+            FDataSet.Insert;
+            FileInfoMove(table1, FDataSet, True);
             FDataSet.Post;
           end;
-        end
-      end
-      else
-      begin
-        if FileProcessing(Record2ClientFile(table1, aSID, c),
-          Record2ClientFile(table1, aSID, c)) then
-        begin
-          FDataSet.Insert;
-          FileInfoMove(table1, FDataSet, True);
-          FDataSet.Post;
         end;
+        table1.Next;
       end;
-      table1.Next;
+      table1.Close;
+      FreeAndNil(table1);
+      FIniFile.WriteString(c, aSID, vers);
     end;
-    table1.Close;
-    FreeAndNil(table1);
-    FIniFile.WriteString(c, aSID, vers);
   end;
 end;
 
