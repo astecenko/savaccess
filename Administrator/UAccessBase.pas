@@ -86,6 +86,7 @@ begin
   FDomainsDir := csDefDomainDir;
   FUsersDir := csDefUserDir;
   FADGroupsDir := csDefADGroupDir;
+  FCaption:='';
 end;
 
 constructor TSAVAccessBase.Create(const aPath: string; const bCanCreate: Boolean
@@ -510,7 +511,9 @@ begin
   begin
     list := TStringList.Create;
     list.LoadFromFile(aFileName);
-    FCaption := ExtractFileName(aFileName);
+    FCaption := list.Values['caption'];
+    if FCaption = '' then
+      FCaption := ExtractFileName(aFileName);
     FStoragePath := list.Values['base'];
     FUsersDir := list.Values['users'];
     FJournalsDir := list.Values['journals'];
@@ -529,6 +532,7 @@ var
   list: TStringList;
 begin
   list := TStringList.Create;
+  list.Add('caption='+FCaption);
   list.Add('base=' + FStoragePath);
   list.Add('journals=' + FJournalsDir);
   list.Add('domains=' + FDomainsDir);

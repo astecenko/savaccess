@@ -331,6 +331,7 @@ object Frm1: TFrm1
           TitleFont.Height = -11
           TitleFont.Name = 'MS Sans Serif'
           TitleFont.Style = []
+          OnDblClick = dbgrdADGroupsDblClick
           Columns = <
             item
               Expanded = False
@@ -509,6 +510,12 @@ object Frm1: TFrm1
               item
                 Action = actUserShow
                 ImageIndex = 5
+              end
+              item
+                Caption = '-'
+              end
+              item
+                Action = actRemoteUser
               end>
             Caption = #1055#1086#1083#1100#1079#1086#1074#1072#1090#1077#1083#1080
           end
@@ -667,6 +674,11 @@ object Frm1: TFrm1
       Category = #1043#1088#1091#1087#1087#1072
       Caption = #1056#1077#1076#1072#1082#1090#1080#1088#1086#1074#1072#1090#1100' '#1076#1086#1084#1077#1085#1085#1091#1102' '#1075#1088#1091#1087#1087#1091
       OnExecute = actADGroupEditExecute
+    end
+    object actRemoteUser: TAction
+      Category = #1055#1086#1083#1100#1079#1086#1074#1072#1090#1077#1083#1080
+      Caption = #1052#1077#1085#1077#1076#1078#1077#1088#1099
+      OnExecute = actRemoteUserExecute
     end
   end
   object il1: TImageList

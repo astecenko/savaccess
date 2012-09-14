@@ -29,6 +29,8 @@ type
     edtADGroups: TEdit;
     lbl7: TLabel;
     btn6: TButton;
+    edtCaption: TEdit;
+    lblCaption: TLabel;
     procedure btn1Click(Sender: TObject);
     procedure btn2Click(Sender: TObject);
     procedure btn3Click(Sender: TObject);

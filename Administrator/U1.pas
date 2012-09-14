@@ -74,6 +74,7 @@ type
     act2: TAction;
     lstADGroupUsers: TListBox;
     actADGroupEdit: TAction;
+    actRemoteUser: TAction;
     procedure actCreateBaseExecute(Sender: TObject);
     procedure actUserAddExecute(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -100,6 +101,8 @@ type
     procedure actADGroupAddExecute(Sender: TObject);
     procedure actAD1Execute(Sender: TObject);
     procedure actADGroupEditExecute(Sender: TObject);
+    procedure dbgrdADGroupsDblClick(Sender: TObject);
+    procedure actRemoteUserExecute(Sender: TObject);
   private
     { Private declarations }
   public
@@ -110,7 +113,7 @@ var
   Frm1: TFrm1;
 
 implementation
-uses U3, U4, U5, U6, U7, U8, U9, U11, U12, U15, DU1, U1AD, UAccessConstant,
+uses U3, U4, U5, U6, U7, U8, U9, U11, U12, U15, U16, DU1, U1AD, UAccessConstant,
   UAccessFileDBF, UAccessGroup, UAccessBase, StrUtils;
 
 {$R *.dfm}
@@ -118,7 +121,7 @@ uses U3, U4, U5, U6, U7, U8, U9, U11, U12, U15, DU1, U1AD, UAccessConstant,
 procedure TFrm1.actCreateBaseExecute(Sender: TObject);
 var
   Frm01: TFrm8;
-  list: array[1..6] of string;
+  list: array[1..7] of string;
 
   function CheckOnEmpty(const edit1, deftext: string): string;
   begin
@@ -137,6 +140,7 @@ begin
   list[4] := Settings.Base.GroupsDir;
   list[5] := Settings.Base.DomainsDir;
   list[6] := Settings.Base.ADGroupsDir;
+  list[7] := Settings.Base.Caption;
 
   if (Frm01.ShowModal = mrok) and (Frm01.edtBase.Text <> '') and
     (dlgSave1.Execute) then
@@ -149,11 +153,15 @@ begin
       csDefGroupDir);
     Settings.Base.DomainsDir := CheckOnEmpty(Frm01.edtDomains.Text,
       csDefDomainDir);
+    if Frm01.edtCaption.Text = '' then
+      Settings.Base.Caption := ExtractFileName(dlgSave1.FileName)
+    else
+      Settings.Base.Caption := Frm01.edtCaption.Text;
     Settings.Base.SaveToFile(dlgSave1.FileName);
     if Settings.Base.CreateStorage then
     begin
       Settings.ConfigFile := dlgSave1.FileName;
-      Frm1.Caption := csFrm1Caption + ExtractFileName(Settings.ConfigFile);
+      Frm1.Caption := csFrm1Caption + Settings.Base.Caption;
     end
     else
     begin
@@ -163,6 +171,7 @@ begin
       Settings.Base.GroupsDir := list[4];
       Settings.Base.DomainsDir := list[5];
       Settings.Base.ADGroupsDir := list[6];
+      Settings.Base.Caption := list[7];
     end;
   end;
   FreeAndNil(Frm01);
@@ -203,7 +212,7 @@ begin
   else
   begin
     Settings.Base.LoadFromFile(Settings.ConfigFile);
-    Frm1.Caption := csFrm1Caption + ExtractFileName(Settings.ConfigFile);
+    Frm1.Caption := csFrm1Caption + Settings.Base.Caption;
     pgc1.Visible := True;
     pnl1.Visible := True;
   end;
@@ -335,7 +344,9 @@ begin
   Memo1.ScrollBars := ssBoth;
   Memo1.Lines.Add('Файл конфигурации: ' + Settings.ConfigFile);
   Memo1.Lines.Add('');
-  Memo1.Lines.Add('--- ДИРЕКТОРИИ ---');
+  Memo1.Lines.Add('Наименование: ' + Settings.Base.Caption);
+  Memo1.Lines.Add('');
+  Memo1.Lines.Add('[ ДИРЕКТОРИИ ]');
   Memo1.Lines.Add('Корень хранилища: ' + Settings.Base.StoragePath);
   Memo1.Lines.Add('Таблицы: ' + Settings.Base.JournalsDir);
   Memo1.Lines.Add('Домены: ' + Settings.Base.DomainsDir);
@@ -565,6 +576,24 @@ begin
   DU1.dtmdl1.dsADGroups.DataSet.Refresh;
   FreeAndNil(Frm01);
   FreeAndNil(UF01);
+end;
+
+procedure TFrm1.dbgrdADGroupsDblClick(Sender: TObject);
+begin
+  actADGroupEdit.Execute;
+end;
+
+procedure TFrm1.actRemoteUserExecute(Sender: TObject);
+  var
+   Frm01:TFrm16;
+   s:string;
+begin
+  s:=IncludeTrailingPathDelimiter(Settings.Base.JournalsDir)+csManagersList;
+  Frm01:=TFrm16.Create(Self);
+  if FileExists(s) then
+    Frm01.lblFileName.Caption:=s;
+  Frm01.ShowModal;
+  FreeAndNil(Frm01);
 end;
 
 end.
