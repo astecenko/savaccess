@@ -3,8 +3,7 @@ library INI1;
 uses
   SysUtils,
   SAVLib_INI,
-  PluginAPI in '..\PluginAPI\Headers\PluginAPI.pas',
-  UAccessClientFile in '..\PluginAPI\Headers\UAccessClientFile.pas';
+  PluginAPI in '..\PluginAPI\Headers\PluginAPI.pas';
 
 {$R *.res}
 {$E .ext}
