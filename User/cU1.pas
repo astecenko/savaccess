@@ -22,9 +22,9 @@ type
     idthrdmgrdflt1: TIdThreadMgrDefault;
     idntfrz1: TIdAntiFreeze;
     aplctnvnts1: TApplicationEvents;
+    actShowMenu: TAction;
     procedure actExitExecute(Sender: TObject);
     procedure FormCreate(Sender: TObject);
-    procedure N4Click(Sender: TObject);
     procedure idtcpsrvr1cmdhUpdateCommand(ASender: TIdCommand);
     procedure idtcpsrvr1Connect(AThread: TIdPeerThread);
     procedure idtcpsrvr1Disconnect(AThread: TIdPeerThread);
@@ -44,6 +44,7 @@ type
     procedure idtcpsrvr1TIdCommandPasswordCommand(ASender: TIdCommand);
     procedure idtcpsrvr1cmdhLogoutCommand(ASender: TIdCommand);
     procedure idtcpsrvr1cmdhWhoamiCommand(ASender: TIdCommand);
+    procedure actShowMenuExecute(Sender: TObject);
   private
     { Private declarations }
   public
@@ -55,7 +56,7 @@ var
   SAVClntFrm1: TSAVClntFrm1;
 
 implementation
-uses SAVLib_INI, Registry, UAccessSimple, SAVLib, Support;
+uses SAVLib_INI, Registry, UAccessSimple, SAVLib, Support, cUMenu;
 
 {$R *.dfm}
 
@@ -101,11 +102,6 @@ begin
   // Settings.InUpdating := False;
   // Application.Terminate;
 
-end;
-
-procedure TSAVClntFrm1.N4Click(Sender: TObject);
-begin
-  Self.Show;
 end;
 
 procedure TSAVClntFrm1.idtcpsrvr1cmdhUpdateCommand(ASender: TIdCommand);
@@ -429,6 +425,37 @@ begin
       ASender.Reply.Text.Text := ASender.Reply.Text.Text + ', login "' +
         TSimpleClient(Asender.Thread.Data).Login + '"';
   end
+end;
+
+procedure TSAVClntFrm1.actShowMenuExecute(Sender: TObject);
+var
+  MnuFrm: TSAVClntMenu;
+  h: HWND;
+  s: string;
+begin
+  s := TSAVClntMenu.ClassName;
+  h := FindWindow(PAnsiChar(s), nil);
+  if h = 0 then
+  begin
+    MnuFrm := TSAVClntMenu.Create(Self);
+    try
+      //  MnuFrm.wb1.
+      //MnuFrm.frameRight.LoadFromFile(Settings.Bases.RootConfig+'Client\index.html');
+      //MnuFrm.chrm1.defaulturl:=Settings.Bases.RootConfig+'Client\index.html';
+      //MnuFrm.chrm1.Load('file:///C:/Documents%20and%20Settings/StetsenkoAV/Application%20Data/NEVZ/OASUP/Client/index.html');
+      MnuFrm.chrm1.Load('c:\Documents and Settings\StetsenkoAV\Application Data\NEVZ\OASUP\Client\index.html');
+      // MnuFrm.chrm1.defaulturl:='file:///C:/Documents%20and%20Settings/StetsenkoAV/Application%20Data/NEVZ/OASUP/Client/index.html';
+      // MnuFrm.chrm1.Refresh;
+       // MnuFrm.frameRight.FwdButtonEnabled:=True;
+       // MnuFrm.frameRight.BackButtonEnabled:=True;
+      MnuFrm.LoadMenuFromFile(Settings.Bases.RootConfig + 'Client\client.mnu');
+      MnuFrm.ShowModal;
+    finally
+      FreeAndNil(MnuFrm);
+    end;
+  end
+  else
+    ShowWindow(h,SW_SHOWNORMAL);
 end;
 
 end.

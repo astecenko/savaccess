@@ -1,8 +1,9 @@
 object SAVClntFrm1: TSAVClntFrm1
   Left = 328
   Top = 170
-  Width = 156
-  Height = 106
+  Width = 226
+  Height = 203
+  BorderIcons = [biMinimize]
   Caption = 'SAVClntFrm1'
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -20,15 +21,14 @@ object SAVClntFrm1: TSAVClntFrm1
     IconIndex = 0
     Hint = #1050#1083#1080#1077#1085#1090' '#1040#1057#1059#1055#13#10#1042#1077#1088#1089#1080#1103' 1.0'
     PopupMenu = pmMain
-    Visibility = [tvVisibleTaskList, tvAutoHide, tvRestoreDbClick, tvMinimizeDbClick]
+    Visibility = [tvVisibleTaskList, tvAutoHide]
     Left = 32
     Top = 24
   end
   object pmMain: TPopupMenu
     Left = 48
     object N4: TMenuItem
-      Caption = #1054#1090#1082#1088#1099#1090#1100
-      OnClick = N4Click
+      Action = actShowMenu
     end
     object N2: TMenuItem
       Caption = #1054#1090#1087#1088#1072#1074#1080#1090#1100' '#1089#1086#1086#1073#1097#1077#1085#1080#1077
@@ -45,6 +45,10 @@ object SAVClntFrm1: TSAVClntFrm1
     object actExit: TAction
       Caption = #1042#1099#1093#1086#1076
       OnExecute = actExitExecute
+    end
+    object actShowMenu: TAction
+      Caption = #1055#1088#1080#1083#1086#1078#1077#1085#1080#1103
+      OnExecute = actShowMenuExecute
     end
   end
   object idtcpsrvr1: TIdTCPServer

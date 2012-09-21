@@ -1,11 +1,14 @@
-library TXT1;
+library ZIP1;
 
 uses
-  SysUtils,Classes,
+  SysUtils, sevenzip,
   PluginAPI in '..\PluginAPI\Headers\PluginAPI.pas';
 
 {$R *.res}
 {$E .ext}
+
+const
+  arch_lib = '7z.dll';
 
 type
   TPlugin = class(TInterfacedObject, IUnknown, IPlugin, ISAVAccessFileAct)
@@ -20,7 +23,7 @@ type
     // ISAVAccessFileAct
     function ProcessedFile(const aOld,
       aNew: TClientFile; const aDir, aSID, aPath: WideString): Integer;
-        safecall;
+      safecall;
   public
     constructor Create(const ACore: ICore);
   end;
@@ -41,10 +44,8 @@ end;
 
 function TPlugin.GetDescription: WideString;
 begin
-  Result := 'Txt adding';
+  Result := 'Zip extract';
 end;
-
-// _________________________________________________________________
 
 function Init(const ACore: ICore): IPlugin; safecall;
 begin
@@ -60,39 +61,39 @@ exports
   Init name SPluginInitFuncName,
   Done name SPluginDoneFuncName;
 
-//begin
-//  ReportMemoryLeaksOnShutdown := True;
-
 function TPlugin.GetExtension: WideString;
 begin
-  Result := '.txt';
+  Result := '.zip';
 end;
 
 function TPlugin.GetFileType: WideChar;
 begin
-  Result:='F';
+  Result := 'F';
 end;
 
 function TPlugin.ProcessedFile(const aOld, aNew: TClientFile; const aDir,
   aSID, aPath: WideString): Integer; safecall;
 var
- lstDest,lstSourc:TStringList;
- s:string;
+  s, x, y: string;
+
 begin
-  Result:=0;
-  lstDest:=TStringList.Create;
-  lstSourc:=TStringList.Create;
-  s:=aDir+aNew.SrvrFile;
-  try
-  if FileExists(aPath) then lstDest.LoadFromFile(aPath);
-  if FileExists(s) then lstSourc.LoadFromFile(s);
-  //lstDest.Add(lstSourc.Text);
-  lstDest.text:=lstDest.Text+lstSourc.Text;
-  lstDest.SaveToFile(aPath);
-  Result:=1;
-  finally
-    FreeAndNil(lstDest);
-    FreeAndNil(lstSourc);
-  end;
+  x := IncludeTrailingPathDelimiter(GetCurrentDir) + arch_lib;
+  y := ExtractFilePath(ParamStr(0)) + arch_lib;
+  if (FileExists(x)) or (FileExists(y)) then
+  begin
+    s := ExcludeTrailingPathDelimiter(aPath);
+    if not (DirectoryExists(s)) then
+      ForceDirectories(s);
+    with CreateInArchive(CLSID_CFormatZip, arch_lib) do
+    begin
+      OpenFile(aDir + aNew.SrvrFile);
+      ExtractTo(s);
+    end;
+    Result := 1;
+  end
+  else
+    Result := 0;
 end;
+
 end.
+
