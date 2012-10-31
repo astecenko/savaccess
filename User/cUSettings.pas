@@ -57,7 +57,7 @@ function Settings: TSettings;
 
 implementation
 uses SysUtils, Windows, PluginManager, PluginAPI, IniFiles, UAccessConstant,
-  MsAD;
+  MsAD,UAccessUserConst;
 
 function Settings: TSettings;
 begin
@@ -78,15 +78,15 @@ begin
   FNetBiosName := MsAD.GetCurrentComputerName;
   FClients := TSimpleClients.Create;
   FBases := TSimpleBases.Create;
-  FBases.RootConfig := 'NEVZ\OASUP';
+  FBases.RootConfig := csUserRootConfig;
   FLog := TSAVLog.Create(nil);
   SetErrorMode(SetErrorMode(0) or SEM_NOOPENFILEERRORBOX or
     SEM_FAILCRITICALERRORS);
   Plugins.SetVersion(1);
   // Загрузка всех плагинов. Подразумевается, что они лежат в под-папке Plugins
-  Plugins.LoadPlugins(ExtractFilePath(ParamStr(0)) + 'Plugins', SPluginExt);
+  Plugins.LoadPlugins(ExtractFilePath(ParamStr(0)) + csPluginsDir, SPluginExt);
   FLastUpdate := EncodeDate(2000, 1, 1);
-  sDir := FBases.RootConfig + 'Client\';
+  sDir := FBases.RootConfig + csUserConfig;
   if not DirectoryExists(sDir) then
     ForceDirectories(sDir);
   FLog.FileName := sDir + csTCPLog;
@@ -96,8 +96,7 @@ begin
   FLog.Active := True;
   sPath := sDir + csContainerCfg;
   ini := TIniFile.Create(sPath);
-  FNetLog := ini.ReadString('option', 'netlog',
-    '\\nevz\nevz\ASUP_Data1\PDO\1\');
+  FNetLog := ini.ReadString('option', 'netlog', csNetLogDef);
   //  FClient := TSAVAccessClient.Create('NEVZ\OASUP\Client');
   if (ParamCount > 0) and (FileExists(ParamStr(1))) then
     FConfigFile := ParamStr(1)
