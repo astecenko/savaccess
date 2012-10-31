@@ -443,7 +443,7 @@ begin
       //MnuFrm.frameRight.LoadFromFile(Settings.Bases.RootConfig+'Client\index.html');
       //MnuFrm.chrm1.defaulturl:=Settings.Bases.RootConfig+'Client\index.html';
       //MnuFrm.chrm1.Load('file:///C:/Documents%20and%20Settings/StetsenkoAV/Application%20Data/NEVZ/OASUP/Client/index.html');
-      MnuFrm.chrm1.Load('c:\Documents and Settings\StetsenkoAV\Application Data\NEVZ\OASUP\Client\index.html');
+      MnuFrm.chrm1.Load('http://opennet.ru/');
       // MnuFrm.chrm1.defaulturl:='file:///C:/Documents%20and%20Settings/StetsenkoAV/Application%20Data/NEVZ/OASUP/Client/index.html';
       // MnuFrm.chrm1.Refresh;
        // MnuFrm.frameRight.FwdButtonEnabled:=True;
