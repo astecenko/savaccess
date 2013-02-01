@@ -25,9 +25,11 @@ const
   paramUpda = 'updating';
   paramDebug = 'debug';
   paramMin = 'minutes';
+  paramLogin = 'login';
+  paramPassw = 'password';
 
   ClientForm = 'TSAVClntFrm1';
-  regPath = 'NEVZ\OASUP\Client';
+  regPath = 'SOFTWARE\SAVClient';
 
   ClientLogin = 'arty';
   ClientPassw = '12345';
@@ -37,7 +39,7 @@ var
   i: Integer;
   updating: Boolean;
   ParamList, TempList: TStringList;
-  shost, sconf, srun, scapt, sparam: string;
+  shost, sconf, srun, scapt, sparam, slogin, spassw: string;
   iport, idebug, iminute: Integer;
   idClient: TIdTCPClient;
   LastUpd, NoUpd: TDateTime;
@@ -85,18 +87,26 @@ begin
     if (sparam = 'help') or (sparam = '?') or (sparam = '/?') then
     begin
       Writeln('SAVAccess starter. Param list:');
-      Writeln('base - full path to config base file. REQUIRED');
-      Writeln('host - host PC IP address, DNS or NetBIOS name. Default=127.0.0.1');
-      Writeln('port - host PC networks port. Default=45890');
-      Writeln('caption - base caption. Needed if config base file not accessed from this PC. Default not set');
-      Writeln('debug - show debug info if equal 1. Default not set');
-      Writeln('minutes - the number of minutes since the last update, above which should launch a new update. If the last database update took less than setting the time, the new update does not start. Default=3');
+      Writeln(paramBase + ' - full path to config base file. REQUIRED');
+      Writeln(paramHost +
+        ' - host PC IP address, DNS or NetBIOS name. Default=127.0.0.1');
+      Writeln(paramPort + ' - host PC networks port. Default=45890');
+      Writeln(paramCapt +
+        ' - base caption. Needed if config base file not accessed from this PC. Default not set');
+      Writeln(paramDebug + ' - show debug info if equal 1. Default not set');
+      Writeln(paramMin +
+        ' - the number of minutes since the last update, above which should launch a new update. If the last database update took less than setting the time, the new update does not start. Default=3');
+      Writeln(paramLogin + ' - client login. Default set in source constant');
+      Writeln(paramPassw +
+        ' - client password. Default set in source constant');
       Writeln('');
       Writeln('Examples:');
       Writeln('All defaults: ' + ExtractFileName(ParamStr(0)) +
-        ' base=\\bs4\share1\file1.savaccess');
+        ' ' + paramBase + '=\\bs4\share1\file1.savaccess');
       Writeln('More parameters: ' + ExtractFileName(ParamStr(0)) +
-        ' base=\\bs4\share1\file1.savaccess host=172.16.0.1 port=8888 minutes=5 caption="main base" debug=1');
+        ' ' + paramBase + '=\\bs4\share1\file1.savaccess ' + paramHost +
+        '=172.16.0.1 ' + paramPort + '=8888 ' + paramMin + '=5 ' + paramCapt +
+        '="main base" ' + paramdebug + '=1');
       Exit;
     end;
   end;
@@ -108,6 +118,12 @@ begin
     shost := ParamList.Values[paramHost];
     if shost = '' then
       shost := localhost;
+    slogin := ParamList.Values[paramLogin];
+    if slogin = '' then
+      slogin := ClientLogin;
+    spassw := ParamList.Values[paramPassw];
+    if spassw = '' then
+      spassw := ClientPassw;
     sconf := ParamList.Values[paramBase];
     scapt := ParamList.Values[paramCapt];
     iport := StrToIntDef(ParamList.Values[paramPort], 0);

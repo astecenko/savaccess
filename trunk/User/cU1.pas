@@ -29,7 +29,6 @@ type
     procedure idtcpsrvr1Connect(AThread: TIdPeerThread);
     procedure idtcpsrvr1Disconnect(AThread: TIdPeerThread);
     procedure idtcpsrvr1cmdhOpenCommand(ASender: TIdCommand);
-    procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure idtcpsrvr1cmdhListCommand(ASender: TIdCommand);
     procedure idtcpsrvr1cmdhStatusCommand(ASender: TIdCommand);
     procedure idtcpsrvr1cmdhInfoCommand(ASender: TIdCommand);
@@ -45,6 +44,7 @@ type
     procedure idtcpsrvr1cmdhLogoutCommand(ASender: TIdCommand);
     procedure idtcpsrvr1cmdhWhoamiCommand(ASender: TIdCommand);
     procedure actShowMenuExecute(Sender: TObject);
+    procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
   private
     { Private declarations }
   public
@@ -56,7 +56,7 @@ var
   SAVClntFrm1: TSAVClntFrm1;
 
 implementation
-uses SAVLib_INI, Registry, UAccessSimple, SAVLib, Support, cUMenu;
+uses SAVLib_INI, Registry, UAccessSimple, SAVLib, Support, UAccessUserConst;
 
 {$R *.dfm}
 
@@ -85,12 +85,12 @@ begin
   if b then
   begin
     reg := TRegistry.Create;
-    reg.OpenKey('NEVZ\OASUP\Client', True);
+    reg.OpenKey('SOFTWARE\SAVClient', True);
     reg.WriteString('path', Application.ExeName);
     reg.CloseKey;
     FreeAndNil(reg);
     Settings.Init;
-
+    //  Settings.Bases.GetCaption();
   end
   else
     Application.Terminate;
@@ -183,15 +183,6 @@ begin
     end;
   end;
   Settings.Log.SaveCommand(ASender);
-end;
-
-procedure TSAVClntFrm1.FormClose(Sender: TObject; var Action: TCloseAction);
-begin
-  if idtcpsrvr1.Active then
-  begin
-    Settings.Clients.DisconnectAll;
-    idtcpsrvr1.Active := False;
-  end;
 end;
 
 procedure TSAVClntFrm1.idtcpsrvr1cmdhListCommand(ASender: TIdCommand);
@@ -429,33 +420,54 @@ end;
 
 procedure TSAVClntFrm1.actShowMenuExecute(Sender: TObject);
 var
-  MnuFrm: TSAVClntMenu;
+  //  MnuFrm: TSAVClntMenu;
   h: HWND;
   s: string;
 begin
-  s := TSAVClntMenu.ClassName;
-  h := FindWindow(PAnsiChar(s), nil);
-  if h = 0 then
+  if Settings.Bases.Count > 0 then
   begin
-    MnuFrm := TSAVClntMenu.Create(Self);
-    try
-      //  MnuFrm.wb1.
-      //MnuFrm.frameRight.LoadFromFile(Settings.Bases.RootConfig+'Client\index.html');
-      //MnuFrm.chrm1.defaulturl:=Settings.Bases.RootConfig+'Client\index.html';
-      //MnuFrm.chrm1.Load('file:///C:/Documents%20and%20Settings/StetsenkoAV/Application%20Data/NEVZ/OASUP/Client/index.html');
-      MnuFrm.chrm1.Load('http://opennet.ru/');
-      // MnuFrm.chrm1.defaulturl:='file:///C:/Documents%20and%20Settings/StetsenkoAV/Application%20Data/NEVZ/OASUP/Client/index.html';
-      // MnuFrm.chrm1.Refresh;
-       // MnuFrm.frameRight.FwdButtonEnabled:=True;
-       // MnuFrm.frameRight.BackButtonEnabled:=True;
-      MnuFrm.LoadMenuFromFile(Settings.Bases.RootConfig + 'Client\client.mnu');
-      MnuFrm.ShowModal;
-    finally
-      FreeAndNil(MnuFrm);
-    end;
+    s := csMainCaption + Settings.Bases.GetCaption(0);
+    h := FindWindow('TSAVClntMenu', PChar(s));
+    if h = 0 then
+      ProcStart('SAVMenu.exe')
+    else
+      ShowWindow(h, SW_SHOWNORMAL);
   end
-  else
-    ShowWindow(h,SW_SHOWNORMAL);
+    (*  s := TSAVClntMenu.ClassName;
+      h := FindWindow(PAnsiChar(s), nil);
+      if h = 0 then
+      begin
+        MnuFrm := TSAVClntMenu.Create(Self);
+        try
+          //  MnuFrm.wb1.
+          //MnuFrm.frameRight.LoadFromFile(Settings.Bases.RootConfig+'Client\index.html');
+          //MnuFrm.chrm1.defaulturl:=Settings.Bases.RootConfig+'Client\index.html';
+          //MnuFrm.chrm1.Load('file:///C:/Documents%20and%20Settings/StetsenkoAV/Application%20Data/NEVZ/OASUP/Client/index.html');
+          MnuFrm.chrm1.Load('http://opennet.ru/');
+          // MnuFrm.chrm1.defaulturl:='file:///C:/Documents%20and%20Settings/StetsenkoAV/Application%20Data/NEVZ/OASUP/Client/index.html';
+          // MnuFrm.chrm1.Refresh;
+           // MnuFrm.frameRight.FwdButtonEnabled:=True;
+           // MnuFrm.frameRight.BackButtonEnabled:=True;
+          MnuFrm.LoadMenuFromFile(Settings.Bases.RootConfig + 'Client\client.mnu');
+          MnuFrm.ShowModal;
+        finally
+          FreeAndNil(MnuFrm);
+        end;
+      end
+      else
+        ShowWindow(h,SW_SHOWNORMAL);
+      *)
+end;
+
+procedure TSAVClntFrm1.FormCloseQuery(Sender: TObject;
+  var CanClose: Boolean);
+begin
+
+  if idtcpsrvr1.Active then
+  begin
+    Settings.Clients.DisconnectAll;
+    idtcpsrvr1.Active := False;
+  end;
 end;
 
 end.

@@ -7,11 +7,6 @@ uses
   Dialogs, ComCtrls, ExtCtrls, ImgList, StdCtrls, Buttons,
   JvExComCtrls, JvComCtrls, IniFiles, cefvcl, ceflib, ShellAPI;
 
-const
-  start_protocol = 'run://';
-  MainCaption = ' ÎËÂÌÚ ¿—”œ: ';
-  error_page = 'd:\html\error.html';
-
 type
 
   PMnuItem = ^TMnuItem;
@@ -54,6 +49,9 @@ type
       const browser: ICefBrowser; const url: ustring;
       out allowOsExecution: Boolean);
     procedure jv1Click(Sender: TObject);
+    procedure chrm1BeforeContextMenu(Sender: TObject;
+      const browser: ICefBrowser; const frame: ICefFrame;
+      const params: ICefContextMenuParams; const model: ICefMenuModel);
   private
     FStartProtLength: Integer;
     FLoading: Boolean;
@@ -64,8 +62,11 @@ type
       aParent: string = '');
   end;
 
+var
+SAVClntMenu:TSAVClntMenu;  
+
 implementation
-uses cUSettings, SAVLib;
+uses SAVLib, cUMenuSett,UAccessUserConst;
 
 {$R *.dfm}
 
@@ -106,6 +107,7 @@ begin
   if FileExists(aFileName) then
   begin
     ini := TMemIniFile.Create(aFileName);
+    Self.Caption:=csMainCaption+ini.ReadString('option','caption','');
     listMain := TStringList.Create;
     GetChildFromIni(ini, listMain);
     nmain := pred(listMain.Count);
@@ -141,6 +143,7 @@ procedure TSAVClntMenu.jv1Deletion(Sender: TObject; Node: TTreeNode);
 var
   NewDoc: PMnuItem;
 begin
+
   if Node.Data <> nil then
   begin
     NewDoc := Node.Data;
@@ -177,8 +180,9 @@ end;     }
 
 procedure TSAVClntMenu.FormCreate(Sender: TObject);
 begin
-  FStartProtLength := Length(start_protocol);
-  Self.Caption := MainCaption;
+  FStartProtLength := Length(csstart_protocol);
+  Self.LoadMenuFromFile(Settings.ConfigFile);
+//    Self.Caption := MainCaption;
   // FLoading:=False;
 end;
 
@@ -240,8 +244,8 @@ end;
 procedure TSAVClntMenu.chrm1TitleChange(Sender: TObject;
   const browser: ICefBrowser; const title: ustring);
 begin
-  if IsMain(browser) then
-    Caption := MainCaption + title;
+{  if IsMain(browser) then
+    Caption := MainCaption + title;}
 end;
 
 procedure TSAVClntMenu.chrm1ProtocolExecution(Sender: TObject;
@@ -250,7 +254,7 @@ procedure TSAVClntMenu.chrm1ProtocolExecution(Sender: TObject;
 var
   s: string;
 begin
-  if Pos(start_protocol, Url) = 1 then
+  if Pos(csstart_protocol, Url) = 1 then
   begin
     s := Copy(Url, succ(FStartProtLength), Length(Url) - FStartProtLength);
     ProcStart(s, SW_NORMAL);
@@ -270,7 +274,15 @@ begin
   if FileExists(s) then
     chrm1.Load(s)
   else
-    chrm1.Load(error_page);
+    chrm1.Load(csError_page);
+end;
+
+procedure TSAVClntMenu.chrm1BeforeContextMenu(Sender: TObject;
+  const browser: ICefBrowser; const frame: ICefFrame;
+  const params: ICefContextMenuParams; const model: ICefMenuModel);
+begin
+model.Clear; //clear standard popup menu
+
 end;
 
 end.

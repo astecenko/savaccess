@@ -144,6 +144,7 @@ object SAVClntMenu: TSAVClntMenu
     TabOrder = 3
     OnLoadStart = chrm1LoadStart
     OnLoadEnd = chrm1LoadEnd
+    OnBeforeContextMenu = chrm1BeforeContextMenu
     OnTitleChange = chrm1TitleChange
     OnDownloadUpdated = chrm1DownloadUpdated
     OnProtocolExecution = chrm1ProtocolExecution

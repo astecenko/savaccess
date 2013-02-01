@@ -74,6 +74,7 @@ type
     function GetItem(const aCaption: string): Pointer;
     function GetIndex(const aCaption: string): integer;
     procedure GetCaptions(aList: TStrings; const aConfigFile: Boolean = False);
+    function GetCaption(const aIndex: Integer): string;
     procedure GetStatus(aList: TStrings);
     function GetItemInfo(const aCaption: string; aList: TStrings): Boolean;
     procedure Clear;
@@ -107,7 +108,7 @@ type
   end;
 
 implementation
-uses SysUtils, SAVLib, IdTCPServer, md5;
+uses SysUtils, SAVLib, IdTCPServer, md5, Registry, Forms;
 
 { TSimpleBase }
 
@@ -376,6 +377,14 @@ begin
     Result := Update(i);
 end;
 
+function TSimpleBases.GetCaption(const aIndex: Integer): string;
+begin
+  if aIndex < FItems.Count then
+    Result := TSimpleBase(FItems[aIndex]).Caption
+  else
+    Result := '';
+end;
+
 { TSimpleClients }
 
 procedure TSimpleClients.Clear;
@@ -389,9 +398,17 @@ begin
 end;
 
 constructor TSimpleClients.Create;
+var
+  reg: TRegIniFile;
 begin
   FItems := TList.Create;
-  FPasswordFile := 'd:\ProjectsD\SAVAccess\managers.pwd';
+ // FPasswordFile := 'd:\ProjectsD\SAVAccess\managers.pwd';
+  reg := TRegIniFile.Create;
+  FPasswordFile := reg.ReadString('SOFTWARE\SAVClient', 'pwd',
+    ExtractFilePath(Application.ExeName) + 'users.pwd');
+  reg.CloseKey;
+  FreeAndNil(reg);
+
 end;
 
 procedure TSimpleClients.Delete(const aIndex: Integer);
@@ -466,7 +483,7 @@ var
   s: string;
 begin
   Result := '';
-  s:=Trim(AnsiLowerCase(aLogin));
+  s := Trim(AnsiLowerCase(aLogin));
   try
     list := TStringList.Create;
     list.LoadFromFile(FPasswordFile);
