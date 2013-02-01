@@ -10,7 +10,7 @@ DCC = $(ROOT)\bin\dcc32.exe $**
 BRCC = $(ROOT)\bin\brcc32.exe $**
 #------------------------------------------------------------------------------
 PROJECTS = SAVAccessClient.exe SAVAccessAdmin.exe INI1.rep TXT1.ext \
-  SAVStarter.exe SAVSupport.exe ZIP1.ext
+  SAVStarter.exe SAVSupport.exe ZIP1.ext SAVMenu.exe
 #------------------------------------------------------------------------------
 default: $(PROJECTS)
 #------------------------------------------------------------------------------
@@ -34,6 +34,9 @@ SAVSupport.exe: Support\SAVSupport.dpr
   $(DCC)
 
 ZIP1.ext: Plugins\ZIP1.dpr
+  $(DCC)
+
+SAVMenu.exe: Menu\SAVMenu.dpr
   $(DCC)
 
 

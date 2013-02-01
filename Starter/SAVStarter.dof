@@ -100,7 +100,7 @@ Conditionals=
 DebugSourceDirs=
 UsePackages=0
 [Parameters]
-RunParams=base=s:\KARTA\pr02.savaccess
+RunParams=base=\\nevz\nevz\PDO\pdo2\kARTA\pr02.savaccess
 HostApplication=
 Launcher=
 UseLauncher=0
