@@ -15,6 +15,7 @@ const
   csNetLogDef = '\\nevz\nevz\ASUP_Data1\PDO\1\';
 
   csStart_protocol = 'run://';
+  csStartCurDir_protocol = 'runcd://';
   csMainCaption = 'Клиент АСУП: ';
   csError_page = 'd:\html\error.html';
 

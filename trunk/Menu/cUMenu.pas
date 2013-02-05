@@ -54,6 +54,7 @@ type
       const params: ICefContextMenuParams; const model: ICefMenuModel);
   private
     FStartProtLength: Integer;
+    FStartCurDirProtLength: Integer;
     FLoading: Boolean;
     function IsMain(const b: ICefBrowser; const f: ICefFrame = nil): Boolean;
   public
@@ -63,10 +64,10 @@ type
   end;
 
 var
-SAVClntMenu:TSAVClntMenu;  
+  SAVClntMenu: TSAVClntMenu;
 
 implementation
-uses SAVLib, cUMenuSett,UAccessUserConst;
+uses SAVLib, cUMenuSett, UAccessUserConst;
 
 {$R *.dfm}
 
@@ -107,7 +108,7 @@ begin
   if FileExists(aFileName) then
   begin
     ini := TMemIniFile.Create(aFileName);
-    Self.Caption:=csMainCaption+ini.ReadString('option','caption','');
+    Self.Caption := csMainCaption + ini.ReadString('option', 'caption', '');
     listMain := TStringList.Create;
     GetChildFromIni(ini, listMain);
     nmain := pred(listMain.Count);
@@ -181,9 +182,10 @@ end;     }
 procedure TSAVClntMenu.FormCreate(Sender: TObject);
 begin
   FStartProtLength := Length(csstart_protocol);
+  FStartCurDirProtLength:= Length(csStartCurDir_protocol);
   Self.LoadMenuFromFile(Settings.ConfigFile);
-//    Self.Caption := MainCaption;
-  // FLoading:=False;
+  //    Self.Caption := MainCaption;
+    // FLoading:=False;
 end;
 
 procedure TSAVClntMenu.btnGoBackClick(Sender: TObject);
@@ -244,20 +246,26 @@ end;
 procedure TSAVClntMenu.chrm1TitleChange(Sender: TObject;
   const browser: ICefBrowser; const title: ustring);
 begin
-{  if IsMain(browser) then
-    Caption := MainCaption + title;}
+  {  if IsMain(browser) then
+      Caption := MainCaption + title;}
 end;
 
 procedure TSAVClntMenu.chrm1ProtocolExecution(Sender: TObject;
   const browser: ICefBrowser; const url: ustring;
   out allowOsExecution: Boolean);
 var
-  s: string;
+  s,s2: string;
 begin
   if Pos(csstart_protocol, Url) = 1 then
   begin
     s := Copy(Url, succ(FStartProtLength), Length(Url) - FStartProtLength);
     ProcStart(s, SW_NORMAL);
+  end
+  else if Pos(csStartCurDir_protocol, Url) = 1 then
+  begin
+    s := Copy(Url, succ(FStartCurDirProtLength), Length(Url) - FStartCurDirProtLength);
+    s2:=Copy(s,1,Pos(' ', s));
+    ProcStart(s, SW_NORMAL,False,$FFFFFFFF,ExtractFileDir(s2));
   end
   else if Pos('mailto:', url) = 1 then
   begin
@@ -281,7 +289,7 @@ procedure TSAVClntMenu.chrm1BeforeContextMenu(Sender: TObject;
   const browser: ICefBrowser; const frame: ICefFrame;
   const params: ICefContextMenuParams; const model: ICefMenuModel);
 begin
-model.Clear; //clear standard popup menu
+  model.Clear; //clear standard popup menu
 
 end;
 

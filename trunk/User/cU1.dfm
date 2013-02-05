@@ -38,6 +38,7 @@ object SAVClntFrm1: TSAVClntFrm1
     end
     object N1: TMenuItem
       Action = actExit
+      Enabled = False
     end
   end
   object actlst1: TActionList

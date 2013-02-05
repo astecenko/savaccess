@@ -56,7 +56,7 @@ var
   SAVClntFrm1: TSAVClntFrm1;
 
 implementation
-uses SAVLib_INI, Registry, UAccessSimple, SAVLib, Support, UAccessUserConst;
+uses SAVLib_INI, Registry, UAccessSimple, SAVLib, Support, UAccessUserConst,shelllink;
 
 {$R *.dfm}
 
@@ -71,10 +71,12 @@ begin
 end;
 
 procedure TSAVClntFrm1.FormCreate(Sender: TObject);
+const
+  csLinkName='savacc.lnk';
 var
   reg: TRegistry;
   b: Boolean;
-
+  s:string;
 begin
   b := True;
   try
@@ -89,6 +91,12 @@ begin
     reg.WriteString('path', Application.ExeName);
     reg.CloseKey;
     FreeAndNil(reg);
+    s:=IncludeTrailingPathDelimiter(GetSpecialFolderLocation(CSIDL_STARTUP,
+    FOLDERID_Startup));
+    if not(FileExists(s+csLinkName)) then
+      begin
+        shelllink.CreateShortcut(Application.ExeName,_OTHERFOLDER,s,'','','',csLinkName);
+      end;
     Settings.Init;
     //  Settings.Bases.GetCaption();
   end
