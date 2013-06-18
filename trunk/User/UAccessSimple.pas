@@ -82,6 +82,7 @@ type
     function Add(const aConfigFile: string): boolean; overload;
     function Update(const aIndex: Integer): Boolean; overload;
     function Update(const aCaption: string): Boolean; overload;
+    function DisUpdate(const aCaption: string): Boolean;
     procedure Delete(const aIndex: Integer);
   end;
 
@@ -287,9 +288,12 @@ begin
     if Result then
     begin
       Updating := True;
-      Client.Update;
-      LastUpdate := Now;
-      Updating := False;
+      try
+        Client.Update;
+        LastUpdate := Now;
+      finally
+        Updating := False;
+      end;
     end;
   end;
 end;
@@ -385,6 +389,19 @@ begin
     Result := '';
 end;
 
+function TSimpleBases.DisUpdate(const aCaption: string): Boolean;
+var
+  i: Integer;
+begin
+  Result := False;
+  i := GetIndex(aCaption);
+  if i > -1 then
+  begin
+    TSimpleBase(FItems.Items[i]).Updating := False;
+    Result := True;
+  end;
+end;
+
 { TSimpleClients }
 
 procedure TSimpleClients.Clear;
@@ -402,7 +419,7 @@ var
   reg: TRegIniFile;
 begin
   FItems := TList.Create;
- // FPasswordFile := 'd:\ProjectsD\SAVAccess\managers.pwd';
+  // FPasswordFile := 'd:\ProjectsD\SAVAccess\managers.pwd';
   reg := TRegIniFile.Create;
   FPasswordFile := reg.ReadString('SOFTWARE\SAVClient', 'pwd',
     ExtractFilePath(Application.ExeName) + 'users.pwd');

@@ -31,9 +31,11 @@ type
     edtDescr: TEdit;
     lbl3: TLabel;
     edtVersion: TEdit;
+    btn1: TButton;
     procedure FormResize(Sender: TObject);
     procedure btnMD5Click(Sender: TObject);
     procedure btnTestClick(Sender: TObject);
+    procedure btn1Click(Sender: TObject);
   private
     FUserFiles: TSAVAccessFilesDBF;
     procedure SetUserFiles(const Value: TSAVAccessFilesDBF);
@@ -43,7 +45,7 @@ type
   end;
 
 implementation
-uses md5, U9;
+uses md5, U9, U12, UAccessConstant, DB;
 {$R *.dfm}
 
 procedure TFrm10.FormResize(Sender: TObject);
@@ -73,6 +75,26 @@ begin
   if Frm02.ShowModal = mrOk then
     edtClntFile.Text := Frm02.edtTestInput.Text;
   FreeAndNil(Frm02);
+end;
+
+procedure TFrm10.btn1Click(Sender: TObject);
+var
+  Form03: TFrm12;
+begin
+    Form03 := TFrm12.Create(Self);
+    Form03.vkdbfExt.DBFFileName :=
+      IncludeTrailingPathDelimiter(UserFiles.Container.Bases.JournalsDir) +
+      csTableExt;
+    Form03.vkdbfAct.DBFFileName :=
+      IncludeTrailingPathDelimiter(UserFiles.Container.Bases.JournalsDir) +
+      csTableAction;
+    if Form03.ShowModal = mrOk then
+    begin
+      edtExt.Text := Form03.vkdbfExt.FieldByName(csFieldExt).AsString;
+      seAction.Value  :=  Form03.vkdbfAct.FieldByName(csFieldAction).AsInteger;
+      cbbType.Text := Form03.vkdbfExt.FieldByName(csFieldType).AsString;
+    end;
+    FreeAndNil(Form03);
 end;
 
 end.

@@ -247,4 +247,13 @@ object Frm10: TFrm10
     ReadOnly = True
     TabOrder = 13
   end
+  object btn1: TButton
+    Left = 280
+    Top = 160
+    Width = 81
+    Height = 22
+    Caption = #1057#1087#1088#1072#1074#1086#1095#1085#1080#1082
+    TabOrder = 14
+    OnClick = btn1Click
+  end
 end

@@ -45,6 +45,10 @@ type
     procedure idtcpsrvr1cmdhWhoamiCommand(ASender: TIdCommand);
     procedure actShowMenuExecute(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
+    procedure idtcpsrvr1cmdhDisupdateCommand(ASender: TIdCommand);
+    procedure idtcpsrvr1cmdhVersionCommand(ASender: TIdCommand);
+    procedure idtcpsrvr1cmdhExecConsCommand(ASender: TIdCommand);
+    procedure idtcpsrvr1cmdhExecConsWinCommand(ASender: TIdCommand);
   private
     { Private declarations }
   public
@@ -56,7 +60,8 @@ var
   SAVClntFrm1: TSAVClntFrm1;
 
 implementation
-uses SAVLib_INI, Registry, UAccessSimple, SAVLib, Support, UAccessUserConst,shelllink;
+uses SAVLib_INI, Registry, UAccessSimple, SAVLib, Support, UAccessUserConst,
+  shelllink;
 
 {$R *.dfm}
 
@@ -72,12 +77,13 @@ end;
 
 procedure TSAVClntFrm1.FormCreate(Sender: TObject);
 const
-  csLinkName='savacc.lnk';
+  csLinkName = 'savacc.lnk';
 var
   reg: TRegistry;
   b: Boolean;
-  s:string;
+  s: string;
 begin
+
   b := True;
   try
     idtcpsrvr1.Active := True
@@ -91,12 +97,13 @@ begin
     reg.WriteString('path', Application.ExeName);
     reg.CloseKey;
     FreeAndNil(reg);
-    s:=IncludeTrailingPathDelimiter(GetSpecialFolderLocation(CSIDL_STARTUP,
-    FOLDERID_Startup));
-    if not(FileExists(s+csLinkName)) then
-      begin
-        shelllink.CreateShortcut(Application.ExeName,_OTHERFOLDER,s,'','','',csLinkName);
-      end;
+    s := IncludeTrailingPathDelimiter(GetSpecialFolderLocation(CSIDL_STARTUP,
+      FOLDERID_Startup));
+    if not (FileExists(s + csLinkName)) then
+    begin
+      shelllink.CreateShortcut(Application.ExeName, _OTHERFOLDER, s, '', '', '',
+        csLinkName);
+    end;
     Settings.Init;
     //  Settings.Bases.GetCaption();
   end
@@ -470,12 +477,162 @@ end;
 procedure TSAVClntFrm1.FormCloseQuery(Sender: TObject;
   var CanClose: Boolean);
 begin
-
   if idtcpsrvr1.Active then
   begin
     Settings.Clients.DisconnectAll;
     idtcpsrvr1.Active := False;
   end;
+end;
+
+procedure TSAVClntFrm1.idtcpsrvr1cmdhDisupdateCommand(ASender: TIdCommand);
+begin
+  if AccessGranted(ASender) then
+  begin
+    if ASender.Params.Count > 0 then
+    begin
+      if not Settings.Bases.DisUpdate(ASender.Params[0]) then
+      begin
+        ASender.Reply.Text.Text := 'Base not founded!';
+        ASender.Reply.NumericCode := 402;
+      end;
+    end
+    else
+    begin
+      ASender.Reply.Text.Text := 'Need base name as parameter!';
+      ASender.Reply.NumericCode := 401;
+    end;
+  end;
+  Settings.Log.SaveCommand(ASender);
+end;
+
+procedure TSAVClntFrm1.idtcpsrvr1cmdhVersionCommand(ASender: TIdCommand);
+begin
+  ASender.Reply.Text.Text := 'Client App Version: ' +
+    SAvlib.FileVersion(Application.ExeName);
+end;
+
+function GetDosOutput(const CommandLine: string): string;
+var
+  SA: TSecurityAttributes;
+  SI: TStartupInfo;
+  PI: TProcessInformation;
+  StdOutPipeRead, StdOutPipeWrite: THandle;
+  WasOK: Boolean;
+  Buffer: array[0..255] of AnsiChar;
+  BytesRead: Cardinal;
+  {cmdLine,}Line: string;
+begin
+  Application.ProcessMessages;
+  with SA do
+  begin
+    nLength := SizeOf(SA);
+    bInheritHandle := True;
+    lpSecurityDescriptor := nil;
+  end;
+  CreatePipe(StdOutPipeRead, StdOutPipeWrite, @SA, 0);
+  try
+    with SI do
+    begin
+      FillChar(SI, SizeOf(SI), 0);
+      cb := SizeOf(SI);
+      dwFlags := STARTF_USESHOWWINDOW or STARTF_USESTDHANDLES;
+      wShowWindow := SW_HIDE;
+      hStdInput := GetStdHandle(STD_INPUT_HANDLE);
+      hStdOutput := StdOutPipeWrite;
+      hStdError := StdOutPipeWrite;
+    end;
+    //cmdLine := PChar(ExtractFilePath(application.exename) + '\cmd.exe /c ping -n 10 ya.ru');
+    WasOK := CreateProcess(nil, PChar(CommandLine), nil, nil, True, 0, nil,
+      PChar(ExtractFilePath(application.exename)), SI, PI);
+    CloseHandle(StdOutPipeWrite);
+    if WasOK then
+      try
+        Line := '';
+        repeat
+          WasOK := ReadFile(StdOutPipeRead, Buffer, 255, BytesRead, nil);
+          if BytesRead > 0 then
+          begin
+            Buffer[BytesRead] := #0;
+            oemtochara(buffer, buffer);
+            Line := Line + string(AnsiString(Buffer));
+          end;
+        until not WasOK or (BytesRead = 0);
+        WaitForSingleObject(PI.hProcess, INFINITE);
+      finally
+        CloseHandle(PI.hThread);
+        CloseHandle(PI.hProcess);
+      end;
+  finally
+    result := Line;
+    CloseHandle(StdOutPipeRead);
+  end;
+end;
+
+procedure TSAVClntFrm1.idtcpsrvr1cmdhExecConsCommand(ASender: TIdCommand);
+var
+  list2: TStringList;
+  i: integer;
+begin
+  if AccessGranted(ASender) then
+  begin
+    if ASender.Params.Count = 0 then
+    begin
+      ASender.Reply.NumericCode := 401;
+      ASender.Reply.Text.Text := 'Parameter is required';
+
+    end
+    else
+    begin
+      list2 := TStringList.Create;
+      i := 0;
+      try
+        list2.Text := GetDosOutput(DosToWin(ASender.Params[0]));
+        while i < list2.Count do
+          if Trim(list2[i]) = '' then
+            list2.Delete(i)
+          else
+            Inc(i);
+        ASender.Reply.Text.Text := WinToDos(list2.Text) + #10#13;
+      finally
+        FreeAndNil(list2);
+      end;
+    end;
+  end;
+  Settings.Log.SaveCommand(ASender);
+end;
+
+procedure TSAVClntFrm1.idtcpsrvr1cmdhExecConsWinCommand(
+  ASender: TIdCommand);
+var
+  list2: TStringList;
+  i: integer;
+begin
+  if AccessGranted(ASender) then
+  begin
+    if ASender.Params.Count = 0 then
+    begin
+      ASender.Reply.NumericCode := 401;
+      ASender.Reply.Text.Text := 'Parameter is required';
+
+    end
+    else
+    begin
+      list2 := TStringList.Create;
+      i := 0;
+      try
+        list2.Text := GetDosOutput(ASender.Params[0]);
+        while i < list2.Count do
+          if Trim(list2[i]) = '' then
+            list2.Delete(i)
+          else
+            Inc(i);
+        ASender.Reply.Text.Text := list2.Text + #10#13;
+      finally
+        FreeAndNil(list2);
+      end;
+    end;
+  end;
+  Settings.Log.SaveCommand(ASender);
 end;
 
 end.
