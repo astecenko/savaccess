@@ -1,6 +1,6 @@
 object Frm1: TFrm1
-  Left = 236
-  Top = 73
+  Left = 13
+  Top = 151
   Width = 800
   Height = 480
   Caption = 'SAV Access - '#1040#1076#1084#1080#1085#1080#1089#1090#1088#1072#1090#1086#1088
@@ -44,7 +44,7 @@ object Frm1: TFrm1
     Top = 24
     Width = 648
     Height = 410
-    ActivePage = tsADGroups
+    ActivePage = tsUsers
     Align = alClient
     TabOrder = 2
     object tsUsers: TTabSheet
@@ -68,6 +68,12 @@ object Frm1: TFrm1
         DesignSize = (
           640
           277)
+        object btn3: TSpeedButton
+          Left = 2
+          Top = 2
+          Width = 23
+          Height = 23
+        end
         object dbgrdUser: TDBGrid
           Left = 3
           Top = 27
@@ -154,6 +160,12 @@ object Frm1: TFrm1
         Cursor = crVSplit
         Align = alBottom
       end
+      object btn1: TSpeedButton
+        Left = 312
+        Top = 184
+        Width = 23
+        Height = 22
+      end
       object pnl2: TPanel
         Left = 0
         Top = 280
@@ -230,6 +242,12 @@ object Frm1: TFrm1
         DesignSize = (
           640
           277)
+        object btn2: TSpeedButton
+          Left = 2
+          Top = 2
+          Width = 23
+          Height = 22
+        end
         object dbgrdGroup: TDBGrid
           Left = 3
           Top = 25
@@ -655,6 +673,7 @@ object Frm1: TFrm1
     object actSupport: TAction
       Category = #1057#1077#1088#1074#1080#1089
       Caption = #1055#1086#1076#1076#1077#1088#1078#1082#1072' '#1087#1086#1083#1100#1079#1086#1074#1072#1090#1077#1083#1077#1081
+      OnExecute = actSupportExecute
     end
     object actADGroupAdd: TAction
       Category = #1043#1088#1091#1087#1087#1072

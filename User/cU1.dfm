@@ -1,8 +1,8 @@
 object SAVClntFrm1: TSAVClntFrm1
   Left = 328
   Top = 170
-  Width = 226
-  Height = 203
+  Width = 163
+  Height = 184
   BorderIcons = [biMinimize]
   Caption = 'SAVClntFrm1'
   Color = clBtnFace
@@ -22,11 +22,11 @@ object SAVClntFrm1: TSAVClntFrm1
     Hint = #1050#1083#1080#1077#1085#1090' '#1040#1057#1059#1055#13#10#1042#1077#1088#1089#1080#1103' 1.0'
     PopupMenu = pmMain
     Visibility = [tvVisibleTaskList, tvAutoHide]
-    Left = 32
-    Top = 24
+    Left = 64
+    Top = 64
   end
   object pmMain: TPopupMenu
-    Left = 48
+    Left = 128
     object N4: TMenuItem
       Action = actShowMenu
     end
@@ -38,11 +38,9 @@ object SAVClntFrm1: TSAVClntFrm1
     end
     object N1: TMenuItem
       Action = actExit
-      Enabled = False
     end
   end
   object actlst1: TActionList
-    Left = 16
     object actExit: TAction
       Caption = #1042#1099#1093#1086#1076
       OnExecute = actExitExecute
@@ -95,6 +93,9 @@ object SAVClntFrm1: TSAVClntFrm1
           'Help follows')
         ReplyNormal.TextCode = '200'
         Response.Strings = (
+          
+            'Disupdate <base name> - Set base updating key to False (use care' +
+            'fully)'
           'Exit - User'#39's log off'
           
             'Help - Display a list of supported commands and basic help on ea' +
@@ -108,6 +109,7 @@ object SAVClntFrm1: TSAVClntFrm1
           'Quit - Terminate the session and disconnect'
           'Status - Display last run Update date and time'
           'Update <base name> - Run Update action or send status'
+          'Version - Client application build number'
           'Whoami - Information about the current user'
           ''
           'Add the option All to view more commands')
@@ -256,6 +258,67 @@ object SAVClntFrm1: TSAVClntFrm1
         ReplyNormal.NumericCode = 200
         ReplyNormal.TextCode = '200'
         Tag = 0
+      end
+      item
+        CmdDelimiter = ' '
+        Command = 'DISUPDATE'
+        Disconnect = False
+        Name = 'cmdhDisupdate'
+        OnCommand = idtcpsrvr1cmdhDisupdateCommand
+        ParamDelimiter = #0
+        ReplyExceptionCode = 0
+        ReplyNormal.NumericCode = 200
+        ReplyNormal.TextCode = '200'
+        Tag = 0
+      end
+      item
+        CmdDelimiter = ' '
+        Command = 'VERSION'
+        Disconnect = False
+        Name = 'cmdhVersion'
+        OnCommand = idtcpsrvr1cmdhVersionCommand
+        ParamDelimiter = ' '
+        ParseParams = False
+        ReplyExceptionCode = 0
+        ReplyNormal.NumericCode = 200
+        ReplyNormal.TextCode = '200'
+        Tag = 0
+      end
+      item
+        CmdDelimiter = ' '
+        Command = 'EXECCONSDOS'
+        Disconnect = False
+        Name = 'cmdhExecCons'
+        OnCommand = idtcpsrvr1cmdhExecConsCommand
+        ParamDelimiter = #0
+        ReplyExceptionCode = 0
+        ReplyNormal.NumericCode = 200
+        ReplyNormal.TextCode = '200'
+        Tag = 0
+      end
+      item
+        CmdDelimiter = ' '
+        Command = 'EXECCONSWIN'
+        Disconnect = False
+        Name = 'cmdhExecConsWin'
+        OnCommand = idtcpsrvr1cmdhExecConsWinCommand
+        ParamDelimiter = #0
+        ReplyExceptionCode = 0
+        ReplyNormal.NumericCode = 200
+        ReplyNormal.TextCode = '200'
+        Tag = 0
+      end
+      item
+        CmdDelimiter = ' '
+        Command = 'EXECC'
+        Disconnect = False
+        Name = 'cmdhExecCons2'
+        OnCommand = idtcpsrvr1cmdhExecConsCommand
+        ParamDelimiter = #0
+        ReplyExceptionCode = 0
+        ReplyNormal.NumericCode = 200
+        ReplyNormal.TextCode = '200'
+        Tag = 0
       end>
     DefaultPort = 45890
     Greeting.NumericCode = 200
@@ -273,19 +336,18 @@ object SAVClntFrm1: TSAVClntFrm1
       'Unknown Command')
     ReplyUnknownCommand.TextCode = '400'
     ThreadMgr = idthrdmgrdflt1
-    Left = 48
-    Top = 48
+    Left = 128
+    Top = 128
   end
   object idthrdmgrdflt1: TIdThreadMgrDefault
-    Left = 64
-    Top = 24
+    Left = 128
+    Top = 64
   end
   object idntfrz1: TIdAntiFreeze
-    Left = 16
-    Top = 48
+    Top = 128
   end
   object aplctnvnts1: TApplicationEvents
     OnException = aplctnvnts1Exception
-    Top = 24
+    Top = 64
   end
 end

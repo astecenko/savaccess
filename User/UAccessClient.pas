@@ -1,7 +1,7 @@
 unit UAccessClient;
 
 interface
-uses Classes, UAccessConstant, DBClient, DB, IniFiles, UAccessPattern,
+uses Classes, UAccessConstant, DBClient, DB, MidasLib, CRTL, IniFiles, UAccessPattern,
   PluginAPI;
 
 type
@@ -49,7 +49,6 @@ type
     procedure SetIniFile(const Value: TIniFile);
     procedure SetActions(const Value: TList);
     procedure SetADGroupsDir(const Value: string);
-
   public
     property ConfigDir: string read FConfigDir;
     property Domain: string read FDomain;
@@ -275,6 +274,7 @@ var
 begin
   if Assigned(FDataSet) then
   begin
+    if FDataSet.Active then
     FDataSet.ApplyUpdates(-1);
     FDataSet.Close;
     FreeAndNil(FDataset);
@@ -595,6 +595,8 @@ begin
       UpdateContainerFile(FUsersDir, SID, FIniFile.ReadString('U', SID, ''));
   end;
   FDataSet.ApplyUpdates(-1);
+  FDataSet.Close;
+  FDataSet.Open;
 end;
 
 //Обновление файлов определенного контейнера хранилища переданного в aDir+aSID
@@ -683,6 +685,9 @@ begin
       FreeAndNil(table1);
       FIniFile.WriteString(c, aSID, vers);
     end;
+    FDataSet.ApplyUpdates(-1);
+//   FDataSet.Close;
+//    FDataSet.Open;
   end;
 end;
 

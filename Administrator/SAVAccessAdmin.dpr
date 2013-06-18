@@ -11,7 +11,8 @@ uses
   U1 in 'U1.pas' {Frm1},
   U4 in 'U4.pas' {Frm4},
   U15 in 'U15.pas' {Frm15},
-  UAccessADGroup in 'UAccessADGroup.pas';
+  UAccessADGroup in 'UAccessADGroup.pas',
+  U17 in 'U17.pas' {Frm17};
 
 (*  U12 in 'U12.pas' {Frm12},
   UAccessBase in 'UAccessBase.pas',

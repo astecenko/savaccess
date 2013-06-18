@@ -75,6 +75,9 @@ type
     lstADGroupUsers: TListBox;
     actADGroupEdit: TAction;
     actRemoteUser: TAction;
+    btn1: TSpeedButton;
+    btn2: TSpeedButton;
+    btn3: TSpeedButton;
     procedure actCreateBaseExecute(Sender: TObject);
     procedure actUserAddExecute(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -103,6 +106,7 @@ type
     procedure actADGroupEditExecute(Sender: TObject);
     procedure dbgrdADGroupsDblClick(Sender: TObject);
     procedure actRemoteUserExecute(Sender: TObject);
+    procedure actSupportExecute(Sender: TObject);
   private
     { Private declarations }
   public
@@ -113,7 +117,7 @@ var
   Frm1: TFrm1;
 
 implementation
-uses U3, U4, U5, U6, U7, U8, U9, U11, U12, U15, U16, DU1, U1AD, UAccessConstant,
+uses U3, U4, U5, U6, U7, U8, U9, U11, U12, U15, U16, U17, DU1, U1AD, UAccessConstant,
   UAccessFileDBF, UAccessGroup, UAccessBase, StrUtils;
 
 {$R *.dfm}
@@ -594,6 +598,16 @@ begin
     Frm01.lblFileName.Caption:=s;
   Frm01.ShowModal;
   FreeAndNil(Frm01);
+end;
+
+procedure TFrm1.actSupportExecute(Sender: TObject);
+var
+  Form1:TFrm17;
+begin
+  Form1:=TFrm17.Create(Self);
+  Form1.ShowModal;
+  FreeAndNil(Form1);
+
 end;
 
 end.
