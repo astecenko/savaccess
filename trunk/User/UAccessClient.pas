@@ -1,7 +1,8 @@
 unit UAccessClient;
 
 interface
-uses Classes, UAccessConstant, DBClient, DB, MidasLib, CRTL, IniFiles, UAccessPattern,
+uses Classes, UAccessConstant, DBClient, DB, MidasLib, CRTL, IniFiles,
+  UAccessPattern,
   PluginAPI;
 
 type
@@ -78,7 +79,7 @@ type
     function AddedProc(const aOld, aNew: TClientFile; const aDir, aSID, aPath:
       string):
       Boolean;
-    procedure UpdateContainerFile(const aDir, aSID, aVersion: string);
+    function UpdateContainerFile(const aDir, aSID, aVersion: string): boolean;
     procedure DeleteContainerFile(const aDir, aSID: string);
     function Update: Boolean;
     function FindPlugin(const AFileType: Char; AExt: string; AID: Integer; const
@@ -275,7 +276,7 @@ begin
   if Assigned(FDataSet) then
   begin
     if FDataSet.Active then
-    FDataSet.ApplyUpdates(-1);
+      FDataSet.ApplyUpdates(-1);
     FDataSet.Close;
     FreeAndNil(FDataset);
   end;
@@ -486,9 +487,9 @@ var
   ini: TIniFile;
   list1, oldGroups, ADGroups, ADOldGroups: TStringList;
   sUserIni, WorkLst, ADWorkLst, sDNS: string;
-  i, j: Integer;
+  i, j, n: Integer;
   b,
-    DelGroups // есть удаленные группы
+    Changed // были изменения, обновляем все полностью
   : Boolean;
 begin
   Result := True;
@@ -499,7 +500,7 @@ begin
   sDNS := GetDNSDomainName(Domain);
   list1 := TStringList.Create;
   ADGroups := TStringList.Create;
-  DelGroups := False;
+  Changed := False;
   b := FileExists(sUserIni);
   if b then
   begin
@@ -531,7 +532,7 @@ begin
     begin
       for i := 0 to pred(ADOldGroups.Count) do
         DeleteContainerFile(FADGroupsDir, ADOldGroups.Names[i]);
-      DelGroups := True;
+      Changed := True;
     end;
     FreeAndNil(ADOldGroups);
   end;
@@ -556,7 +557,7 @@ begin
     begin
       for i := 0 to pred(oldGroups.Count) do
         DeleteContainerFile(FGroupsDir, oldGroups.Names[i]);
-      DelGroups := True;
+      Changed := True;
     end;
     FreeAndNil(oldGroups);
   end;
@@ -566,30 +567,47 @@ begin
   except
     Result := False;
   end;
-  if DelGroups then
+  if Changed then
   begin
     UpdateContainerFile(FDomainsDir, Domain, '');
-    for i := 0 to pred(ADGroups.Count) do
+    n := pred(ADGroups.Count);
+    for i := 0 to n do
       UpdateContainerFile(FADGroupsDir, ADGroups.Names[i], '');
-    for i := 0 to pred(list1.Count) do
+    n := pred(list1.Count);
+    for i := 0 to n do
       UpdateContainerFile(FGroupsDir, list1.Names[i], '');
   end
   else
   begin
-    UpdateContainerFile(FDomainsDir, Domain, FIniFile.ReadString('D', Domain,
+    Changed := UpdateContainerFile(FDomainsDir, Domain, FIniFile.ReadString('D',
+      Domain,
       ''));
-    for i := 0 to pred(ADGroups.Count) do
-      UpdateContainerFile(FADGroupsDir, ADGroups.Names[i],
-        FIniFile.ReadString('A', ADGroups.Names[i], ''));
-    for i := 0 to pred(list1.Count) do
-      UpdateContainerFile(FGroupsDir, list1.Names[i], FIniFile.ReadString('G',
-        list1.Names[i], ''));
+    n := pred(ADGroups.Count);
+    for i := 0 to n do
+    begin
+      if Changed = False then
+        Changed := UpdateContainerFile(FADGroupsDir, ADGroups.Names[i],
+          FIniFile.ReadString('A', ADGroups.Names[i], ''))
+      else
+        UpdateContainerFile(FADGroupsDir, ADGroups.Names[i], '');
+    end;
+    n := pred(list1.Count);
+    for i := 0 to n do
+    begin
+      if Changed = False then
+        Changed := UpdateContainerFile(FGroupsDir, list1.Names[i],
+          FIniFile.ReadString('G',
+          list1.Names[i], ''))
+      else
+        UpdateContainerFile(FGroupsDir, list1.Names[i], '');
+    end
   end;
   FreeAndNil(ADGroups);
   FreeAndNil(list1);
   if b then
   begin
-    if DelGroups then
+    { TODO : надо обновлять в случае изменения вышестоящих контейнеров }
+    if Changed then
       UpdateContainerFile(FUsersDir, SID, '')
     else
       UpdateContainerFile(FUsersDir, SID, FIniFile.ReadString('U', SID, ''));
@@ -601,8 +619,8 @@ end;
 
 //Обновление файлов определенного контейнера хранилища переданного в aDir+aSID
 
-procedure TSAVAccessClient.UpdateContainerFile(const aDir, aSID, aVersion:
-  string);
+function TSAVAccessClient.UpdateContainerFile(const aDir, aSID, aVersion:
+  string): boolean;
 var
   ini: TIniFile;
   c: Char;
@@ -634,6 +652,7 @@ var
   end;
 
 begin
+  Result := False;
   s := '';
   sPath := IncludeTrailingPathDelimiter(IncludeTrailingPathDelimiter(aDir) +
     aSID);
@@ -657,8 +676,9 @@ begin
           table1.fieldbyname(csFieldExt).AsString,
             table1.fieldbyname(csFieldType).AsString, c, aSID]), []) then
         begin
-          if FDataSet.fieldbyname(csFieldVersion).AsString <>
-            table1.fieldbyname(csFieldVersion).AsString then
+
+          if (FDataSet.fieldbyname(csFieldVersion).AsString <>
+            table1.fieldbyname(csFieldVersion).AsString) or (aVersion = '') then
           begin
             if FileProcessing(Record2ClientFile(FDataSet, aSID, c),
               Record2ClientFile(table1, aSID, c)) then
@@ -666,6 +686,7 @@ begin
               FDataSet.Edit;
               FileInfoMove(table1, FDataSet, False);
               FDataSet.Post;
+              Result := True;
             end;
           end
         end
@@ -677,6 +698,7 @@ begin
             FDataSet.Insert;
             FileInfoMove(table1, FDataSet, True);
             FDataSet.Post;
+            Result := True;
           end;
         end;
         table1.Next;
@@ -686,8 +708,8 @@ begin
       FIniFile.WriteString(c, aSID, vers);
     end;
     FDataSet.ApplyUpdates(-1);
-//   FDataSet.Close;
-//    FDataSet.Open;
+    //   FDataSet.Close;
+    //    FDataSet.Open;
   end;
 end;
 
