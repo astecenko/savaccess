@@ -52,6 +52,10 @@ type
     procedure chrm1BeforeContextMenu(Sender: TObject;
       const browser: ICefBrowser; const frame: ICefFrame;
       const params: ICefContextMenuParams; const model: ICefMenuModel);
+    procedure chrm1BeforeDownload(Sender: TObject;
+      const browser: ICefBrowser; const downloadItem: ICefDownloadItem;
+      const suggestedName: ustring;
+      const callback: ICefBeforeDownloadCallback);
   private
     FStartProtLength: Integer;
     FStartCurDirProtLength: Integer;
@@ -223,6 +227,7 @@ procedure TSAVClntMenu.chrm1LoadStart(Sender: TObject;
 begin
   if IsMain(browser, frame) then
     FLoading := True;
+
 end;
 
 procedure TSAVClntMenu.chrm1LoadEnd(Sender: TObject;
@@ -238,9 +243,9 @@ procedure TSAVClntMenu.chrm1DownloadUpdated(Sender: TObject;
   const callback: ICefDownloadItemCallback);
 begin
   if downloadItem.IsInProgress then
-    stat1.SimpleText := IntToStr(downloadItem.PercentComplete) + '%'
+    stat1.Panels[0].Text := IntToStr(downloadItem.PercentComplete) + '%'
   else
-    stat1.SimpleText := '';
+    stat1.Panels[0].Text := '';
 end;
 
 procedure TSAVClntMenu.chrm1TitleChange(Sender: TObject;
@@ -291,6 +296,25 @@ procedure TSAVClntMenu.chrm1BeforeContextMenu(Sender: TObject;
 begin
   model.Clear; //clear standard popup menu
 
+end;
+
+procedure TSAVClntMenu.chrm1BeforeDownload(Sender: TObject;
+  const browser: ICefBrowser; const downloadItem: ICefDownloadItem;
+  const suggestedName: ustring;
+  const callback: ICefBeforeDownloadCallback);
+ var
+ i:integer;
+ s1,s2:String;
+begin
+ I:=0;
+  downloadItem.Url;
+ downloadItem.FullPath;
+ s1:=downloadItem.GetFullPath;
+
+
+ if (s1='33') and (s2='33') then exit;
+ s2:=downloadItem.GetUrl;
+  if (s1='33') and (s2='33') then exit;
 end;
 
 end.
