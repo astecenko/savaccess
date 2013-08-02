@@ -26,7 +26,13 @@ object SAVClntMenu: TSAVClntMenu
     Top = 434
     Width = 920
     Height = 19
-    Panels = <>
+    Panels = <
+      item
+        Width = 50
+      end
+      item
+        Width = 200
+      end>
   end
   object pnl1: TPanel
     Left = 0
@@ -146,6 +152,7 @@ object SAVClntMenu: TSAVClntMenu
     OnLoadEnd = chrm1LoadEnd
     OnBeforeContextMenu = chrm1BeforeContextMenu
     OnTitleChange = chrm1TitleChange
+    OnBeforeDownload = chrm1BeforeDownload
     OnDownloadUpdated = chrm1DownloadUpdated
     OnProtocolExecution = chrm1ProtocolExecution
     Options.JavaDisabled = True
