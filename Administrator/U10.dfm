@@ -1,6 +1,6 @@
 object Frm10: TFrm10
-  Left = 530
-  Top = 105
+  Left = 310
+  Top = 103
   Width = 400
   Height = 350
   Caption = #1056#1077#1076#1072#1082#1090#1086#1088' '#1087#1088#1072#1074#1080#1083' '#1092#1072#1081#1083#1072
@@ -18,7 +18,7 @@ object Frm10: TFrm10
   PixelsPerInch = 96
   TextHeight = 13
   object lbl1: TLabel
-    Left = 0
+    Left = 64
     Top = 8
     Width = 189
     Height = 13
@@ -80,10 +80,17 @@ object Frm10: TFrm10
     Height = 13
     Caption = #1042#1077#1088#1089#1080#1103
   end
-  object edtSrvrFile: TEdit
+  object lbl9: TLabel
     Left = 0
+    Top = 8
+    Width = 54
+    Height = 13
+    Caption = #1055#1088#1080#1086#1088#1080#1090#1077#1090
+  end
+  object edtSrvrFile: TEdit
+    Left = 64
     Top = 24
-    Width = 343
+    Width = 279
     Height = 21
     Anchors = [akLeft, akTop, akRight]
     TabOrder = 0
@@ -255,5 +262,16 @@ object Frm10: TFrm10
     Caption = #1057#1087#1088#1072#1074#1086#1095#1085#1080#1082
     TabOrder = 14
     OnClick = btn1Click
+  end
+  object sePriority: TSpinEdit
+    Left = 0
+    Top = 24
+    Width = 60
+    Height = 22
+    Increment = 25
+    MaxValue = 99999
+    MinValue = 0
+    TabOrder = 15
+    Value = 100
   end
 end

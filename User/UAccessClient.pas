@@ -606,7 +606,6 @@ begin
   FreeAndNil(list1);
   if b then
   begin
-    { TODO : надо обновлять в случае изменения вышестоящих контейнеров }
     if Changed then
       UpdateContainerFile(FUsersDir, SID, '')
     else

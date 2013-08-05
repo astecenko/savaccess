@@ -32,6 +32,8 @@ type
     lbl3: TLabel;
     edtVersion: TEdit;
     btn1: TButton;
+    sePriority: TSpinEdit;
+    lbl9: TLabel;
     procedure FormResize(Sender: TObject);
     procedure btnMD5Click(Sender: TObject);
     procedure btnTestClick(Sender: TObject);

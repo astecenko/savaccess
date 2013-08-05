@@ -79,74 +79,171 @@ object Frm4: TFrm4
       Indent = 19
       TabOrder = 0
     end
-    object dbgrd1: TDBGrid
+    object pgc1: TPageControl
       Left = 156
       Top = 1
       Width = 635
       Height = 322
+      ActivePage = ts2
       Align = alClient
-      DataSource = dsUserFiles
       TabOrder = 1
-      TitleFont.Charset = DEFAULT_CHARSET
-      TitleFont.Color = clWindowText
-      TitleFont.Height = -11
-      TitleFont.Name = 'MS Sans Serif'
-      TitleFont.Style = []
-      OnEditButtonClick = dbgrd1EditButtonClick
-      Columns = <
-        item
-          Expanded = False
-          FieldName = 'SRVRFILE'
+      object ts1: TTabSheet
+        Caption = 'D->G->A->U'
+        object dbgrd1: TDBGrid
+          Left = 0
+          Top = 0
+          Width = 627
+          Height = 294
+          Align = alClient
+          DataSource = dsUserFiles
           ReadOnly = True
-          Title.Caption = #1060#1072#1081#1083
-          Width = 120
-          Visible = True
+          TabOrder = 0
+          TitleFont.Charset = DEFAULT_CHARSET
+          TitleFont.Color = clWindowText
+          TitleFont.Height = -11
+          TitleFont.Name = 'MS Sans Serif'
+          TitleFont.Style = []
+          OnDblClick = actFileEditExecute
+          OnEditButtonClick = dbgrd1EditButtonClick
+          Columns = <
+            item
+              Expanded = False
+              FieldName = 'PRIORITY'
+              Title.Caption = #1055#1088#1080#1086#1088#1080#1090#1077#1090
+              Visible = True
+            end
+            item
+              Expanded = False
+              FieldName = 'SRVRFILE'
+              Title.Caption = #1060#1072#1081#1083
+              Width = 120
+              Visible = True
+            end
+            item
+              Expanded = False
+              FieldName = 'CLNTFILE'
+              Title.Caption = #1050#1083#1080#1077#1085#1090#1089#1082#1080#1081' '#1087#1091#1090#1100' ('#1096#1072#1073#1083#1086#1085#1099')'
+              Width = 250
+              Visible = True
+            end
+            item
+              Expanded = False
+              FieldName = 'EXT'
+              Title.Caption = #1056#1072#1089#1096#1080#1088#1077#1085#1080#1077
+              Width = 70
+              Visible = True
+            end
+            item
+              Expanded = False
+              FieldName = 'TYPE'
+              PickList.Strings = (
+                'F'
+                'D')
+              Title.Caption = #1058#1080#1087
+              Width = 35
+              Visible = True
+            end
+            item
+              ButtonStyle = cbsEllipsis
+              Expanded = False
+              FieldName = 'ACTION'
+              Title.Caption = #1044#1077#1081#1089#1090#1074#1080#1077
+              Width = 60
+              Visible = True
+            end
+            item
+              Expanded = False
+              FieldName = 'DESCR'
+              Title.Caption = #1054#1087#1080#1089#1072#1085#1080#1077
+              Width = 120
+              Visible = True
+            end
+            item
+              Expanded = False
+              FieldName = 'MD5'
+              Visible = True
+            end>
         end
-        item
-          Expanded = False
-          FieldName = 'CLNTFILE'
-          Title.Caption = #1050#1083#1080#1077#1085#1090#1089#1082#1080#1081' '#1087#1091#1090#1100' ('#1096#1072#1073#1083#1086#1085#1099')'
-          Width = 250
-          Visible = True
-        end
-        item
-          Expanded = False
-          FieldName = 'EXT'
-          Title.Caption = #1056#1072#1089#1096#1080#1088#1077#1085#1080#1077
-          Width = 70
-          Visible = True
-        end
-        item
-          Expanded = False
-          FieldName = 'TYPE'
-          PickList.Strings = (
-            'F'
-            'D')
-          Title.Caption = #1058#1080#1087
-          Width = 35
-          Visible = True
-        end
-        item
-          ButtonStyle = cbsEllipsis
-          Expanded = False
-          FieldName = 'ACTION'
-          Title.Caption = #1044#1077#1081#1089#1090#1074#1080#1077
-          Width = 60
-          Visible = True
-        end
-        item
-          Expanded = False
-          FieldName = 'DESCR'
-          Title.Caption = #1054#1087#1080#1089#1072#1085#1080#1077
-          Width = 120
-          Visible = True
-        end
-        item
-          Expanded = False
-          FieldName = 'MD5'
+      end
+      object ts2: TTabSheet
+        Caption = 'U->A->G->D'
+        ImageIndex = 1
+        object dbgrd2: TDBGrid
+          Left = 0
+          Top = 0
+          Width = 627
+          Height = 294
+          Align = alClient
+          DataSource = dsUserFilesReverse
           ReadOnly = True
-          Visible = True
-        end>
+          TabOrder = 0
+          TitleFont.Charset = DEFAULT_CHARSET
+          TitleFont.Color = clWindowText
+          TitleFont.Height = -11
+          TitleFont.Name = 'MS Sans Serif'
+          TitleFont.Style = []
+          OnDblClick = actFileEditExecute
+          OnEditButtonClick = dbgrd1EditButtonClick
+          Columns = <
+            item
+              Expanded = False
+              FieldName = 'PRIORITY'
+              Title.Caption = #1055#1088#1080#1086#1088#1080#1090#1077#1090
+              Visible = True
+            end
+            item
+              Expanded = False
+              FieldName = 'SRVRFILE'
+              Title.Caption = #1060#1072#1081#1083
+              Width = 120
+              Visible = True
+            end
+            item
+              Expanded = False
+              FieldName = 'CLNTFILE'
+              Title.Caption = #1050#1083#1080#1077#1085#1090#1089#1082#1080#1081' '#1087#1091#1090#1100' ('#1096#1072#1073#1083#1086#1085#1099')'
+              Width = 250
+              Visible = True
+            end
+            item
+              Expanded = False
+              FieldName = 'EXT'
+              Title.Caption = #1056#1072#1089#1096#1080#1088#1077#1085#1080#1077
+              Width = 70
+              Visible = True
+            end
+            item
+              Expanded = False
+              FieldName = 'TYPE'
+              PickList.Strings = (
+                'F'
+                'D')
+              Title.Caption = #1058#1080#1087
+              Width = 35
+              Visible = True
+            end
+            item
+              ButtonStyle = cbsEllipsis
+              Expanded = False
+              FieldName = 'ACTION'
+              Title.Caption = #1044#1077#1081#1089#1090#1074#1080#1077
+              Width = 60
+              Visible = True
+            end
+            item
+              Expanded = False
+              FieldName = 'DESCR'
+              Title.Caption = #1054#1087#1080#1089#1072#1085#1080#1077
+              Width = 120
+              Visible = True
+            end
+            item
+              Expanded = False
+              FieldName = 'MD5'
+              Visible = True
+            end>
+        end
+      end
     end
   end
   object stat1: TStatusBar
@@ -307,9 +404,10 @@ object Frm4: TFrm4
   object dbnvgr1: TDBNavigator
     Left = 120
     Top = 406
-    Width = 280
+    Width = 260
     Height = 25
     DataSource = dsUserFiles
+    VisibleButtons = [nbFirst, nbPrior, nbNext, nbLast, nbRefresh]
     Anchors = [akLeft, akRight, akBottom]
     TabOrder = 12
   end
@@ -336,5 +434,9 @@ object Frm4: TFrm4
     object actFileDelete: TAction
       OnExecute = actFileDeleteExecute
     end
+  end
+  object dsUserFilesReverse: TDataSource
+    Left = 680
+    Top = 8
   end
 end
