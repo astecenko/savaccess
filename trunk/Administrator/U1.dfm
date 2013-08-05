@@ -1,6 +1,6 @@
 object Frm1: TFrm1
-  Left = 13
-  Top = 151
+  Left = 353
+  Top = 104
   Width = 800
   Height = 480
   Caption = 'SAV Access - '#1040#1076#1084#1080#1085#1080#1089#1090#1088#1072#1090#1086#1088

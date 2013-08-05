@@ -35,6 +35,11 @@ type
     actFileEdit: TAction;
     actFileAdd: TAction;
     actFileDelete: TAction;
+    pgc1: TPageControl;
+    ts1: TTabSheet;
+    ts2: TTabSheet;
+    dsUserFilesReverse: TDataSource;
+    dbgrd2: TDBGrid;
     procedure btnCloseClick(Sender: TObject);
     procedure edtCaptionChange(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -48,9 +53,9 @@ type
   private
     FUserFiles: TSAVAccessFilesDBF;
     FDataSetUpdated: Boolean;
-    FDomainSID:string;
-    FUserSID:string;
-    FGroupSID:string;
+    FDomainSID: string;
+    FUserSID: string;
+    FGroupSID: string;
     procedure SetUserFiles(const Value: TSAVAccessFilesDBF);
     procedure SetDataSetUpdated(const Value: Boolean);
     procedure SetDomainSID(const Value: string);
@@ -60,14 +65,14 @@ type
     property UserFiles: TSAVAccessFilesDBF read FUserFiles write SetUserFiles;
     property DataSetUpdated: Boolean read FDataSetUpdated write
       SetDataSetUpdated;
-    property DomainSID:string read FDomainSID write SetDomainSID;
-    property UserSID:string read FUserSID write SetUserSID;
-    property GroupSID:string read FGroupSID write SetGroupSID;
+    property DomainSID: string read FDomainSID write SetDomainSID;
+    property UserSID: string read FUserSID write SetUserSID;
+    property GroupSID: string read FGroupSID write SetGroupSID;
     procedure FullAccess(const bParam: Boolean = True);
   end;
 
 implementation
-uses UAccessConstant, U10, KoaUtils, U12,SAVLib;
+uses UAccessConstant, U10, KoaUtils, U12, SAVLib;
 
 {$R *.dfm}
 
@@ -121,8 +126,11 @@ begin
   Frm02.cbbType.Text := dsUserFiles.DataSet.fieldbyname(csFieldType).AsString;
   Frm02.seAction.Value :=
     dsUserFiles.DataSet.fieldbyname(csFieldAction).AsInteger;
+  Frm02.sePriority.Value :=
+    dsUserFiles.DataSet.fieldbyname(csFieldPrority).AsInteger;
   Frm02.edtVersion.Text :=
     dsUserFiles.DataSet.FieldByName(csFieldVersion).AsString;
+
   if Frm02.ShowModal = mrok then
   begin
     Frm02.edtSrvrFile.Text := AnsiLowerCase(Frm02.edtSrvrFile.Text);
@@ -139,6 +147,8 @@ begin
     dsUserFiles.DataSet.fieldbyname(csFieldType).AsString := Frm02.cbbType.Text;
     dsUserFiles.DataSet.fieldbyname(csFieldAction).AsInteger :=
       Frm02.seAction.Value;
+    dsUserFiles.DataSet.fieldbyname(csFieldPrority).AsInteger :=
+      Frm02.sePriority.Value;
     dsUserFiles.DataSet.FieldByName(csFieldVersion).AsString :=
       UserFiles.Container.GetNewVersion;
     dsUserFiles.DataSet.Post;
@@ -278,9 +288,9 @@ end;
 
 procedure TFrm4.FormCreate(Sender: TObject);
 begin
-FUserSID:='';
-FDomainSID:='';
-FGroupSID:='';
+  FUserSID := '';
+  FDomainSID := '';
+  FGroupSID := '';
 end;
 
 end.

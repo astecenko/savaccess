@@ -26,6 +26,7 @@ const
 
   csTableDomains = 'domains.dbf'; //Домены
   csTableFiles = 'files.dbf'; //Настройки к файлам
+  csTableFilesReverse='rfiles.dbf';
   csTableGroups = 'groups.dbf'; //Группы доступа
   csTableADGroups = 'adgroups.dbf'; //Группы доступа
   csTableIni = 'ini.dbf'; //Настройки к ini-файлам
@@ -40,6 +41,8 @@ const
   { Indexes filename }
 
   csUsersSIDIndex='users_sid.ntx';
+  csFilePriorityIndex='file_prio.ntx';
+  csFilePriorityIndexReverse='rfile_prio.ntx';
 
   { Fields name}
 
