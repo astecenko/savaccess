@@ -492,6 +492,7 @@ var
     Changed // были изменени€, обновл€ем все полностью
   : Boolean;
 begin
+  { TODO : Ќадо реализовать обработку реверсивных таблиц }
   Result := True;
   WorkLst := FConfigDir + csWorkGroupsLst;
   ADWorkLst := FConfigDir + csWorkADGroupsLst;

@@ -10,19 +10,22 @@ type
   private
     FContainer: TSAVAccessContainer;
     FDataSource: TDataSet;
+    FRDataSource: TDataSet;
     FFileDir: string;
     procedure SetContainer(const Value: TSAVAccessContainer);
     procedure SetDataSource(const Value: TDataSet);
+    procedure SetRDataSource(const Value: TDataSet);
   public
     property Container: TSAVAccessContainer read FContainer write SetContainer;
     property DataSource: TDataSet read FDataSource write SetDataSource;
+    property RDataSource: TDataSet read FRDataSource write SetRDataSource;
     property FileDir: string read FFileDir;
     function GetMD5(const aFileName: string): string;
-    function AppendFile(const aFileName: string): Boolean; virtual;
-    function AppendAndCopyFile(const aFileName: string; const aNewFileName:
+    function AppendFile(aDS:TDataSet; const aFileName: string): Boolean; virtual;
+    function AppendAndCopyFile(aDS:TDataSet; const aFileName: string; const aNewFileName:
       string = ''): Boolean; virtual;
-    function UpdateFile: Boolean; virtual;
-    function DeleteFile: Boolean; virtual;
+    function UpdateFile(aDS:TDataSet): Boolean; virtual;
+    function DeleteFile(aDS:TDataSet): Boolean; virtual;
     constructor Create(aContainer: TSAVAccessContainer); overload;
   end;
 
@@ -96,7 +99,7 @@ end;
 
 { TSAVAccessFiles }
 
-function TSAVAccessFiles.AppendAndCopyFile(const aFileName,
+function TSAVAccessFiles.AppendAndCopyFile(aDS:TDataSet; const aFileName,
   aNewFileName: string): Boolean;
 var
   s: string;
@@ -112,21 +115,21 @@ begin
     Result := False;
   end;
   if Result then
-    Result := AppendFile(FFileDir + s);
+    Result := AppendFile(aDS, FFileDir + s);
 end;
 
-function TSAVAccessFiles.AppendFile(const aFileName: string): Boolean;
+function TSAVAccessFiles.AppendFile(aDS:TDataSet; const aFileName: string): Boolean;
 begin
   try
     Result := True;
-    FDataSource.Append;
-    FDataSource.FieldByName(csFieldSrvrFile).AsString :=
+    aDS.Append;
+    aDS.FieldByName(csFieldSrvrFile).AsString :=
       AnsiLowerCase(ExtractFileName(aFileName));
-    FDataSource.FieldByName(csFieldExt).AsString :=
-      ExtractFileExt(FDataSource.FieldByName(csFieldSrvrFile).AsString);
-    FDataSource.FieldByName(csFieldMD5).AsString := GetMD5(aFileName);
-    FDataSource.FieldByName(csFieldVersion).AsString := Container.GetNewVersion;
-    FDataSource.Post;
+    aDS.FieldByName(csFieldExt).AsString :=
+      ExtractFileExt(aDS.FieldByName(csFieldSrvrFile).AsString);
+    aDS.FieldByName(csFieldMD5).AsString := GetMD5(aFileName);
+    aDS.FieldByName(csFieldVersion).AsString := Container.GetNewVersion;
+    aDS.Post;
   except
     Result := False;
   end;
@@ -139,15 +142,16 @@ begin
   FFileDir := IncludeTrailingPathDelimiter(FContainer.WorkDir) + 'f\';
 end;
 
-function TSAVAccessFiles.DeleteFile: Boolean;
+function TSAVAccessFiles.DeleteFile(aDS:TDataSet): Boolean;
 begin
-  Result:=True;
+  Result := True;
   try
-  fDeleteFile(FFileDir+DataSource.FieldByName(csFieldSrvrFile).AsString);
+    fDeleteFile(FFileDir + aDS.FieldByName(csFieldSrvrFile).AsString);
   except
-    Result:=False;
+    Result := False;
   end;
-  if Result then DataSource.Delete;
+  if Result then
+    aDS.Delete;
 end;
 
 function TSAVAccessFiles.GetMD5(const aFileName: string): string;
@@ -169,21 +173,26 @@ begin
   FDataSource := Value;
 end;
 
-function TSAVAccessFiles.UpdateFile: Boolean;
+procedure TSAVAccessFiles.SetRDataSource(const Value: TDataSet);
+begin
+  FRDataSource := Value;
+end;
+
+function TSAVAccessFiles.UpdateFile(aDS:TDataSet): Boolean;
 var
   s: string;
 begin
   Result := False;
-  if FDataSource.FieldByName(csFieldSrvrFile).AsString <> '' then
+  if aDS.FieldByName(csFieldSrvrFile).AsString <> '' then
   begin
-    s := GetMD5(FFileDir + FDataSource.FieldByName(csFieldSrvrFile).AsString);
-    if s <> FDataSource.FieldByName(csFieldMD5).AsString then
+    s := GetMD5(FFileDir + aDS.FieldByName(csFieldSrvrFile).AsString);
+    if s <> aDS.FieldByName(csFieldMD5).AsString then
     begin
-      FDataSource.Edit;
-      FDataSource.FieldByName(csFieldMD5).AsString := s;
-      FDataSource.FieldByName(csFieldVersion).AsString :=
+      aDS.Edit;
+      aDS.FieldByName(csFieldMD5).AsString := s;
+      aDS.FieldByName(csFieldVersion).AsString :=
         Container.GetNewVersion;
-      FDataSource.Post;
+      aDS.Post;
     end;
     Result := True;
   end;

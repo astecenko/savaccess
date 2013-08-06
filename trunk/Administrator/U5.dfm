@@ -34,4 +34,8 @@ inherited Frm5: TFrm5
     TabOrder = 13
     Value = 0
   end
+  inherited dsUserFilesReverse: TDataSource
+    Left = 648
+    Top = 16
+  end
 end
