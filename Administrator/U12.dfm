@@ -87,7 +87,6 @@ object Frm12: TFrm12
           Expanded = False
           FieldName = 'ID'
           ReadOnly = True
-          Width = -1
           Visible = False
         end
         item
@@ -139,7 +138,6 @@ object Frm12: TFrm12
           Expanded = False
           FieldName = 'FID'
           ReadOnly = True
-          Width = -1
           Visible = False
         end
         item

@@ -84,7 +84,7 @@ object Frm4: TFrm4
       Top = 1
       Width = 635
       Height = 322
-      ActivePage = ts2
+      ActivePage = ts1
       Align = alClient
       TabOrder = 1
       object ts1: TTabSheet
@@ -436,6 +436,7 @@ object Frm4: TFrm4
     end
   end
   object dsUserFilesReverse: TDataSource
+    OnStateChange = dsUserFilesReverseStateChange
     Left = 680
     Top = 8
   end

@@ -4,17 +4,22 @@ interface
 uses UAccessFile, UAccessContainer, DB, VKDBFDataSet;
 
 type
-    { TODO : Сделать обратные правила! }
+  { TODO : Сделать обратные правила! }
   TSAVAccessFilesDBF = class(TSAVAccessFiles)
   private
-    FTable: TVKDBFNTX;
+    FTable: TVKDBFNTX; // D-A-G-U
+    FrTable: TVKDBFNTX; // U-G-A-D
+    FWorkDir: string;
     FFilePriorityIndex: string;
+    FFilePriorityIndexReverse: string;
     procedure DataSourceAfterDelete(DataSet: TDataSet);
   public
     property FilePriorityIndex: string read FFilePriorityIndex;
-    function TableCreate: Boolean;
-    function IndexCreate: Boolean;
-    procedure TablePrepare(const ReadOnly: Boolean = True);
+    property FilePriorityIndexReverse: string read FFilePriorityIndexReverse;
+    property WorkDir: string read FWorkDir;
+    function TableCreate(const aTable: string): Boolean;
+    function IndexCreate(const aTableName, aIndexName: string): Boolean;
+    procedure TablePrepare(aTable: TVKDBFNTX; const ReadOnly: Boolean = True);
     constructor Create(aContainer: TSAVAccessContainer); overload;
     destructor Destroy; override;
   end;
@@ -27,38 +32,51 @@ uses SysUtils, UAccessConstant, VKDBFNTX, VKDBFIndex, VKDBFSorters,
 { TSAVAccessFilesDBF }
 
 constructor TSAVAccessFilesDBF.Create(aContainer: TSAVAccessContainer);
-var
-  t, i: boolean;
+
+  function DoDBFFileCreate(aTable: TVKDBFNTX; aIndexName: string): boolean;
+  var
+    t, i: boolean;
+  begin
+    t:=True;
+    i:=True;
+    Result := False;
+    TablePrepare(aTable, False);
+    if not FileExists(aTable.DBFFileName) then
+    begin
+      t := TableCreate(aTable.DBFFileName);
+      i := IndexCreate(aTable.DBFFileName, aIndexName);
+    end;
+    if not FileExists(aIndexName) then
+      i := IndexCreate(aTable.DBFFileName, aIndexName);
+    if not (t) then
+      raise Exception.Create('Table create error! ' + aTable.DBFFileName)
+    else if not (i) then
+      raise Exception.Create('Index create error! ' + aIndexName);
+    Result := i and t;
+    if Result then
+    begin
+      with aTable.Indexes.Add as TVKNTXIndex do
+        NTXFileName := aIndexName;
+      aTable.Open;
+      aTable.SetOrder(1);
+    end;
+  end;
+
 begin
   inherited Create(aContainer);
-  i := True;
-  t := True;
+  FWorkDir := IncludeTrailingPathDelimiter(Container.WorkDir);
   FTable := TVKDBFNTX.Create(nil);
+  FrTable := TVKDBFNTX.Create(nil);
   FTable.AfterDelete := DataSourceAfterDelete;
-  FTable.DBFFileName := IncludeTrailingPathDelimiter(Container.WorkDir) +
-    csTableFiles;
-  FFilePriorityIndex := ExtractFilePath(FTable.DBFFileName) +
-    csFilePriorityIndex;
-  TablePrepare(False);
-  if not FileExists(FTable.DBFFileName) then
-  begin
-    t := TableCreate;
-    i := IndexCreate;
-  end;
-  if not FileExists(FFilePriorityIndex) then
-    i := IndexCreate;
-  if not (t) then
-    raise Exception.Create('Table create error!')
-  else if not (i) then
-    raise Exception.Create('Index create error!');
-  if i and t then
-  begin
-    with FTable.Indexes.Add as TVKNTXIndex do
-      NTXFileName := FFilePriorityIndex;
-    FTable.Open;
-    FTable.SetOrder(1);
-  end;
+  FrTable.AfterDelete := DataSourceAfterDelete;
+  FTable.DBFFileName := FWorkDir + csTableFiles;
+  FrTable.DBFFileName := FWorkDir + csTableFilesReverse;
+  FFilePriorityIndex := FWorkDir + csFilePriorityIndex;
+  FFilePriorityIndexReverse := FWorkDir + csFilePriorityIndexReverse;
+  DoDBFFileCreate(FTable, FFilePriorityIndex);
   DataSource := FTable;
+  DoDBFFileCreate(FrTable, FFilePriorityIndexReverse);
+  RDataSource := FrTable;
 end;
 
 procedure TSAVAccessFilesDBF.DataSourceAfterDelete(DataSet: TDataSet);
@@ -73,16 +91,20 @@ destructor TSAVAccessFilesDBF.Destroy;
 begin
   FTable.Close;
   FreeAndNil(FTable);
+  FrTable.Close;
+  FreeAndNil(FrTable);
   DataSource := nil;
+  RDataSource:= nil;
   inherited;
 end;
 
-function TSAVAccessFilesDBF.IndexCreate: Boolean;
+function TSAVAccessFilesDBF.IndexCreate(const aTableName, aIndexName: string):
+  Boolean;
 var
   table1: TVKDBFNTX;
 begin
   table1 := TVKDBFNTX.Create(nil);
-  table1.DBFFileName := FTable.DBFFileName;
+  table1.DBFFileName := aTableName;
   table1.AccessMode.AccessMode := 66;
   table1.oem := True;
   Result := True;
@@ -90,7 +112,7 @@ begin
     table1.Open;
     with table1.Indexes.Add as TVKNTXIndex do
     begin
-      NTXFileName := ExtractFilePath(table1.DBFFileName) + csFilePriorityIndex;
+      NTXFileName := aIndexName;
       ClipperVer := v501;
       KeyExpresion := csFieldPrority;
       CreateIndex(True);
@@ -102,12 +124,12 @@ begin
   FreeAndNil(table1);
 end;
 
-function TSAVAccessFilesDBF.TableCreate: Boolean;
+function TSAVAccessFilesDBF.TableCreate(const aTable: string): Boolean;
 var
   table1: TVKDBFNTX;
 begin
   table1 := TVKDBFNTX.Create(nil);
-  table1.DBFFileName := FTable.DBFFileName;
+  table1.DBFFileName := aTable;
   table1.AccessMode.AccessMode := 66;
   table1.oem := True;
   with table1.DBFFieldDefs.Add as TVKDBFFieldDef do
@@ -173,18 +195,19 @@ begin
   FreeAndNil(table1);
 end;
 
-procedure TSAVAccessFilesDBF.TablePrepare(const ReadOnly: Boolean = True);
+procedure TSAVAccessFilesDBF.TablePrepare(aTable: TVKDBFNTX; const ReadOnly:
+  Boolean = True);
 begin
   if ReadOnly then
-    FTable.AccessMode.AccessMode := 64
+    aTable.AccessMode.AccessMode := 64
   else
-    FTable.AccessMode.AccessMode := 66;
-  FTable.OEM := True;
-  FTable.DbfVersion := xClipper;
-  FTable.LockProtocol := lpClipperLock;
-  FTable.LobLockProtocol := lpClipperLock;
-  FTable.TrimInLocate := True;
-  FTable.TrimCType := True;
+    aTable.AccessMode.AccessMode := 66;
+  aTable.OEM := True;
+  aTable.DbfVersion := xClipper;
+  aTable.LockProtocol := lpClipperLock;
+  aTable.LobLockProtocol := lpClipperLock;
+  aTable.TrimInLocate := True;
+  aTable.TrimCType := True;
 end;
 
 end.

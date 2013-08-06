@@ -50,9 +50,11 @@ type
     procedure dsUserFilesStateChange(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure FormCreate(Sender: TObject);
+    procedure dsUserFilesReverseStateChange(Sender: TObject);
   private
     FUserFiles: TSAVAccessFilesDBF;
     FDataSetUpdated: Boolean;
+    FRDataSetUpdated: Boolean;
     FDomainSID: string;
     FUserSID: string;
     FGroupSID: string;
@@ -61,14 +63,18 @@ type
     procedure SetDomainSID(const Value: string);
     procedure SetGroupSID(const Value: string);
     procedure SetUserSID(const Value: string);
+    procedure SetRDataSetUpdated(const Value: Boolean);
   public
     property UserFiles: TSAVAccessFilesDBF read FUserFiles write SetUserFiles;
     property DataSetUpdated: Boolean read FDataSetUpdated write
       SetDataSetUpdated;
+    property RDataSetUpdated: Boolean read FRDataSetUpdated write
+      SetRDataSetUpdated;
     property DomainSID: string read FDomainSID write SetDomainSID;
     property UserSID: string read FUserSID write SetUserSID;
     property GroupSID: string read FGroupSID write SetGroupSID;
     procedure FullAccess(const bParam: Boolean = True);
+    function ActiveDataSet: TDataSet;
   end;
 
 implementation
@@ -105,53 +111,49 @@ end;
 procedure TFrm4.FormShow(Sender: TObject);
 begin
   if Assigned(UserFiles) then
+  begin
     dsUserFiles.DataSet := FUserFiles.DataSource;
+    dsUserFilesReverse.DataSet := FUserFiles.RDataSource;
+  end;
   FDataSetUpdated := False;
+  FRDataSetUpdated := False;
 end;
 
 procedure TFrm4.actFileEditExecute(Sender: TObject);
 var
   Frm02: TFrm10;
+  ActiveDS: TDataSet;
 begin
   Frm02 := TFrm10.Create(Self);
   Frm02.UserFiles := Self.UserFiles;
+  ActiveDS := ActiveDataSet;
   Frm02.edtSrvrFile.Text :=
-    dsUserFiles.DataSet.fieldbyname(csFieldSrvrFile).AsString;
+    ActiveDS.fieldbyname(csFieldSrvrFile).AsString;
   Frm02.edtClntFile.Text :=
-    dsUserFiles.DataSet.fieldbyname(csFieldClntFile).AsString;
-  Frm02.edtExt.Text := dsUserFiles.DataSet.fieldbyname(csFieldExt).AsString;
-  Frm02.edtMD5.Text := dsUserFiles.DataSet.fieldbyname(csFieldMD5).AsString;
-  Frm02.edtDescr.Text :=
-    dsUserFiles.DataSet.fieldbyname(csFieldDescription).AsString;
-  Frm02.cbbType.Text := dsUserFiles.DataSet.fieldbyname(csFieldType).AsString;
-  Frm02.seAction.Value :=
-    dsUserFiles.DataSet.fieldbyname(csFieldAction).AsInteger;
-  Frm02.sePriority.Value :=
-    dsUserFiles.DataSet.fieldbyname(csFieldPrority).AsInteger;
-  Frm02.edtVersion.Text :=
-    dsUserFiles.DataSet.FieldByName(csFieldVersion).AsString;
-
+    ActiveDS.fieldbyname(csFieldClntFile).AsString;
+  Frm02.edtExt.Text := ActiveDS.fieldbyname(csFieldExt).AsString;
+  Frm02.edtMD5.Text := ActiveDS.fieldbyname(csFieldMD5).AsString;
+  Frm02.edtDescr.Text := ActiveDS.fieldbyname(csFieldDescription).AsString;
+  Frm02.cbbType.Text := ActiveDS.fieldbyname(csFieldType).AsString;
+  Frm02.seAction.Value := ActiveDS.fieldbyname(csFieldAction).AsInteger;
+  Frm02.sePriority.Value := ActiveDS.fieldbyname(csFieldPrority).AsInteger;
+  Frm02.edtVersion.Text := ActiveDS.FieldByName(csFieldVersion).AsString;
   if Frm02.ShowModal = mrok then
   begin
     Frm02.edtSrvrFile.Text := AnsiLowerCase(Frm02.edtSrvrFile.Text);
     Frm02.cbbType.Text := AnsiUpperCase(Frm02.cbbType.Text);
-    dsUserFiles.DataSet.Edit;
-    dsUserFiles.DataSet.fieldbyname(csFieldSrvrFile).AsString :=
-      Frm02.edtSrvrFile.Text;
-    dsUserFiles.DataSet.fieldbyname(csFieldClntFile).AsString :=
-      Frm02.edtClntFile.Text;
-    dsUserFiles.DataSet.fieldbyname(csFieldExt).AsString := Frm02.edtExt.Text;
-    dsUserFiles.DataSet.fieldbyname(csFieldMD5).AsString := Frm02.edtMD5.Text;
-    dsUserFiles.DataSet.fieldbyname(csFieldDescription).AsString :=
-      Frm02.edtDescr.Text;
-    dsUserFiles.DataSet.fieldbyname(csFieldType).AsString := Frm02.cbbType.Text;
-    dsUserFiles.DataSet.fieldbyname(csFieldAction).AsInteger :=
-      Frm02.seAction.Value;
-    dsUserFiles.DataSet.fieldbyname(csFieldPrority).AsInteger :=
-      Frm02.sePriority.Value;
-    dsUserFiles.DataSet.FieldByName(csFieldVersion).AsString :=
+    ActiveDS.Edit;
+    ActiveDS.fieldbyname(csFieldSrvrFile).AsString := Frm02.edtSrvrFile.Text;
+    ActiveDS.fieldbyname(csFieldClntFile).AsString := Frm02.edtClntFile.Text;
+    ActiveDS.fieldbyname(csFieldExt).AsString := Frm02.edtExt.Text;
+    ActiveDS.fieldbyname(csFieldMD5).AsString := Frm02.edtMD5.Text;
+    ActiveDS.fieldbyname(csFieldDescription).AsString := Frm02.edtDescr.Text;
+    ActiveDS.fieldbyname(csFieldType).AsString := Frm02.cbbType.Text;
+    ActiveDS.fieldbyname(csFieldAction).AsInteger := Frm02.seAction.Value;
+    ActiveDS.fieldbyname(csFieldPrority).AsInteger := Frm02.sePriority.Value;
+    ActiveDS.FieldByName(csFieldVersion).AsString :=
       UserFiles.Container.GetNewVersion;
-    dsUserFiles.DataSet.Post;
+    ActiveDS.Post;
     // UserFiles.Container.UpdateVersion;
   end;
   FreeAndNil(Frm02);
@@ -163,15 +165,17 @@ var
   s: string;
   s2: string;
   b: Boolean;
+  aDs:TDataSet;
 begin
   b := False;
   if dlgOpen1.Execute then
   begin
     i := 0;
+    aDs:=ActiveDataSet;
     while i < dlgOpen1.Files.Count do
     begin
       s := AnsiLowerCase(ExtractFileName(dlgOpen1.Files[i]));
-      if dsUserFiles.DataSet.Locate(csFieldSrvrFile, s, []) then
+      if aDs.Locate(csFieldSrvrFile, s, []) then
       begin
         DateTimeToString(s2, 'yymmddhhnn', Now);
         case
@@ -191,11 +195,11 @@ begin
                 ShowMessage('Ошибка при обработке файла "' + s + '"'#10#13 +
                   SysErrorMessage(GetLastError));
               end;
-              UserFiles.UpdateFile;
+              UserFiles.UpdateFile(aDs);
             end;
           IDNO:
             begin
-              if UserFiles.AppendAndCopyFile(dlgOpen1.Files[i], s2 + s) = False
+              if UserFiles.AppendAndCopyFile(aDs,dlgOpen1.Files[i], s2 + s) = False
                 then
                 ShowMessage('Ошибка при обработке файла "' + dlgOpen1.Files[i] +
                   '"'#10#13 + SysErrorMessage(GetLastError))
@@ -206,7 +210,7 @@ begin
       end
       else
       begin
-        if UserFiles.AppendAndCopyFile(dlgOpen1.Files[i]) = False then
+        if UserFiles.AppendAndCopyFile(aDs, dlgOpen1.Files[i]) = False then
           ShowMessage('Ошибка при обработке файла "' + dlgOpen1.Files[i] +
             '"'#10#13 + SysErrorMessage(GetLastError))
         else
@@ -224,7 +228,7 @@ begin
     Application.MessageBox('Вы уверены в необходимости удаления файла/каталога из базы?',
     'Удаление файла/каталога', MB_YESNOCANCEL + MB_ICONWARNING +
     MB_DEFBUTTON2) = IDYES then
-    UserFiles.DeleteFile;
+    UserFiles.DeleteFile(ActiveDataSet);
 end;
 
 procedure TFrm4.dbgrd1EditButtonClick(Sender: TObject);
@@ -267,7 +271,7 @@ end;
 
 procedure TFrm4.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
-  if DataSetUpdated then
+  if DataSetUpdated or RDataSetUpdated then
     UserFiles.Container.UpdateVersion;
 end;
 
@@ -291,6 +295,25 @@ begin
   FUserSID := '';
   FDomainSID := '';
   FGroupSID := '';
+end;
+
+function TFrm4.ActiveDataSet: TDataSet;
+begin
+  if pgc1.TabIndex = 0 then
+    Result := UserFiles.DataSource
+  else
+    Result := UserFiles.RDataSource;
+end;
+
+procedure TFrm4.SetRDataSetUpdated(const Value: Boolean);
+begin
+  FRDataSetUpdated := Value;
+end;
+
+procedure TFrm4.dsUserFilesReverseStateChange(Sender: TObject);
+begin
+  if dsUserFilesReverse.State in [dsInsert, dsEdit] then
+    RDataSetUpdated := True;
 end;
 
 end.
