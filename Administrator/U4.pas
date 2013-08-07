@@ -164,10 +164,8 @@ var
   i: Integer;
   s: string;
   s2: string;
-  b: Boolean;
   aDs:TDataSet;
 begin
-  b := False;
   if dlgOpen1.Execute then
   begin
     i := 0;
@@ -190,7 +188,6 @@ begin
               try
                 fDeleteFile(UserFiles.FileDir + s);
                 fCopyFile(dlgOpen1.Files[i], UserFiles.FileDir + s);
-                b := True;
               except
                 ShowMessage('Ошибка при обработке файла "' + s + '"'#10#13 +
                   SysErrorMessage(GetLastError));
@@ -204,7 +201,6 @@ begin
                 ShowMessage('Ошибка при обработке файла "' + dlgOpen1.Files[i] +
                   '"'#10#13 + SysErrorMessage(GetLastError))
               else
-                b := True;
             end;
         end;
       end
@@ -212,14 +208,11 @@ begin
       begin
         if UserFiles.AppendAndCopyFile(aDs, dlgOpen1.Files[i]) = False then
           ShowMessage('Ошибка при обработке файла "' + dlgOpen1.Files[i] +
-            '"'#10#13 + SysErrorMessage(GetLastError))
-        else
-          b := True;
+            '"'#10#13 + SysErrorMessage(GetLastError));
       end;
       Inc(i);
     end;
   end;
-  // if b then UserFiles.Container.UpdateVersion;
 end;
 
 procedure TFrm4.actFileDeleteExecute(Sender: TObject);
@@ -228,7 +221,10 @@ begin
     Application.MessageBox('Вы уверены в необходимости удаления файла/каталога из базы?',
     'Удаление файла/каталога', MB_YESNOCANCEL + MB_ICONWARNING +
     MB_DEFBUTTON2) = IDYES then
+    begin
     UserFiles.DeleteFile(ActiveDataSet);
+    DataSetUpdated:=True { TODO : Если будут различия по приориетам надо здесь переделать }
+    end;
 end;
 
 procedure TFrm4.dbgrd1EditButtonClick(Sender: TObject);

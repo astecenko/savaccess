@@ -5,11 +5,11 @@ interface
 const
   { Directory default name }
 
-  csDefUserDir='Users';
-  csDefDomainDir='Domains';
-  csDefJournalDir='Journal';
-  csDefGroupDir='Groups';
-  csDefADGroupDir='ADGroups';
+  csDefUserDir='U';
+  csDefDomainDir='D';
+  csDefJournalDir='J';
+  csDefGroupDir='G';
+  csDefADGroupDir='A';
 
 
   { Default filenames }
@@ -41,8 +41,17 @@ const
   { Indexes filename }
 
   csUsersSIDIndex='users_sid.ntx';
-  csFilePriorityIndex='file_prio.ntx';
-  csFilePriorityIndexReverse='rfile_prio.ntx';
+  csIndexFilePriority='file_prio.ntx';
+  csIndexFilePriorityR='rfile_prio.ntx';
+  csIndexDomainVersion='dom_vers.ntx';
+  csIndexDomainName='dom_name.ntx';
+  csIndexADGroupVersion='adg_vers.ntx';
+  csIndexADGroupName='adg_name.ntx';
+  csIndexGroupVersion='grp_vers.ntx';
+  csIndexGroupName='grp_name.ntx';
+  csIndexUserVersion='usr_vers.ntx';
+  csIndexUserName='usr_name.ntx';
+  csIndexExtensExt='ext_ext.ntx';
 
   { Fields name}
 
@@ -79,6 +88,9 @@ const
 
    csOpenError='Ошибка открытия ';
    csSaveError='Ошибка сохранения ';
+   csFLockError='Unable FLock table! ';
+   csTableCreateError='Table create error! ';
+   csIndexCreateError='Index create error! ';
 
   { Others }
 

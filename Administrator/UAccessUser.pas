@@ -22,7 +22,7 @@ type
     function Load(aSID: string = ''): Boolean; override;
     procedure GetGroups(List: TStrings);
     procedure Clear; override;
-    function GroupDelete(const aSID:string):Boolean;
+    function GroupDelete(const aSID: string): Boolean;
     procedure UpdateVersion; override;
   end;
 
@@ -63,7 +63,7 @@ begin
   Ini01 := TIniFile.Create(IncludeTrailingPathDelimiter(WorkDir) +
     csContainerCfg);
   list1 := TStringList.Create;
-  ini01.ReadSectionValues(csIniGroups,list1);
+  ini01.ReadSectionValues(csIniGroups, list1);
   FreeAndNil(Ini01);
   table1 := TVKDBFNTX.Create(nil);
   SAVLib_DBF.InitOpenDBF(table1, IncludeTrailingPathDelimiter(Bases.JournalsDir)
@@ -91,8 +91,7 @@ begin
   else
     s := aSID;
   table1 := TVKDBFNTX.Create(nil);
-  SAVLib_DBF.InitOpenDBF(table1, IncludeTrailingPathDelimiter(Bases.JournalsDir)
-    + csTableUsers, 64);
+  SAVLib_DBF.InitOpenDBF(table1, Bases.JournalsPath + csTableUsers, 64);
   table1.Open;
   Result := table1.Locate(csFieldSID, s, []);
   if Result then
@@ -115,24 +114,34 @@ var
 begin
   inherited;
   table1 := TVKDBFNTX.Create(nil);
-  SAVLib_DBF.InitOpenDBF(table1, IncludeTrailingPathDelimiter(Bases.JournalsDir)
-    + csTableUsers, 66);
+  SAVLib_DBF.InitOpenDBF(table1, Bases.JournalsPath + csTableUsers, 66);
+  with table1.Indexes.Add as TVKNTXIndex do
+    NTXFileName := Bases.JournalsPath + csIndexUserName;
+  with table1.Indexes.Add as TVKNTXIndex do
+    NTXFileName := Bases.JournalsPath + csIndexUserVersion;
   table1.Open;
-  if not (table1.Locate(csFieldSID, SID, [])) then
+  if table1.FLock then
   begin
-    table1.Append;
-    table1.FieldByName(csFieldSID).AsString := SID;
-    table1.FieldByName(csFieldID).AsInteger := table1.GetNextAutoInc(csFieldID);
-    table1.FieldByName(csFieldDomain).AsString := Domain;
+    if not (table1.Locate(csFieldSID, SID, [])) then
+    begin
+      table1.Append;
+      table1.FieldByName(csFieldSID).AsString := SID;
+      table1.FieldByName(csFieldID).AsInteger :=
+        table1.GetNextAutoInc(csFieldID);
+      table1.FieldByName(csFieldDomain).AsString := Domain;
+    end
+    else
+      table1.Edit;
+    table1.FieldByName(csFieldCaption).AsString := Caption;
+    table1.FieldByName(csFieldDescription).AsString := Description;
+    table1.FieldByName(csFieldVersion).AsString := GetNewVersion;
+    Version := table1.FieldByName(csFieldVersion).AsString;
+    ID := table1.FieldByName(csFieldID).AsInteger;
+    table1.Post;
+    table1.UnLock;
   end
   else
-    table1.Edit;
-  table1.FieldByName(csFieldCaption).AsString := Caption;
-  table1.FieldByName(csFieldDescription).AsString := Description;
-  table1.FieldByName(csFieldVersion).AsString := GetNewVersion;
-  Version := table1.FieldByName(csFieldVersion).AsString;
-  ID := table1.FieldByName(csFieldID).AsInteger;
-  table1.Post;
+    raise Exception.Create(csFLockError + Table1.DBFFileName);
   table1.Close;
   FreeAndNil(table1);
   WorkDir := IncludeTrailingPathDelimiter(Bases.UsersDir) + SID;
@@ -183,14 +192,21 @@ var
 begin
   inherited;
   table1 := TVKDBFNTX.Create(nil);
-  InitOpenDBF(table1, IncludeTrailingPathDelimiter(Bases.JournalsDir)
-    + csTableUsers, 66);
+  InitOpenDBF(table1, Bases.JournalsPath  + csTableUsers, 66);
+  with table1.Indexes.Add as TVKNTXIndex do
+    NTXFileName := Bases.JournalsPath + csIndexUserVersion;
   table1.Open;
   if table1.Locate(csFieldSID, SID, []) then
   begin
-    table1.Edit;
-    table1.FieldByName(csFieldVersion).AsString := Version;
-    table1.Post;
+    if table1.FLock then
+    begin
+      table1.Edit;
+      table1.FieldByName(csFieldVersion).AsString := Version;
+      table1.Post;
+      table1.UnLock;
+    end
+    else
+      raise Exception.Create(csFLockError + Table1.DBFFileName);
   end;
   table1.Close;
   FreeAndNil(table1);

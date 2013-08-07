@@ -26,14 +26,13 @@ object Frm1: TFrm1
     Top = 0
     Width = 792
     Height = 24
-    UseSystemFont = False
     ActionManager = actmgr1
     Caption = 'actmmb1'
     ColorMap.HighlightColor = 14410210
     ColorMap.BtnSelectedColor = clBtnFace
     ColorMap.UnusedColor = 14410210
     Font.Charset = DEFAULT_CHARSET
-    Font.Color = clWindowText
+    Font.Color = clMenuText
     Font.Height = -11
     Font.Name = 'Tahoma'
     Font.Style = []
@@ -69,10 +68,41 @@ object Frm1: TFrm1
           640
           277)
         object btn3: TSpeedButton
+          Left = 34
+          Top = 2
+          Width = 31
+          Height = 23
+          Hint = #1057#1086#1088#1090#1080#1088#1086#1074#1082#1072' '#1074' '#1072#1083#1092#1072#1074#1080#1090#1085#1086#1084' '#1087#1086#1088#1103#1076#1082#1077' '#1086#1090' '#1040' '#1076#1086' '#1071
+          GroupIndex = 2
+          Caption = #1040#1083#1092
+          ParentShowHint = False
+          ShowHint = True
+          OnClick = btn3Click
+        end
+        object btn4: TSpeedButton
+          Left = 65
+          Top = 2
+          Width = 31
+          Height = 23
+          Hint = #1057#1086#1088#1090#1080#1088#1086#1074#1082#1072' '#1087#1086' '#1085#1086#1084#1077#1088#1091' '#1074#1077#1088#1089#1080#1080
+          GroupIndex = 2
+          Caption = #1042#1077#1088#1089
+          ParentShowHint = False
+          ShowHint = True
+          OnClick = btn4Click
+        end
+        object btn8: TSpeedButton
           Left = 2
           Top = 2
-          Width = 23
+          Width = 31
           Height = 23
+          Hint = #1057#1086#1088#1090#1080#1088#1086#1074#1082#1072' '#1074' '#1072#1083#1092#1072#1074#1080#1090#1085#1086#1084' '#1087#1086#1088#1103#1076#1082#1077' '#1086#1090' '#1040' '#1076#1086' '#1071
+          GroupIndex = 2
+          Down = True
+          Caption = 'ID'
+          ParentShowHint = False
+          ShowHint = True
+          OnClick = btn8Click
         end
         object dbgrdUser: TDBGrid
           Left = 3
@@ -242,11 +272,42 @@ object Frm1: TFrm1
         DesignSize = (
           640
           277)
-        object btn2: TSpeedButton
+        object btn5: TSpeedButton
+          Left = 65
+          Top = 2
+          Width = 31
+          Height = 23
+          Hint = #1057#1086#1088#1090#1080#1088#1086#1074#1082#1072' '#1087#1086' '#1085#1086#1084#1077#1088#1091' '#1074#1077#1088#1089#1080#1080
+          GroupIndex = 3
+          Caption = #1042#1077#1088#1089
+          ParentShowHint = False
+          ShowHint = True
+          OnClick = btn5Click
+        end
+        object btn6: TSpeedButton
+          Left = 34
+          Top = 2
+          Width = 31
+          Height = 23
+          Hint = #1057#1086#1088#1090#1080#1088#1086#1074#1082#1072' '#1074' '#1072#1083#1092#1072#1074#1080#1090#1085#1086#1084' '#1087#1086#1088#1103#1076#1082#1077' '#1086#1090' '#1040' '#1076#1086' '#1071
+          GroupIndex = 3
+          Caption = #1040#1083#1092
+          ParentShowHint = False
+          ShowHint = True
+          OnClick = btn6Click
+        end
+        object btn9: TSpeedButton
           Left = 2
           Top = 2
-          Width = 23
-          Height = 22
+          Width = 31
+          Height = 23
+          Hint = #1057#1086#1088#1090#1080#1088#1086#1074#1082#1072' '#1074' '#1072#1083#1092#1072#1074#1080#1090#1085#1086#1084' '#1087#1086#1088#1103#1076#1082#1077' '#1086#1090' '#1040' '#1076#1086' '#1071
+          GroupIndex = 3
+          Down = True
+          Caption = 'ID'
+          ParentShowHint = False
+          ShowHint = True
+          OnClick = btn9Click
         end
         object dbgrdGroup: TDBGrid
           Left = 3
@@ -335,6 +396,43 @@ object Frm1: TFrm1
         DesignSize = (
           640
           277)
+        object btn2: TSpeedButton
+          Left = 34
+          Top = 2
+          Width = 31
+          Height = 23
+          Hint = #1057#1086#1088#1090#1080#1088#1086#1074#1082#1072' '#1074' '#1072#1083#1092#1072#1074#1080#1090#1085#1086#1084' '#1087#1086#1088#1103#1076#1082#1077' '#1086#1090' '#1040' '#1076#1086' '#1071
+          GroupIndex = 4
+          Caption = #1040#1083#1092
+          ParentShowHint = False
+          ShowHint = True
+          OnClick = btn2Click
+        end
+        object btn7: TSpeedButton
+          Left = 65
+          Top = 2
+          Width = 31
+          Height = 23
+          Hint = #1057#1086#1088#1090#1080#1088#1086#1074#1082#1072' '#1087#1086' '#1085#1086#1084#1077#1088#1091' '#1074#1077#1088#1089#1080#1080
+          GroupIndex = 4
+          Caption = #1042#1077#1088#1089
+          ParentShowHint = False
+          ShowHint = True
+          OnClick = btn7Click
+        end
+        object btn10: TSpeedButton
+          Left = 2
+          Top = 2
+          Width = 31
+          Height = 23
+          Hint = #1057#1086#1088#1090#1080#1088#1086#1074#1082#1072' '#1074' '#1072#1083#1092#1072#1074#1080#1090#1085#1086#1084' '#1087#1086#1088#1103#1076#1082#1077' '#1086#1090' '#1040' '#1076#1086' '#1071
+          GroupIndex = 4
+          Down = True
+          Caption = 'ID'
+          ParentShowHint = False
+          ShowHint = True
+          OnClick = btn10Click
+        end
         object dbgrdADGroups: TDBGrid
           Left = 3
           Top = 32

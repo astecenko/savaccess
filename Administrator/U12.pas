@@ -40,7 +40,7 @@ type
   end;
 
 implementation
-uses UAccessConstant;
+uses UAccessConstant, VKDBFNTX;
 
 {$R *.dfm}
 
@@ -68,7 +68,10 @@ end;
 procedure TFrm12.FormShow(Sender: TObject);
 begin
   vkdbfAct.Open;
+  with vkdbfExt.Indexes.Add as TVKNTXIndex do
+    NTXFileName := ExtractFilePath(vkdbfExt.DBFFileName) + csIndexExtensExt;
   vkdbfExt.Open;
+  vkdbfExt.SetOrder(1);
 end;
 
 procedure TFrm12.vkdbfExtAfterInsert(DataSet: TDataSet);
@@ -127,7 +130,7 @@ end;
 procedure TFrm12.dbgrdActKeyDown(Sender: TObject; var Key: Word;
   Shift: TShiftState);
 begin
-case Key of
+  case Key of
     VK_Down:
       begin
         dbgrdAct.DataSource.DataSet.Next;

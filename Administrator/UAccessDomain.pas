@@ -113,23 +113,33 @@ var
 begin
   inherited;
   table1 := TVKDBFNTX.Create(nil);
-  SAVLib_DBF.InitOpenDBF(table1, IncludeTrailingPathDelimiter(Bases.JournalsDir)
-    + csTableDomains, 66);
+  SAVLib_DBF.InitOpenDBF(table1, Bases.JournalsPath + csTableDomains, 66);
+  with table1.Indexes.Add as TVKNTXIndex do
+    NTXFileName := Bases.JournalsPath + csIndexDomainName;
+  with table1.Indexes.Add as TVKNTXIndex do
+    NTXFileName := Bases.JournalsPath + csIndexDomainVersion;
   table1.Open;
-  if not (table1.Locate(csFieldSID, SID, [])) then
+  if table1.FLock then
   begin
-    table1.Append;
-    table1.FieldByName(csFieldSID).AsString := SID;
-    table1.FieldByName(csFieldID).AsInteger := table1.GetNextAutoInc(csFieldID);
+    if not (table1.Locate(csFieldSID, SID, [])) then
+    begin
+      table1.Append;
+      table1.FieldByName(csFieldSID).AsString := SID;
+      table1.FieldByName(csFieldID).AsInteger :=
+        table1.GetNextAutoInc(csFieldID);
+    end
+    else
+      table1.Edit;
+    table1.FieldByName(csFieldVersion).AsString := GetNewVersion;
+    Version := table1.FieldByName(csFieldVersion).AsString;
+    table1.FieldByName(csFieldCaption).AsString := Caption;
+    table1.FieldByName(csFieldDescription).AsString := Description;
+    ID := table1.FieldByName(csFieldID).AsInteger;
+    table1.Post;
+    table1.UnLock;
   end
   else
-    table1.Edit;
-  table1.FieldByName(csFieldVersion).AsString := GetNewVersion;
-  Version := table1.FieldByName(csFieldVersion).AsString;
-  table1.FieldByName(csFieldCaption).AsString := Caption;
-  table1.FieldByName(csFieldDescription).AsString := Description;
-  ID := table1.FieldByName(csFieldID).AsInteger;
-  table1.Post;
+    raise Exception.Create(csFLockError + Table1.DBFFileName);
   table1.Close;
   FreeAndNil(table1);
   WorkDir := IncludeTrailingPathDelimiter(Bases.DomainsDir) + SID;
@@ -155,14 +165,21 @@ var
 begin
   inherited;
   table1 := TVKDBFNTX.Create(nil);
-  InitOpenDBF(table1, IncludeTrailingPathDelimiter(Bases.JournalsDir)
-    + csTableDomains, 66);
+  InitOpenDBF(table1, Bases.JournalsPath + csTableDomains, 66);
+  with table1.Indexes.Add as TVKNTXIndex do
+    NTXFileName := Bases.JournalsPath + csIndexDomainVersion;
   table1.Open;
   if table1.Locate(csFieldSID, SID, []) then
   begin
-    table1.Edit;
-    table1.FieldByName(csFieldVersion).AsString := Version;
-    table1.Post;
+    if table1.FLock then
+    begin
+      table1.Edit;
+      table1.FieldByName(csFieldVersion).AsString := Version;
+      table1.Post;
+      table1.UnLock;
+    end
+    else
+      raise Exception.Create(csFLockError + Table1.DBFFileName);
   end;
   table1.Close;
   FreeAndNil(table1);
