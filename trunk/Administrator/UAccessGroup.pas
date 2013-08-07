@@ -31,7 +31,7 @@ type
     function UserDelete(const aSID: string): Boolean;
     function UserOff(const aSID: string): Boolean;
     function UserOn(const aSID: string): Boolean;
-    function UserSwitch(const aSID: string; const aWork: Boolean):Boolean;
+    function UserSwitch(const aSID: string; const aWork: Boolean): Boolean;
     procedure Clear; override;
     procedure UpdateVersion; override;
   end;
@@ -78,8 +78,8 @@ end;
 
 constructor TSAVAccessGroup.Create;
 begin
-inherited Create;
-ContainerType:='G';
+  inherited Create;
+  ContainerType := 'G';
 end;
 
 procedure TSAVAccessGroup.GetUsersSID(List: TStrings; const aCaption: Boolean =
@@ -157,27 +157,36 @@ var
 begin
   inherited;
   table1 := TVKDBFNTX.Create(nil);
-  SAVLib_DBF.InitOpenDBF(table1, IncludeTrailingPathDelimiter(Bases.JournalsDir)
-    + csTableGroups, 66);
+  SAVLib_DBF.InitOpenDBF(table1, Bases.JournalsPath + csTableGroups, 66);
+  with table1.Indexes.Add as TVKNTXIndex do
+    NTXFileName := Bases.JournalsPath + csIndexGroupName;
+  with table1.Indexes.Add as TVKNTXIndex do
+    NTXFileName := Bases.JournalsPath + csIndexGroupVersion;
   table1.Open;
-  if (SID = '') or (not (table1.Locate(csFieldSID, SID, []))) then
+  if table1.FLock then
   begin
-    table1.Append;
-    j := table1.GetNextAutoInc(csFieldID);
-    if SID = '' then
-      SID := IntToStr(j);
-    table1.FieldByName(csFieldSID).AsString := SID;
-    table1.FieldByName(csFieldID).AsInteger := j;
+    if (SID = '') or (not (table1.Locate(csFieldSID, SID, []))) then
+    begin
+      table1.Append;
+      j := table1.GetNextAutoInc(csFieldID);
+      if SID = '' then
+        SID := IntToStr(j);
+      table1.FieldByName(csFieldSID).AsString := SID;
+      table1.FieldByName(csFieldID).AsInteger := j;
+    end
+    else
+      table1.Edit;
+    table1.FieldByName(csFieldPrority).AsInteger := FPriority;
+    table1.FieldByName(csFieldCaption).AsString := Caption;
+    table1.FieldByName(csFieldDescription).AsString := Description;
+    table1.FieldByName(csFieldVersion).AsString := GetNewVersion;
+    Version := table1.FieldByName(csFieldVersion).AsString;
+    ID := table1.FieldByName(csFieldID).AsInteger;
+    table1.Post;
+    table1.UnLock;
   end
   else
-    table1.Edit;
-  table1.FieldByName(csFieldPrority).AsInteger := FPriority;
-  table1.FieldByName(csFieldCaption).AsString := Caption;
-  table1.FieldByName(csFieldDescription).AsString := Description;
-  table1.FieldByName(csFieldVersion).AsString := GetNewVersion;
-  Version := table1.FieldByName(csFieldVersion).AsString;
-  ID := table1.FieldByName(csFieldID).AsInteger;
-  table1.Post;
+    raise Exception.Create(csFLockError + Table1.DBFFileName);
   table1.Close;
   FreeAndNil(table1);
   WorkDir := IncludeTrailingPathDelimiter(Bases.GroupsDir) + SID;
@@ -247,16 +256,16 @@ end;
 
 function TSAVAccessGroup.UserOff(const aSID: string): Boolean;
 begin
-  Result:=UserSwitch(aSID, False);
+  Result := UserSwitch(aSID, False);
 end;
 
 function TSAVAccessGroup.UserOn(const aSID: string): Boolean;
 begin
-  Result:=UserSwitch(aSID, True);
+  Result := UserSwitch(aSID, True);
 end;
 
 function TSAVAccessGroup.UserSwitch(const aSID: string;
-  const aWork: Boolean):Boolean;
+  const aWork: Boolean): Boolean;
 var
   Ini01: TIniFile;
 begin
@@ -280,22 +289,26 @@ begin
     FreeAndNil(Ini01);
 end;
 
-
-
 procedure TSAVAccessGroup.UpdateVersion;
 var
   table1: TVKDBFNTX;
 begin
   inherited;
   table1 := TVKDBFNTX.Create(nil);
-  InitOpenDBF(table1, IncludeTrailingPathDelimiter(Bases.JournalsDir)
-    + csTableGroups, 66);
+  InitOpenDBF(table1, Bases.JournalsPath + csTableGroups, 66);
+  with table1.Indexes.Add as TVKNTXIndex do
+    NTXFileName := Bases.JournalsPath + csIndexGroupVersion;
   table1.Open;
   if table1.Locate(csFieldSID, SID, []) then
   begin
-    table1.Edit;
-    table1.FieldByName(csFieldVersion).AsString := Version;
-    table1.Post;
+    if table1.FLock then
+    begin
+      table1.Edit;
+      table1.FieldByName(csFieldVersion).AsString := Version;
+      table1.Post;
+    end
+    else
+      raise Exception.Create(csFLockError + Table1.DBFFileName);
   end;
   table1.Close;
   FreeAndNil(table1);

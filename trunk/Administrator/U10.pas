@@ -47,7 +47,7 @@ type
   end;
 
 implementation
-uses md5, U9, U12, UAccessConstant, DB;
+uses md5, U9, U12, UAccessConstant, DB, UAccessBase;
 {$R *.dfm}
 
 procedure TFrm10.FormResize(Sender: TObject);
@@ -84,11 +84,9 @@ var
   Form03: TFrm12;
 begin
     Form03 := TFrm12.Create(Self);
-    Form03.vkdbfExt.DBFFileName :=
-      IncludeTrailingPathDelimiter(UserFiles.Container.Bases.JournalsDir) +
+    Form03.vkdbfExt.DBFFileName := UserFiles.Container.Bases.JournalsPath +
       csTableExt;
-    Form03.vkdbfAct.DBFFileName :=
-      IncludeTrailingPathDelimiter(UserFiles.Container.Bases.JournalsDir) +
+    Form03.vkdbfAct.DBFFileName := UserFiles.Container.Bases.JournalsPath +
       csTableAction;
     if Form03.ShowModal = mrOk then
     begin

@@ -76,8 +76,15 @@ type
     actADGroupEdit: TAction;
     actRemoteUser: TAction;
     btn1: TSpeedButton;
-    btn2: TSpeedButton;
     btn3: TSpeedButton;
+    btn4: TSpeedButton;
+    btn5: TSpeedButton;
+    btn6: TSpeedButton;
+    btn2: TSpeedButton;
+    btn7: TSpeedButton;
+    btn8: TSpeedButton;
+    btn9: TSpeedButton;
+    btn10: TSpeedButton;
     procedure actCreateBaseExecute(Sender: TObject);
     procedure actUserAddExecute(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -107,6 +114,15 @@ type
     procedure dbgrdADGroupsDblClick(Sender: TObject);
     procedure actRemoteUserExecute(Sender: TObject);
     procedure actSupportExecute(Sender: TObject);
+    procedure btn3Click(Sender: TObject);
+    procedure btn4Click(Sender: TObject);
+    procedure btn6Click(Sender: TObject);
+    procedure btn5Click(Sender: TObject);
+    procedure btn2Click(Sender: TObject);
+    procedure btn7Click(Sender: TObject);
+    procedure btn8Click(Sender: TObject);
+    procedure btn9Click(Sender: TObject);
+    procedure btn10Click(Sender: TObject);
   private
     { Private declarations }
   public
@@ -117,7 +133,8 @@ var
   Frm1: TFrm1;
 
 implementation
-uses U3, U4, U5, U6, U7, U8, U9, U11, U12, U15, U16, U17, DU1, U1AD, UAccessConstant,
+uses U3, U4, U5, U6, U7, U8, U9, U11, U12, U15, U16, U17, DU1, U1AD,
+  UAccessConstant,
   UAccessFileDBF, UAccessGroup, UAccessBase, StrUtils;
 
 {$R *.dfm}
@@ -492,13 +509,10 @@ var
   Form01: TFrm12;
 begin
   Form01 := TFrm12.Create(Self);
-  Form01.vkdbfExt.DBFFileName :=
-    IncludeTrailingPathDelimiter(Settings.Base.JournalsDir) + csTableExt;
-  Form01.vkdbfAct.DBFFileName :=
-    IncludeTrailingPathDelimiter(Settings.Base.JournalsDir) + csTableAction;
+  Form01.vkdbfExt.DBFFileName :=Settings.Base.JournalsPath + csTableExt;
+  Form01.vkdbfAct.DBFFileName :=Settings.Base.JournalsPath + csTableAction;
   Form01.ShowModal;
-  FreeAndNil(Form01);
-
+  FreeAndNil(Form01);  
 end;
 
 procedure TFrm1.btnGroupAddClick(Sender: TObject);
@@ -588,26 +602,79 @@ begin
 end;
 
 procedure TFrm1.actRemoteUserExecute(Sender: TObject);
-  var
-   Frm01:TFrm16;
-   s:string;
+var
+  Frm01: TFrm16;
+  s: string;
 begin
-  s:=IncludeTrailingPathDelimiter(Settings.Base.JournalsDir)+csManagersList;
-  Frm01:=TFrm16.Create(Self);
+  s := IncludeTrailingPathDelimiter(Settings.Base.JournalsDir) + csManagersList;
+  Frm01 := TFrm16.Create(Self);
   if FileExists(s) then
-    Frm01.lblFileName.Caption:=s;
+    Frm01.lblFileName.Caption := s;
   Frm01.ShowModal;
   FreeAndNil(Frm01);
 end;
 
 procedure TFrm1.actSupportExecute(Sender: TObject);
 var
-  Form1:TFrm17;
+  Form1: TFrm17;
 begin
-  Form1:=TFrm17.Create(Self);
+  Form1 := TFrm17.Create(Self);
   Form1.ShowModal;
   FreeAndNil(Form1);
+end;
 
+procedure TFrm1.btn3Click(Sender: TObject);
+begin
+  if btn3.Down then
+    TVKDBFNTX(dbgrdUser.DataSource.DataSet).SetOrder(1);
+end;
+
+procedure TFrm1.btn4Click(Sender: TObject);
+begin
+  if btn4.Down then
+    TVKDBFNTX(dbgrdUser.DataSource.DataSet).SetOrder(2);
+end;
+
+procedure TFrm1.btn6Click(Sender: TObject);
+begin
+  if btn6.Down then
+    TVKDBFNTX(dbgrdGroup.DataSource.DataSet).SetOrder(1);
+end;
+
+procedure TFrm1.btn5Click(Sender: TObject);
+begin
+  if btn5.Down then
+    TVKDBFNTX(dbgrdGroup.DataSource.DataSet).SetOrder(2);
+end;
+
+procedure TFrm1.btn2Click(Sender: TObject);
+begin
+  if btn2.Down then
+    TVKDBFNTX(dbgrdADGroups.DataSource.DataSet).SetOrder(1);
+end;
+
+procedure TFrm1.btn7Click(Sender: TObject);
+begin
+  if btn7.Down then
+    TVKDBFNTX(dbgrdADGroups.DataSource.DataSet).SetOrder(2);
+end;
+
+procedure TFrm1.btn8Click(Sender: TObject);
+begin
+  if btn8.Down then
+    TVKDBFNTX(dbgrdUser.DataSource.DataSet).SetOrder(0);
+end;
+
+procedure TFrm1.btn9Click(Sender: TObject);
+begin
+  if btn9.Down then
+    TVKDBFNTX(dbgrdGroup.DataSource.DataSet).SetOrder(0);
+end;
+
+procedure TFrm1.btn10Click(Sender: TObject);
+begin
+  if btn10.Down then
+    TVKDBFNTX(dbgrdADGroups.DataSource.DataSet).SetOrder(0);
 end;
 
 end.

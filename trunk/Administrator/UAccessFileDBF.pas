@@ -9,10 +9,14 @@ type
   private
     FTable: TVKDBFNTX; // D-A-G-U
     FrTable: TVKDBFNTX; // U-G-A-D
+    { TODO : При групповых обработках нужно FLock вначале и UnLock в конце }
     FWorkDir: string;
     FFilePriorityIndex: string;
     FFilePriorityIndexReverse: string;
     procedure DataSourceAfterDelete(DataSet: TDataSet);
+    procedure DataSourceBeforeInsert(DataSet: TDataSet);
+    procedure DataSourceBeforeEdit(DataSet: TDataSet);
+    procedure DataSourceAfterPost(DataSet: TDataSet);
   public
     property FilePriorityIndex: string read FFilePriorityIndex;
     property FilePriorityIndexReverse: string read FFilePriorityIndexReverse;
@@ -37,9 +41,8 @@ constructor TSAVAccessFilesDBF.Create(aContainer: TSAVAccessContainer);
   var
     t, i: boolean;
   begin
-    t:=True;
-    i:=True;
-    Result := False;
+    t := True;
+    i := True;
     TablePrepare(aTable, False);
     if not FileExists(aTable.DBFFileName) then
     begin
@@ -49,9 +52,9 @@ constructor TSAVAccessFilesDBF.Create(aContainer: TSAVAccessContainer);
     if not FileExists(aIndexName) then
       i := IndexCreate(aTable.DBFFileName, aIndexName);
     if not (t) then
-      raise Exception.Create('Table create error! ' + aTable.DBFFileName)
+      raise Exception.Create(csTableCreateError + aTable.DBFFileName)
     else if not (i) then
-      raise Exception.Create('Index create error! ' + aIndexName);
+      raise Exception.Create(csIndexCreateError + aIndexName);
     Result := i and t;
     if Result then
     begin
@@ -68,11 +71,17 @@ begin
   FTable := TVKDBFNTX.Create(nil);
   FrTable := TVKDBFNTX.Create(nil);
   FTable.AfterDelete := DataSourceAfterDelete;
+  FTable.BeforeInsert:=DataSourceBeforeInsert;
+  FTable.BeforeEdit:=DataSourceBeforeEdit;
+  FTable.AfterPost:=DataSourceAfterPost;
   FrTable.AfterDelete := DataSourceAfterDelete;
+  FrTable.BeforeInsert:=DataSourceBeforeInsert;
+  FrTable.BeforeEdit:=DataSourceBeforeEdit;
+  FrTable.AfterPost:=DataSourceAfterPost;
   FTable.DBFFileName := FWorkDir + csTableFiles;
   FrTable.DBFFileName := FWorkDir + csTableFilesReverse;
-  FFilePriorityIndex := FWorkDir + csFilePriorityIndex;
-  FFilePriorityIndexReverse := FWorkDir + csFilePriorityIndexReverse;
+  FFilePriorityIndex := FWorkDir + csIndexFilePriority;
+  FFilePriorityIndexReverse := FWorkDir + csIndexFilePriorityR;
   DoDBFFileCreate(FTable, FFilePriorityIndex);
   DataSource := FTable;
   DoDBFFileCreate(FrTable, FFilePriorityIndexReverse);
@@ -84,7 +93,25 @@ begin
   with DataSet as TVKDBFNTX do
   begin
     Pack;
+    Reindex;
   end;
+end;
+
+procedure TSAVAccessFilesDBF.DataSourceAfterPost(DataSet: TDataSet);
+begin
+  TVKDBFNTX(DataSet).UnLock;
+end;
+
+procedure TSAVAccessFilesDBF.DataSourceBeforeEdit(DataSet: TDataSet);
+begin
+  if not TVKDBFNTX(DataSet).FLock then
+    raise Exception.Create(csFLockError + TVKDBFNTX(DataSet).DBFFileName);
+end;
+
+procedure TSAVAccessFilesDBF.DataSourceBeforeInsert(DataSet: TDataSet);
+begin
+  if not TVKDBFNTX(DataSet).FLock then
+    raise Exception.Create(csFLockError + TVKDBFNTX(DataSet).DBFFileName);
 end;
 
 destructor TSAVAccessFilesDBF.Destroy;
@@ -94,7 +121,7 @@ begin
   FrTable.Close;
   FreeAndNil(FrTable);
   DataSource := nil;
-  RDataSource:= nil;
+  RDataSource := nil;
   inherited;
 end;
 

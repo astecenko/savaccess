@@ -123,6 +123,7 @@ begin
   try
     Result := True;
     aDS.Append;
+    ads.FieldByName(csFieldPrority).AsInteger:=100;
     aDS.FieldByName(csFieldSrvrFile).AsString :=
       AnsiLowerCase(ExtractFileName(aFileName));
     aDS.FieldByName(csFieldExt).AsString :=
@@ -130,6 +131,7 @@ begin
     aDS.FieldByName(csFieldMD5).AsString := GetMD5(aFileName);
     aDS.FieldByName(csFieldVersion).AsString := Container.GetNewVersion;
     aDS.Post;
+
   except
     Result := False;
   end;

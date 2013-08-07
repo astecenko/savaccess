@@ -11,6 +11,7 @@ type
   private
     FStoragePath: string;
     FJournalsDir: string;
+    FJournalsPath: string;
     FUsersDir: string;
     FGroupsDir: string;
     FADGroupsDir: string;
@@ -48,6 +49,7 @@ type
   public
     property StoragePath: string read FStoragePath write SetStoragePath;
     property JournalsDir: string read FJournalsDir write SetJournalsDir;
+    property JournalsPath: string read FJournalsPath;
     property UsersDir: string read FUsersDir write SetUsersDir;
     property GroupsDir: string read FGroupsDir write SetGroupsDir;
     property ADGroupsDir: string read FADGroupsDir write SetADGroupsDir;
@@ -65,6 +67,10 @@ type
       overload;
     function CreateTableADGroups: Boolean;
     function CreateStorage: Boolean;
+    function IndexCreate(const aFullTableName, aFullIndexName, aIndexKey:
+      string; const aDesc: boolean = False):
+      Boolean;
+    function CheckAndCreateIndex: boolean;
     procedure GetGroups(List: TStrings);
     procedure GetUsers(List: TStrings);
     procedure GetDomains(List: TStrings);
@@ -82,11 +88,12 @@ uses SAVLib, SAVLib_DBF, KoaUtils, SysUtils, UAccessConstant;
 constructor TSAVAccessBase.Create;
 begin
   FJournalsDir := csDefJournalDir;
+  FJournalsPath := FJournalsDir + PathDelim;
   FGroupsDir := csDefGroupDir;
   FDomainsDir := csDefDomainDir;
   FUsersDir := csDefUserDir;
   FADGroupsDir := csDefADGroupDir;
-  FCaption:='';
+  FCaption := '';
 end;
 
 constructor TSAVAccessBase.Create(const aPath: string; const bCanCreate: Boolean
@@ -103,6 +110,7 @@ begin
     FJournalsDir := ExcludeTrailingPathDelimiter(aJournals)
   else
     FJournalsDir := s + FJournalsDir;
+  FJournalsPath := IncludeTrailingPathDelimiter(FJournalsDir);
   if aGroups <> '' then
     FGroupsDir := ExcludeTrailingPathDelimiter(aGroups)
   else
@@ -145,6 +153,7 @@ end;
 procedure TSAVAccessBase.SetJournalsDir(const Value: string);
 begin
   FJournalsDir := GetFullPath(Value);
+  FStoragePath := IncludeTrailingPathDelimiter(FJournalsDir);
 end;
 
 procedure TSAVAccessBase.SetUsersDir(const Value: string);
@@ -172,63 +181,56 @@ begin
       (ForceDirectories(ExcludeTrailingPathDelimiter(FDomainsDir))) and
       (ForceDirectories(ExcludeTrailingPathDelimiter(FADGroupsDir)));
     if Result then
-    begin
-      CreateTableDomains;
-      CreateTableUsers;
-      CreateTableGroups;
-      CreateTableADGroups;
-      CreateTableOrgUnits;
-      CreateTableLinks;
-      CreateTableActions;
-      CreateTableExtension;
-      CreateTableSupport;
-    end;
+      Result := CreateTableDomains and CreateTableUsers and CreateTableGroups
+        and CreateTableADGroups and CreateTableOrgUnits and CreateTableLinks and
+        CreateTableActions and CreateTableExtension and CreateTableSupport;
   end;
+  if Result then
+    Result := CheckAndCreateIndex;
   if Result then
   begin
     if Assigned(FTableDomains) then
     begin
       FTableDomains.Close;
       ClearStructDBF(FTableDomains);
-      InitOpenDBF(FTableDomains, IncludeTrailingPathDelimiter(FJournalsDir) +
-        csTableDomains, 66);
+      InitOpenDBF(FTableDomains, FJournalsPath + csTableDomains, 66);
+      with FTableDomains.Indexes.Add as TVKNTXIndex do
+        NTXFileName := FJournalsPath + csIndexDomainName;
+      with FTableDomains.Indexes.Add as TVKNTXIndex do
+        NTXFileName := FJournalsPath + csIndexDomainVersion;
       FTableDomains.Open;
     end;
     if Assigned(FTableUsers) then
     begin
       FTableUsers.Close;
       ClearStructDBF(FTableUsers);
-      InitOpenDBF(FTableUsers, IncludeTrailingPathDelimiter(FJournalsDir) +
-        csTableUsers, 66);
+      InitOpenDBF(FTableUsers, FJournalsPath + csTableUsers, 66);
+      with FTableUsers.Indexes.Add as TVKNTXIndex do
+        NTXFileName := FJournalsPath + csIndexUserName;
+      with FTableUsers.Indexes.Add as TVKNTXIndex do
+        NTXFileName := FJournalsPath + csIndexUserVersion;
       FTableUsers.Open;
-      {with FTableUsers.Indexes.Add as TVKNTXIndex do
-      begin
-        NTXFileName := IncludeTrailingPathDelimiter(FJournalsDir) +
-          csUsersSIDIndex;
-        if FileExists(NTXFileName) = False then
-        begin
-          ClipperVer := v501;
-          KeyExpresion := 'SID';
-        //  Unique := True;
-          CreateIndex(True);
-        end;
-      end;
-      FTableUsers.SetOrder(1);}
     end;
     if Assigned(FTableGroups) then
     begin
       FTableGroups.Close;
       ClearStructDBF(FTableGroups);
-      InitOpenDBF(FTableGroups, IncludeTrailingPathDelimiter(FJournalsDir) +
-        csTableGroups, 66);
+      InitOpenDBF(FTableGroups, FJournalsPath + csTableGroups, 66);
+      with FTableGroups.Indexes.Add as TVKNTXIndex do
+        NTXFileName := FJournalsPath + csIndexGroupName;
+      with FTableGroups.Indexes.Add as TVKNTXIndex do
+        NTXFileName := FJournalsPath + csIndexGroupVersion;
       FTableGroups.Open;
     end;
     if Assigned(FTableADGroups) then
     begin
       FTableADGroups.Close;
       ClearStructDBF(FTableADGroups);
-      InitOpenDBF(FTableADGroups, IncludeTrailingPathDelimiter(FJournalsDir) +
-        csTableADGroups, 66);
+      InitOpenDBF(FTableADGroups, FJournalsPath + csTableADGroups, 66);
+      with FTableADGroups.Indexes.Add as TVKNTXIndex do
+        NTXFileName := FJournalsPath + csIndexADGroupName;
+      with FTableADGroups.Indexes.Add as TVKNTXIndex do
+        NTXFileName := FJournalsPath + csIndexADGroupVersion;
       FTableADGroups.Open;
     end;
   end;
@@ -239,8 +241,7 @@ var
   table1: TVKDBFNTX;
 begin
   table1 := TVKDBFNTX.Create(nil);
-  table1.DBFFileName := IncludeTrailingPathDelimiter(FJournalsDir) +
-    csTableDomains;
+  table1.DBFFileName := FJournalsPath + csTableDomains;
   table1.OEM := True;
   table1.AccessMode.AccessMode := 66;
   with table1.DBFFieldDefs.Add as TVKDBFFieldDef do
@@ -292,23 +293,6 @@ begin
     Result := False;
   end;
   FreeAndNil(table1);
-  (*viborka.Open;
-  with viborka.Indexes.Add as TVKNTXIndex do
-  begin
-    NTXFileName := ChangeFileExt(viborka.DBFFileName, csExt_Ntx);
-    KeyExpresion := csField_Ki;
-    { TODO -oСтеценко А.В. : Нужен ли тут индекс? }
-    if arr_cp.Count > 0 then
-      KeyExpresion := KeyExpresion + '+' + csField_Cp;
-    CreateIndex(True);
-  end;
-
-  with qryBases.Indexes.Add as TVKNTXIndex do
-          NTXFileName := ChangeFileExt(qryBases.DBFFileName, '.ntx');
-  qryBases.Open;
-  qryBases.SetOrder(1);
-
-  *)
 end;
 
 function TSAVAccessBase.CreateTableGroups: Boolean;
@@ -318,8 +302,7 @@ begin
   table1 := TVKDBFNTX.Create(nil);
   table1.AccessMode.AccessMode := 66;
   table1.OEM := True;
-  table1.DBFFileName := IncludeTrailingPathDelimiter(FJournalsDir) +
-    csTableGroups;
+  table1.DBFFileName := FJournalsPath + csTableGroups;
   with table1.DBFFieldDefs.Add as TVKDBFFieldDef do
   begin
     Name := csFieldID;
@@ -372,8 +355,7 @@ begin
   table1 := TVKDBFNTX.Create(nil);
   table1.AccessMode.AccessMode := 66;
   table1.OEM := True;
-  table1.DBFFileName := IncludeTrailingPathDelimiter(FJournalsDir) +
-    csTableOULink;
+  table1.DBFFileName := FJournalsPath + csTableOULink;
   with table1.DBFFieldDefs.Add as TVKDBFFieldDef do
   begin
     Name := csFieldParent;
@@ -407,8 +389,7 @@ begin
   table1 := TVKDBFNTX.Create(nil);
   table1.AccessMode.AccessMode := 66;
   table1.OEM := True;
-  table1.DBFFileName := IncludeTrailingPathDelimiter(FJournalsDir) +
-    csTableUsers;
+  table1.DBFFileName := FJournalsPath + csTableUsers;
   with table1.DBFFieldDefs.Add as TVKDBFFieldDef do
   begin
     Name := csFieldID;
@@ -451,15 +432,6 @@ begin
   except
     Result := False;
   end;
-  { table1.Open;
-   with table1.Indexes.Add as TVKNTXIndex do
-   begin
-     NTXFileName := IncludeTrailingPathDelimiter(FJournalsDir) + csUsersSIDIndex;
-     KeyExpresion := csFieldSID;
-     Unique:=True;
-     CreateIndex(True);
-   end;
-   table1.Close;}
   FreeAndNil(table1);
 end;
 
@@ -476,8 +448,7 @@ begin
   table1 := TVKDBFNTX.Create(nil);
   table1.AccessMode.AccessMode := 64;
   table1.OEM := True;
-  table1.DBFFileName := IncludeTrailingPathDelimiter(FJournalsDir) +
-    TableName;
+  table1.DBFFileName := FJournalsPath + TableName;
   table1.Open;
   while not (table1.Eof) do
   begin
@@ -517,6 +488,7 @@ begin
     FStoragePath := list.Values['base'];
     FUsersDir := list.Values['users'];
     FJournalsDir := list.Values['journals'];
+    FJournalsPath := IncludeTrailingPathDelimiter(FJournalsDir);
     FGroupsDir := list.Values['groups'];
     FADGroupsDir := list.Values['adgroups'];
     FDomainsDir := list.Values['domains'];
@@ -532,7 +504,7 @@ var
   list: TStringList;
 begin
   list := TStringList.Create;
-  list.Add('caption='+FCaption);
+  list.Add('caption=' + FCaption);
   list.Add('base=' + FStoragePath);
   list.Add('journals=' + FJournalsDir);
   list.Add('domains=' + FDomainsDir);
@@ -577,8 +549,7 @@ begin
   table1 := TVKDBFNTX.Create(nil);
   table1.AccessMode.AccessMode := 66;
   table1.OEM := True;
-  table1.DBFFileName := IncludeTrailingPathDelimiter(FJournalsDir) +
-    csTableAction;
+  table1.DBFFileName := FJournalsPath + csTableAction;
   with table1.DBFFieldDefs.Add as TVKDBFFieldDef do
   begin
     Name := csFieldFID;
@@ -613,8 +584,7 @@ begin
   table1 := TVKDBFNTX.Create(nil);
   table1.AccessMode.AccessMode := 66;
   table1.OEM := True;
-  table1.DBFFileName := IncludeTrailingPathDelimiter(FJournalsDir) +
-    csTableExt;
+  table1.DBFFileName := FJournalsPath + csTableExt;
   with table1.DBFFieldDefs.Add as TVKDBFFieldDef do
   begin
     Name := csFieldID;
@@ -655,8 +625,7 @@ begin
   table1 := TVKDBFNTX.Create(nil);
   table1.AccessMode.AccessMode := 66;
   table1.OEM := True;
-  table1.DBFFileName := IncludeTrailingPathDelimiter(FJournalsDir) +
-    csTableSupport;
+  table1.DBFFileName := FJournalsPath + csTableSupport;
   with table1.DBFFieldDefs.Add as TVKDBFFieldDef do
   begin
     Name := csFieldID;
@@ -691,8 +660,7 @@ begin
   table1 := TVKDBFNTX.Create(nil);
   table1.AccessMode.AccessMode := 66;
   table1.OEM := True;
-  table1.DBFFileName := IncludeTrailingPathDelimiter(FJournalsDir) +
-    csTableADGroups;
+  table1.DBFFileName := FJournalsPath + csTableADGroups;
   with table1.DBFFieldDefs.Add as TVKDBFFieldDef do
   begin
     Name := csFieldID;
@@ -755,6 +723,7 @@ begin
   s := IncludeTrailingPathDelimiter(FStoragePath);
   if FJournalsDir = '' then
     FJournalsDir := s + FJournalsDir;
+  FJournalsPath := IncludeTrailingPathDelimiter(FJournalsDir);
   if FGroupsDir = '' then
     FGroupsDir := s + FGroupsDir;
   if FADGroupsDir = '' then
@@ -763,6 +732,61 @@ begin
     FDomainsDir := s + FDomainsDir;
   if FUsersDir = '' then
     FUsersDir := s + FUsersDir;
+end;
+
+function TSAVAccessBase.IndexCreate(const aFullTableName, aFullIndexName,
+  aIndexKey: string; const aDesc: boolean = False): Boolean;
+var
+  table1: TVKDBFNTX;
+begin
+  table1 := TVKDBFNTX.Create(nil);
+  table1.DBFFileName := aFullTableName;
+  table1.AccessMode.AccessMode := 66;
+  table1.oem := True;
+  Result := True;
+  try
+    table1.Open;
+    with table1.Indexes.Add as TVKNTXIndex do
+    begin
+      NTXFileName := aFullIndexName;
+      ClipperVer := v501;
+      KeyExpresion := aIndexKey;
+      Desc := aDesc;
+      CreateIndex(True);
+    end;
+    table1.Close;
+  except
+    Result := False;
+  end;
+  FreeAndNil(table1);
+end;
+
+function TSAVAccessBase.CheckAndCreateIndex: boolean;
+
+  function ChkAndCrtIndx(const aTableName, aIndexName, aIndexKey: string; const
+    aDesc: boolean = False):
+      boolean;
+  var
+    s: string;
+  begin
+    s := FJournalsPath + aIndexName;
+    Result := FileExists(s);
+    if not Result then
+      Result := IndexCreate(FJournalsPath + aTableName, s, aIndexKey,aDesc);
+  end;
+
+begin
+  Result := ChkAndCrtIndx(csTableDomains, csIndexDomainVersion, csFieldVersion,
+    True)
+    and ChkAndCrtIndx(csTableDomains, csIndexDomainName, csFieldCaption)
+    and ChkAndCrtIndx(csTableADGroups, csIndexADGroupVersion, csFieldVersion,
+      True)
+    and ChkAndCrtIndx(csTableADGroups, csIndexADGroupName, csFieldCaption)
+    and ChkAndCrtIndx(csTableGroups, csIndexGroupVersion, csFieldVersion, True)
+    and ChkAndCrtIndx(csTableGroups, csIndexGroupName, csFieldCaption)
+    and ChkAndCrtIndx(csTableUsers, csIndexUserVersion, csFieldVersion, True)
+    and ChkAndCrtIndx(csTableUsers, csIndexUserName, csFieldCaption)
+    and ChkAndCrtIndx(csTableExt,csIndexExtensExt,csFieldExt);
 end;
 
 end.
