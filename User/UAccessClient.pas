@@ -82,6 +82,7 @@ type
     function UpdateContainerFile(const aDir, aSID, aVersion: string): boolean;
     procedure DeleteContainerFile(const aDir, aSID: string);
     function Update: Boolean;
+    function ReverseUpdate: Boolean;
     function FindPlugin(const AFileType: Char; AExt: string; AID: Integer; const
       AGUID:
       TGUID; out Obj): Boolean;
@@ -482,6 +483,7 @@ begin
   end
 end;
 
+
 function TSAVAccessClient.Update: Boolean;
 var
   ini: TIniFile;
@@ -759,6 +761,141 @@ end;
 procedure TSAVAccessClient.SetADGroupsDir(const Value: string);
 begin
   FADGroupsDir := Value;
+end;
+
+function TSAVAccessClient.ReverseUpdate: Boolean;
+var
+  ini: TIniFile;
+  list1, oldGroups, ADGroups, ADOldGroups: TStringList;
+  sUserIni, WorkLst, ADWorkLst, sDNS: string;
+  i, j, n: Integer;
+  b,
+    Changed // были изменени€, обновл€ем все полностью
+  : Boolean;
+begin
+  { TODO : Ќадо реализовать обработку реверсивных таблиц }
+  Result := True;
+  WorkLst := FConfigDir + csWorkGroupsLst;
+  ADWorkLst := FConfigDir + csWorkADGroupsLst;
+  sUserIni := IncludeTrailingPathDelimiter(FUsersDir) + FSID + '\' +
+    csContainerCfg;
+  sDNS := GetDNSDomainName(Domain);
+  list1 := TStringList.Create;
+  ADGroups := TStringList.Create;
+  Changed := False;
+  b := FileExists(sUserIni);
+  if b then
+  begin
+    ini := TIniFile.Create(sUserIni);
+    ini.ReadSectionValues(csIniGroups, list1);
+    FreeAndNil(ini);
+  end;
+  GetAllUserGroups(User, GetDomainController(Domain), ADGroups);
+  for i := 0 to pred(ADGroups.Count) do
+    ADGroups[i] := GetSID(ADGroups[i], sdns) + '=' + ADGroups[i];
+  if FileExists(ADWorkLst) then
+  begin
+    ADOldGroups := TStringList.Create;
+    ADOldGroups.LoadFromFile(ADWorkLst);
+    for i := Pred(ADOldGroups.Count) downto 0 do
+    begin
+      j := 0;
+      while j < ADGroups.Count do
+        if ADGroups.Names[j] = ADOldGroups.Names[i] then
+        begin
+          ADOldGroups.Delete(i);
+          j := ADGroups.Count;
+        end
+        else
+          Inc(j);
+    end;
+    if ADOldGroups.Count > 0 then
+      // есть группы из которых пользователь был удален
+    begin
+      for i := 0 to pred(ADOldGroups.Count) do
+        DeleteContainerFile(FADGroupsDir, ADOldGroups.Names[i]);
+      Changed := True;
+    end;
+    FreeAndNil(ADOldGroups);
+  end;
+  SortListVal(list1);
+  if FileExists(WorkLst) then
+  begin
+    oldGroups := TStringList.Create;
+    oldGroups.LoadFromFile(WorkLst);
+    for i := Pred(oldGroups.Count) downto 0 do
+    begin
+      j := 0;
+      while j < list1.Count do
+        if list1.Names[j] = oldGroups.Names[i] then
+        begin
+          oldGroups.Delete(i);
+          j := list1.Count;
+        end
+        else
+          Inc(j);
+    end;
+    if oldGroups.Count > 0 then // есть группы из которых пользователь был удален
+    begin
+      for i := 0 to pred(oldGroups.Count) do
+        DeleteContainerFile(FGroupsDir, oldGroups.Names[i]);
+      Changed := True;
+    end;
+    FreeAndNil(oldGroups);
+  end;
+  try
+    ADGroups.SaveToFile(ADWorkLst);
+    list1.SaveToFile(WorkLst);
+  except
+    Result := False;
+  end;
+  if Changed then
+  begin
+    UpdateContainerFile(FDomainsDir, Domain, '');
+    n := pred(ADGroups.Count);
+    for i := 0 to n do
+      UpdateContainerFile(FADGroupsDir, ADGroups.Names[i], '');
+    n := pred(list1.Count);
+    for i := 0 to n do
+      UpdateContainerFile(FGroupsDir, list1.Names[i], '');
+  end
+  else
+  begin
+    Changed := UpdateContainerFile(FDomainsDir, Domain, FIniFile.ReadString('D',
+      Domain,
+      ''));
+    n := pred(ADGroups.Count);
+    for i := 0 to n do
+    begin
+      if Changed = False then
+        Changed := UpdateContainerFile(FADGroupsDir, ADGroups.Names[i],
+          FIniFile.ReadString('A', ADGroups.Names[i], ''))
+      else
+        UpdateContainerFile(FADGroupsDir, ADGroups.Names[i], '');
+    end;
+    n := pred(list1.Count);
+    for i := 0 to n do
+    begin
+      if Changed = False then
+        Changed := UpdateContainerFile(FGroupsDir, list1.Names[i],
+          FIniFile.ReadString('G',
+          list1.Names[i], ''))
+      else
+        UpdateContainerFile(FGroupsDir, list1.Names[i], '');
+    end
+  end;
+  FreeAndNil(ADGroups);
+  FreeAndNil(list1);
+  if b then
+  begin
+    if Changed then
+      UpdateContainerFile(FUsersDir, SID, '')
+    else
+      UpdateContainerFile(FUsersDir, SID, FIniFile.ReadString('U', SID, ''));
+  end;
+  FDataSet.ApplyUpdates(-1);
+  FDataSet.Close;
+  FDataSet.Open;
 end;
 
 end.
