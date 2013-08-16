@@ -79,8 +79,11 @@ type
     function AddedProc(const aOld, aNew: TClientFile; const aDir, aSID, aPath:
       string):
       Boolean;
-    function UpdateContainerFile(const aDir, aSID, aVersion: string): boolean;
-    procedure DeleteContainerFile(const aDir, aSID: string);
+    function UpdateContainerFile(const aDir, aSID, aVersion: string;
+      aTableFileName: string = csTableFiles; aReverse: boolean = False):
+        boolean;
+    procedure DeleteContainerFile(const aDir, aSID: string;
+      aTableFileName: string = csTableFiles; aReverse: boolean = False);
     function Update: Boolean;
     function ReverseUpdate: Boolean;
     function FindPlugin(const AFileType: Char; AExt: string; AID: Integer; const
@@ -483,7 +486,6 @@ begin
   end
 end;
 
-
 function TSAVAccessClient.Update: Boolean;
 var
   ini: TIniFile;
@@ -622,7 +624,8 @@ end;
 //Обновление файлов определенного контейнера хранилища переданного в aDir+aSID
 
 function TSAVAccessClient.UpdateContainerFile(const aDir, aSID, aVersion:
-  string): boolean;
+  string; aTableFileName: string = csTableFiles; aReverse: boolean = False):
+    boolean;
 var
   ini: TIniFile;
   c: Char;
@@ -665,10 +668,10 @@ begin
     c := Ini.ReadString('main', 'type', ' ')[1];
     vers := Ini.ReadString('main', 'version', '');
     FreeAndNil(ini);
-    if (FileExists(sPath + csTableFiles)) and (vers <> aVersion) then
+    if (FileExists(sPath + aTableFileName)) and (vers <> aVersion) then
     begin
       table1 := TVKDBFNTX.Create(nil);
-      InitOpenDBF(table1, sPath + csTableFiles, 64);
+      InitOpenDBF(table1, sPath + aTableFileName, 64);
       table1.Open;
       while not (table1.Eof) do
       begin
@@ -715,7 +718,8 @@ begin
   end;
 end;
 
-procedure TSAVAccessClient.DeleteContainerFile(const aDir, aSID: string);
+procedure TSAVAccessClient.DeleteContainerFile(const aDir, aSID: string;
+  aTableFileName: string = csTableFiles; aReverse: boolean = False);
 var
   ini: TIniFile;
   c: Char;
@@ -732,10 +736,10 @@ begin
     ini := TIniFile.Create(sPathIni);
     c := Ini.ReadString('main', 'type', ' ')[1];
     FreeAndNil(ini);
-    if FileExists(sPath + csTableFiles) {and (vers <> aVersion)} then
+    if FileExists(sPath + aTableFileName) {and (vers <> aVersion)} then
     begin
       table1 := TVKDBFNTX.Create(nil);
-      InitOpenDBF(table1, sPath + csTableFiles, 64);
+      InitOpenDBF(table1, sPath + aTableFileName, 64);
       table1.Open;
       while not (table1.Eof) do
       begin
@@ -793,7 +797,7 @@ begin
   GetAllUserGroups(User, GetDomainController(Domain), ADGroups);
   for i := 0 to pred(ADGroups.Count) do
     ADGroups[i] := GetSID(ADGroups[i], sdns) + '=' + ADGroups[i];
-  if FileExists(ADWorkLst) then
+  {if FileExists(ADWorkLst) then
   begin
     ADOldGroups := TStringList.Create;
     ADOldGroups.LoadFromFile(ADWorkLst);
@@ -817,9 +821,9 @@ begin
       Changed := True;
     end;
     FreeAndNil(ADOldGroups);
-  end;
+  end;}
   SortListVal(list1);
-  if FileExists(WorkLst) then
+  {if FileExists(WorkLst) then
   begin
     oldGroups := TStringList.Create;
     oldGroups.LoadFromFile(WorkLst);
@@ -848,7 +852,7 @@ begin
     list1.SaveToFile(WorkLst);
   except
     Result := False;
-  end;
+  end;}
   if Changed then
   begin
     UpdateContainerFile(FDomainsDir, Domain, '');
